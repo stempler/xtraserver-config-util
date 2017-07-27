@@ -1,0 +1,16 @@
+apply plugin: 'application'
+
+version = '1.0.0-SNAPSHOT'
+group = 'de.interactive_instruments'
+
+repositories {
+    mavenCentral()
+}
+
+mainClassName = project.hasProperty('xml')? "de.interactive_instruments.xtraserver.util.MappingMarshaller" : "de.interactive_instruments.xtraserver.util.MappingUnmarshaller"
+
+run {
+    args = ["src/main/resources/XtraServer_Mapping.xsd", "src/main/resources/XtraSrvConfig_Mapping.inc.xml", "bla.xml"]
+    debug = project.hasProperty('debug')? project.debug : false
+}
+

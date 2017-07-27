@@ -1,0 +1,40 @@
+<jxb:bindings version="2.1"
+               xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+               xmlns:xtraSrv="http://www.interactive-instruments.de/namespaces/XtraServer"
+               xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<jxb:bindings schemaLocation="XtraServer_Mapping.xsd">
+
+  <jxb:globalBindings underscoreBinding="asCharInWord"/>
+
+  <jxb:bindings
+        node="//xsd:complexType[@name='MappingsSequenceType']/xsd:sequence/xsd:choice/xsd:element[@name='Table']/xsd:complexType/xsd:simpleContent/xsd:extension/xsd:attribute[@name='value']">
+        <jxb:property name="value4" />
+  </jxb:bindings>
+
+</jxb:bindings> 
+
+<!--jxb:bindings schemaLocation="file:///home/zahnen/development/XtraServer/schema/w3/xlink/1.1/xlink.xsd">
+
+  <jxb:bindings
+        node="//xsd:attributeGroup[@name='locatorAttrs']/xsd:attribute[@ref='xlink:title']">
+        <jxb:property name="title2" />
+  </jxb:bindings>
+
+  <jxb:bindings
+        node="//xsd:group[@name='locatorModel']/xsd:sequence/xsd:element[@ref='xlink:title']">
+        <jxb:property name="title3" />
+  </jxb:bindings>
+	
+  <jxb:bindings
+        node="//xsd:attributeGroup[@name='arcAttrs']/xsd:attribute[@ref='xlink:title']">
+        <jxb:property name="title4" />
+  </jxb:bindings>
+
+  <jxb:bindings
+        node="//xsd:group[@name='arcModel']/xsd:sequence/xsd:element[@ref='xlink:title']">
+        <jxb:property name="title5" />
+  </jxb:bindings>
+
+</jxb:bindings--> 
+
+</jxb:bindings>

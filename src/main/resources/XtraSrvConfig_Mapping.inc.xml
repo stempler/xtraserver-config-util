@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+	This file is a part of XtraServer SimpleDemo configuration
+	
+	Copyright (c) 2012-2014, interactive instruments GmbH
+-->
+
+<!--GML/DB-Mapping-->
+<FeatureTypes xmlns="http://www.interactive-instruments.de/namespaces/XtraServer">
+
+	<FeatureType>
+		<Name>ci:City</Name>
+		<PGISFeatureTypeImpl logging="false">
+			<!-- Main table of feature type City -->
+			<Table table_name="city" oid_col="id" target=""/>
+			<!-- location -->
+			<Table table_name="city" value="location" target="ci:location"/>
+			<!-- country -->
+			<Table table_name="city" value="Germany" value_type="constant" target="ci:country"/>
+			<!-- inhabitants -->
+			<Table table_name="city" value="inhabitants" target="ci:inhabitants"/>
+			<!-- function : nillable property -->
+			<Table table_name="city" value="function" target="ci:function"/>
+			<Table table_name="city" value="function" mapping_mode="nil" db_codes="NULL"
+				target="ci:function"/>
+			<!-- alternativeName : DataType of multiple occurrence -->
+			<Table table_name="alternativename" oid_col="id" target="ci:alternativeName"/>
+			<Table table_name="alternativename" value="name"
+				target="ci:alternativeName/ci:AlternativeName/ci:name"/>
+			<Table table_name="alternativename" value="language"
+				target="ci:alternativeName/ci:AlternativeName/ci:language"/>
+			<Join target="ci:alternativeName" axis="parent"
+				join_path="alternativename/ref(cid:id)::city"/>
+			<!-- district : embedded FeatureType of multiple occurrence -->
+			<Table table_name="district" oid_col="id" target="ci:district"/>
+			<Join target="ci:district" axis="parent" join_path="district/ref(cid:id)::city"/>
+			<!-- river : FeatureTyp, multiple occurrence linked by reference -->
+			<Table table_name="river" oid_col="id" target="ci:passingRiver"/>
+			<Table table_name="river" target="ci:passingRiver/@xlink:href"/>
+			<AssociationTarget object_ref="ci:River" target="ci:passingRiver"/>
+			<Join target="ci:passingRiver" axis="parent"
+				join_path="river/ref(id:rid)::city_river/ref(cid:id)::city"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+
+	<FeatureType>
+		<Name>ci:District</Name>
+		<PGISFeatureTypeImpl>
+			<!-- Main table of feature type District -->
+			<Table table_name="district" oid_col="id" target=""/>
+			<!-- location -->
+			<Table table_name="district" value="location" target="ci:location"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+
+	<FeatureType>
+		<Name>ci:River</Name>
+		<PGISFeatureTypeImpl>
+			<!-- Main table of feature type River -->
+			<Table table_name="river" oid_col="id" target=""/>
+			<!-- location -->
+			<Table table_name="river" value="location" target="ci:location"/>
+			<!-- length -->
+			<Table table_name="river" value="length" target="ci:length"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+
+	<FeatureType>
+		<Name>ci:State</Name>
+		<PGISFeatureTypeImpl>
+			<!-- Main table of feature type State -->
+			<Table table_name="state" oid_col="id" target=""/>
+			<!-- location -->
+			<Table table_name="state" value="location" target="ci:location"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+
+	<FeatureType>
+		<Name>ci:NamedGeoObject</Name>
+		<PGISFeatureTypeImpl>
+			<!--City-->
+			<Table table_name="city" oid_col="id" target=""/>
+			<Table table_name="city" value="name" target="ci:name"/>
+			<!--District-->
+			<Table table_name="district" oid_col="id" target=""/>
+			<Table table_name="district" value="name" target="ci:name"/>
+			<!--River-->
+			<Table table_name="river" oid_col="id" target=""/>
+			<Table table_name="river" value="name" target="ci:name"/>
+			<!--State-->
+			<Table table_name="state" oid_col="id" target=""/>
+			<Table table_name="state" value="name" target="ci:name"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+	
+	<FeatureType>
+		<Name>gml:AbstractFeature</Name>
+		<PGISFeatureTypeImpl>
+			<!--City-->
+			<Table oid_col="id" table_name="city" target=""/>
+			<Table table_name="city" target="@gml:id"/>
+			<!--District-->
+			<Table oid_col="id" table_name="district" target=""/>
+			<Table table_name="district" target="@gml:id"/>
+			<!--River-->
+			<Table oid_col="id" table_name="river" target=""/>
+			<Table table_name="river" target="@gml:id"/>
+			<!--State-->
+			<Table oid_col="id" table_name="state" target=""/>
+			<Table table_name="state" target="@gml:id"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+
+</FeatureTypes>

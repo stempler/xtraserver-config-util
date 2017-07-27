@@ -1,0 +1,596 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema targetNamespace="http://www.interactive-instruments.de/namespaces/XtraServer" 
+        xmlns:xtraSrv="http://www.interactive-instruments.de/namespaces/XtraServer" 
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+        xmlns:xml="http://www.w3.org/XML/1998/namespace" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xmlns:xlink="http://www.w3.org/1999/xlink" 
+        xmlns:ogc="http://www.opengis.net/ogc" 
+        xmlns:wfs="http://www.opengis.net/wfs/2.0" 
+        elementFormDefault="qualified">
+
+<xsd:complexType name="MappingsSequenceType">
+		<xsd:sequence>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="Table">
+					<xsd:complexType>
+						<xsd:simpleContent>
+							<xsd:extension base="xsd:string">
+								<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
+								<xsd:attribute name="id" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Id zur Referenzierung durch ContentConnections.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="target" use="optional" type="xsd:string" default="">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Wo, ausgehend vom FeatureType soll das Mapping hin?</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="match" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">MatchPath kann explizit angegeben werden.
+										Sonst wird er aus dem Target-Pfad bestimmt, bzw. enthält
+										nur ein Element (das, an dem das Mapping hängt).</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="disambiguate" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">
+										Disambiguierung (d.h. der Match-Pfad) kann abgeschaltet werden ('no'),
+										durch den Target-Pfad geschehen ('target_path') oder durch die direkte
+										Angabe des Match-Pfades. Default ist 'target_path'.
+										</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="map_targetpath" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">
+										Ab SchemaAnalyzerVersion 2.0: obsolet (Mapping wird automatisch auf den TargetPath verteilt).
+										Bis SchemaAnalyzerVersion 2.0:
+										Das Mapping an allen Elementen auf dem TargetPath setzen?
+										Ansonsten müssen alle Elemente auf dem Pfad explizit gemappt werden, z.B.:
+										Für 'adv:modellart/adv:AA_Modellart/adv:advStandardModell' (mit value) muss
+										auch  'adv:modellart/adv:AA_Modellart' (ohne value-Attribut) gemappt werden.
+										</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="apply_mapping_to_path" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Ab SchemaAnalyzerVersion 2.0. Ersetzt map_targetpath:
+									  Das Mapping auf dem TargetPath setzen (vom letzten Element bis zum ersten, das
+									  ein Join auf die Table enthält). Dieses Attribut dient nur dazu, dieses Verhalten
+									  abstellen zu können (durch Setzen auf 'false'). default="true"
+									</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="applyMappingToPath" use="optional" type="xsd:boolean" >
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltete Form von apply_mapping_to_path. default="true"</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="mapping_mode" use="optional" default="value">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Mapping-Type: Normales Mapping (value) oder Nil-Mapping (nil).
+										nilAttr ist für Attribute im Nil-Fall.</xsd:documentation>
+									</xsd:annotation>
+									<xsd:simpleType>
+										<xsd:restriction base="xsd:string">
+											<xsd:enumeration value="value"/>
+											<xsd:enumeration value="nil"/>
+											<xsd:enumeration value="nil_attr"/>
+											<xsd:enumeration value="nilAttr"/>	<!-- obsolete -->
+										</xsd:restriction>
+									</xsd:simpleType>
+								</xsd:attribute>
+								<xsd:attribute name="filter_mapping" type="xsd:boolean" use="optional" default="false">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Mappings nur für den Filter-Kontext (d.h. keine Ausgabe).  
+											Wichtig: es muss ein weiteres Mapping ohne filter_mapping=true geben, sonst wird es komplett ignoriert.</xsd:documentation>
+										<xsd:documentation xml:lang="en">Mappings for filters only (no output). 
+											Note: a second mapping without filter_mapping=true is necessary otherwise this mapping will be ignored.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="no_output" type="xsd:boolean" use="optional" >
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Property im Output unterdrücken. default="false"</xsd:documentation>
+										<xsd:documentation xml:lang="en">Suppress the property in the GML output. default="false"</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="noOutput" type="xsd:boolean" use="optional">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltet für no_output.</xsd:documentation>
+										<xsd:documentation xml:lang="en">Obsolete for no_output.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="table_name" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Name der Table (kann auch Inhalt des Table-Nodes sein)</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="oid_col" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Wie heißt die OID-Spalte? Auch Ausdruck mit $T$ möglich. 
+										Dieses Attribut wird nur bei Features (Haupttabelle) und explizitem 
+										xlink:href-Mapping benötigt.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="ft_col" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Für 'enhenced' FGV-Referenzen: Der referenzierte
+										FeatureType ist in einer DB-Column angegeben.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="generator" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Generator-Informationen für Key- und Oid-Columns</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="value" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Spalte in der Datenbank. Der Wert kann als Column, Ausdruck,
+										allg. Konstante oder Null vorliegen. Welche Art
+										vorliegt, wird durch valueType angegeben</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="value_type" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">
+											Gibt an, wie das value-Attribut zu interpretieren ist.
+											Erlaubt sind 'constant', 'expression', 'null' oder 'val_col'
+											Fehlender value_type bedeutet Value-Column.
+											In der Regel werden aber auch Ausdrücke (mit $T$) automatisch erkannt, ohne
+											dass value_type='expression' angegeben werden muss.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="valueType" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Alias für @value_type.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="srs" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Bei einer Geometrie das SRS in
+										XtraServer-Notation: srs="EPSG:XXX;EN;scaleFactor"
+										Bsp: srs="EPSG:31467;EN;1"</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="srid" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Bei einer Geometrie das SRID. Fehlt 
+										diese Angabe, wird die Datenbank befragt. Das kann nur
+										für ValueColumns erfolgreich sein. Insbesondere expressions
+										müssen also diese Angabe haben.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="mapped_geometry" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Mapping für komplexe Gml-Objekte, statt sie
+										wie SimpleTypes zu behandeln</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="isMappedGeometry" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltet für is_mapped_geometry.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="use_geotypes" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">zu verwendende Gml-Types für Geometry-Propertys.
+										Hier können außerdem noch (in []) Hinweise für die Speicherung in der
+										Datenbank stehen. Verwendet werden können nur die implementierten
+										Darstellungen. Für die Standard-Darstellungen (z.B. gml:Point als
+										PGIS POINT) ist keine Angabe erforderlich. Implementiert sind
+										momentan nur PGIS-Geometrien: Pnt für POINT, Lns für LINESTRING,
+										Pol für POLYGON, M für Multi... und Coll für GEOMETRYCOLLECTION.
+										(Coll kann mehrfach am Anfang vorkommen, um 'geschachtelte' 
+										Collections angeben zu können.)</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="useGeotypes" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltet für use_geotypes.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="assign" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Bei expressions: der 'umgekehrte' Ausdruck
+											für Inserts/Updates</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="assign1" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Eine weitere Zuweisung für 
+											Inserts/Updates. Hier darf (im Moment) keine Expression stehen, nur die
+										Zuweisung einer Konstanten (etwa für Prädikate).</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="significant_for_emptiness" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Falls nur dieses Attribut gesetzt ist, soll das
+										Xml-Tag trotzdem als leer gelten.
+										Der Default hängt vom Target ab! Er ist 'true', außer für @uom.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="significantForEmptiness" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltete Form von significant_for_emptiness.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="suppress_xml_entities_encoding" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Xml-Quoting und weiteren Abstieg im Schema unterdrücken.
+										Man kann mit dieser Option also komplette XML-Elemente aus der DB laden, für die man kein Mapping
+										erzeugen will/kann.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="suppressXMLEntitiesEncoding" use="optional" type="xsd:boolean">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltet für suppress_xml_entitiy_encoding.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="is_reference" use="optional" type="xsd:boolean" >
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Falls ein xlink:href keine Referenz auf ein anderes Feature enthält,
+										sondern einen beliebigen Stringwert, muss isReference="false" gesetzt werden. default="true"</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="isReference" use="optional" type="xsd:boolean" >
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Veraltete Form von is_reference. default="true"</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="derivation_pattern" use="optional" type="xsd:string"/>
+								<xsd:attribute name="db_codes" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Quellwerte zum Umkodieren von Werten in der
+										Datenbank entsprechend mapping_mode, angegeben durch eine blank-separated list.
+										Bei mapping_mode=value werden die in der Liste gefundenen Werte in die entsprechenden
+										in schmea_codes umgesetzt. Bei mapping_mode=nil gelten alle db_codes als Werte für NIL
+										und führen deshalb zur Erzeugung von xsi:nil='true'.
+										In mapping_mode=nilAttr wird umkodiert wie bei value. Die Elemente in der Liste werden
+										durch Blank getrennt. Der DB-Wert NULL wird als NULL geschrieben. Quoting von Blank 
+										oder NULL durch einfache Hochkommata, also 'NULL' oder 'Text mit Blank'.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="schema_codes" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Zielwerte zum Umkodieren von Werten aus der 
+										Datenbank in Werte, die das Schema vorgibt, entsprechend mapping_mode. Die Angabe
+										erfolgt als blank-separated list. Bei mapping_mode=value oder nilAttr werden die 
+										Werte in db_codes in die entsprechenden Werte in schema_codes umgesetzt. Bei 
+										mapping_mode=nil wird (falls schema_codes angegeben ist) das zusätzliche Attribut
+										nilReason erzeugt, welches als Wert den entsprechenden Wert zu db_codes besitzt.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="nil_value" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Nil-Mapping: Obsolete für db_codes.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="nil_reason" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Nil-Mapping: Obsolete für schema_codes.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="for_each_select_id" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Fasst die folgenden Table-Mappings mit select_id-Attribut
+										als einzelne Elemente auf, nicht als Alternativen</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="select_id" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">s. for_each_select_id</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:simpleContent>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Join">
+					<xsd:complexType>
+						<xsd:simpleContent>
+							<xsd:extension base="xsd:string">
+								<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
+								<xsd:attribute name="target" use="optional" type="xsd:string" default="">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Wo, ausgehend vom FeatureType soll das Mapping hin?</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="filter_mapping" type="xsd:boolean" use="optional" default="false">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Mappings nur für den Filter-Kontext</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="join_path" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Der Join-Pfad (kann auch Inhalt des Join-Nodes sein)</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="axis" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Über welche Achse verläuft das Join? default="parent"</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="idref" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Bei mehrdeutigen Achsen wird der Join-Partner über seine id angegeben</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="match" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">MatchPath kann explizit angegeben werden.
+										Sonst wird er aus dem Target-Pfad bestimmt, bzw. enthält
+										nur ein Element (das, an dem das Mapping hängt).</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="disambiguate" use="optional" type="xsd:string">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Ab SchemaAnalyzerVersion 2.1.
+										Disambiguierung (d.h. der Match-Pfad) kann abgeschaltet werden ('no'),
+										durch den Target-Pfad geschehen ('target_path') oder durch die direkte
+										Angabe des Match-Pfades. Default ist 'target_path'.</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:simpleContent>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="AssociationTarget">
+					<xsd:complexType>
+						<xsd:simpleContent>
+							<xsd:extension base="xsd:string">
+								<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
+								<xsd:attribute name="target" use="optional" type="xsd:string" default="">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Wo, ausgehend vom FeatureType soll das AssociationTarget hin?</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="object_ref" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">
+							  Alternative anstatt das AssociationTarget
+							  als Node-Value anzugeben.
+							</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:simpleContent>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Content">
+					<xsd:complexType>
+						<xsd:simpleContent>
+							<xsd:extension base="xsd:string">
+								<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
+								<xsd:attribute name="target" use="optional" type="xsd:string" default="">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">Wo, ausgehend vom FeatureType soll das Content-Mapping hin?</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="representation" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">direct, reference</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="implementation" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">embedded, per_reference</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+								<xsd:attribute name="mode" type="xsd:string" use="optional">
+									<xsd:annotation>
+										<xsd:documentation xml:lang="de">OBSOLET: association, reference, directInternRef, direct</xsd:documentation>
+									</xsd:annotation>
+								</xsd:attribute>
+							</xsd:extension>
+						</xsd:simpleContent>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="Substitution">
+					<xsd:complexType>
+						<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
+						<xsd:attribute name="target" use="optional" type="xsd:string" default="">
+							<xsd:annotation>
+								<xsd:documentation xml:lang="de">Wo, ausgehend vom FeatureType soll das Substitution-Mapping hin?</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="implementation" type="xsd:string" use="optional">
+							<xsd:annotation>
+								<xsd:documentation xml:lang="de">embedded, per_reference</xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:choice>
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:element name="Mappings" type="xtraSrv:MappingsSequenceType"/>
+<xsd:complexType name="SQLFeatureTypeImplType">
+		<xsd:complexContent>
+			<xsd:extension base="xtraSrv:MappingsSequenceType">
+				<xsd:attribute name="logging" use="optional" default="false">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="de">
+							Ausgabe des Generation-Vectors ins Logging-File
+						</xsd:documentation>
+					</xsd:annotation>
+					<xsd:simpleType>
+						<xsd:union memberTypes="xsd:boolean xtraSrv:loggingExtensionType  "/>
+					</xsd:simpleType>
+				</xsd:attribute>
+				<xsd:attribute name="useTempTable" type="xsd:boolean" use="optional" default="false">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="de">
+							Benutzung temporärer DB-Tables für Filter
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="tempTableName" type="xsd:string" use="optional">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="de">
+							Name für die temporäre Table. (Wird erweitert um 'TMP_' und einen Zähler)
+							Wenn diese Angabe fehlt, wird der (qualifizierte) FeatureTypeName verwendet.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="FTCode" type="xsd:string" use="optional">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="de">
+							Abkürzung in der DB (für OETs und FeatureType-Columns). Hier darf kein '@'
+							enthalten sein (damit trennt die DB die Codes voneinander).
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+<xsd:element name="FeatureType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="de">
+				Ein FeatureType-Element steht für eine bestimmte Objektart, auf
+				die	von einem WFS-Service oder SLD zugegriffen werden kann. Im
+				Element wird die Implementierung des FeatureTypes beschrieben.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element ref="xtraSrv:Name" minOccurs="0"/>
+				<xsd:element ref="xtraSrv:Title" minOccurs="0"/>
+				<xsd:element name="Abstract" type="xsd:string" minOccurs="0"/>
+				<xsd:element name="Keyword" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xsd:element name="OutputFormat" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:simpleContent>
+							<xsd:extension base="xsd:string">
+								<xsd:attribute name="wfsVersion" type="xsd:string"/>
+							</xsd:extension>
+						</xsd:simpleContent>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="SuppressIdentity" type="xsd:boolean" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation xml:lang="de">
+							Die 'Identität' ist relevant beim WFS-Update: Feature-Values haben
+							normalerweise Identität, d.h. die alten Werte werden nicht gelöscht,
+							wenn neue gesetzt werden. Datatypes-Values haben keine Identität,
+							d.h. sie werden gelöscht, wenn neue Werte gesetzt werden. Mit
+							dieser Option kann man auch für FeatureTypes konfigurieren, dass
+							sie keine Identität haben. Default ist 'false', d.h. FeatureTypes
+							haben Identität.
+						</xsd:documentation>
+					</xsd:annotation>
+				</xsd:element>
+				<xsd:element name="PathAliases" minOccurs="0">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="PathAlias" minOccurs="0" maxOccurs="unbounded">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="Pattern" type="xsd:string"/>
+										<xsd:element name="Replacement" type="xsd:string"/>
+									</xsd:sequence>
+									<xsd:attribute name="externalUse" type="xsd:boolean" use="optional" default="false"/>
+									<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:choice>
+					<xsd:element ref="xtraSrv:OraSFeatureTypeImpl" minOccurs="0"/>
+					<xsd:element ref="xtraSrv:PGISFeatureTypeImpl" minOccurs="0"/>
+					<xsd:element ref="xtraSrv:GDBSQLFeatureTypeImpl" minOccurs="0"/>
+					<!-- später mehr ... -->
+				</xsd:choice>
+			</xsd:sequence>
+			<xsd:attribute name="includeDerivations" type="xsd:boolean" use="optional" default="false">
+				<xsd:annotation>
+					<xsd:documentation xml:lang="de">
+				Dieses Attribut steuert bei der Xml-Ausgabe, ob auch abgeleitete Subtypen ausgegeben
+				werden.
+				ACHTUNG: Ab WFS 2.0 geschieht das über die schema-element()-Funktion, dann hat dieses
+				Attribut KEINE BEDEUTUNG mehr.
+			  </xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="mode" type="xtraSrv:EnablingType" use="optional" default="enabled"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="AdditionalMappings">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="de">Dient für SQL-DBs zur Angabe von Mappings
+			z.B. in abstrakten Featuretypes.
+			</xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="RootElementName" type="xsd:string"/>
+				<xsd:element ref="xtraSrv:Mappings"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+<xsd:element name="PGISFeatureTypeImpl" type="xtraSrv:SQLFeatureTypeImplType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="de">
+			Das Element PGISFeatureTypeImpl beschreibt die Implementierung 
+			eines FeatureTypes auf der Grundlage von PostgreSQL/PostGIS DB
+			Angegeben wird das durch das Mapping von GML-Element-Knoten auf
+			die Tabellen und Tabellenverbindungen.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+<xsd:element name="GDBSQLFeatureTypeImpl" type="xtraSrv:SQLFeatureTypeImplType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="de">
+        Das Element GDBSQLFeatureTypeImpl beschreibt die Implementierung
+        eines FeatureTypes auf der Grundlage von GDB DB
+        Angegeben wird das durch das Mapping von GML-Element-Knoten auf
+        die Tabellen und Tabellenverbindungen.
+      </xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+<xsd:element name="OraSFeatureTypeImpl" type="xtraSrv:SQLFeatureTypeImplType">
+		<xsd:annotation>
+			<xsd:documentation xml:lang="de">
+			Das Element OraSFeatureTypeImpl beschreibt die Implementierung 
+			eines FeatureTypes auf der Grundlage der Oracle Database.
+			Angegeben wird das durch das Mapping von GML-Element-Knoten auf
+			die Tabellen und Tabellenverbindungen.
+			</xsd:documentation>
+		</xsd:annotation>
+	</xsd:element>
+<xsd:element name="FeatureTypes">
+
+							<xsd:annotation>
+								<xsd:documentation xml:lang="de">
+									Alternativ können die FeatureType-Elemente in ein FeatureTypes-Element eingebettet werden.
+								</xsd:documentation>
+								<xsd:documentation xml:lang="en">
+									Alternatively, the FeatureType elements can be embedded in the FeatureTypes element.
+								</xsd:documentation>
+							</xsd:annotation>
+							<xsd:complexType>
+								<xsd:choice minOccurs="0" maxOccurs="unbounded">
+									<xsd:element ref="xtraSrv:FeatureType"/>
+									<xsd:element ref="xtraSrv:AdditionalMappings"/>
+								</xsd:choice>
+								<xsd:attribute name="defaultDbSchema" type="xsd:string" use="optional"/>
+								<xsd:attribute name="appSchemaGenerator" type="xsd:IDREF" use="optional"/>
+							</xsd:complexType>
+						</xsd:element>
+<xsd:simpleType name="EnablingType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="enabled"/>
+			<xsd:enumeration value="disabled"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+<xsd:simpleType name="loggingExtensionType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="short"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+<xsd:element name="Name" type="xsd:string"/>
+	<xsd:element name="Title" type="xsd:string"/>
+</xsd:schema>
