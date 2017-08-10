@@ -1,16 +1,15 @@
 import javax.xml.bind.JAXBException;
 
-import de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping;
 import de.interactive_instruments.xtraserver.config.api.XtraServerMapping;
-import de.interactive_instruments.xtraserver.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.util.MappingParser;
-import de.interactive_instruments.xtraserver.util.Namespaces;
+import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
+import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
+import de.interactive_instruments.xtraserver.config.util.MappingParser;
+import de.interactive_instruments.xtraserver.config.util.Namespaces;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 import de.interactive_instruments.xtraserver.schema.*;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
 
 public class MappingUnmarshaller
 {

@@ -1,12 +1,11 @@
-package de.interactive_instruments.xtraserver.config.api;
+package de.interactive_instruments.xtraserver.config.util;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
-import de.interactive_instruments.xtraserver.schema.FeatureType;
-import de.interactive_instruments.xtraserver.schema.FeatureTypes;
-import de.interactive_instruments.xtraserver.util.ApplicationSchema;
+import de.interactive_instruments.xtraserver.config.schema.FeatureType;
+import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
 
 import java.util.ArrayList;
 import java.util.Collection;

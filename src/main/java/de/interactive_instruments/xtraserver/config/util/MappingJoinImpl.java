@@ -1,4 +1,4 @@
-package de.interactive_instruments.xtraserver.config.api;
+package de.interactive_instruments.xtraserver.config.util;
 
 import java.util.List;
 
