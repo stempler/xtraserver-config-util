@@ -7,6 +7,9 @@ import com.google.common.collect.Iterables;
 import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.schema.SQLFeatureTypeImplType;
+import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
+import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
+import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,33 +18,37 @@ import java.util.List;
 /**
  * @author zahnen
  */
-public class FeatureTypeMapping {
+public class FeatureTypeMappingImpl implements de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping {
     private String name;
     private List<MappingTable> tables;
     private List<MappingJoin> joins;
     private List<MappingValue> values;
 
-    public FeatureTypeMapping(FeatureType featureType) {
+    public FeatureTypeMappingImpl(FeatureType featureType) {
         this.name = featureType.getName();
         this.tables = extractTables(featureType);
         extractJoins(featureType);
         this.values = extractValues(featureType);
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public Collection<String> getPrimaryTableNames() {
 
         return getTableNames(true);
     }
 
+    @Override
     public Collection<String> getJoinedTableNames() {
 
         return getTableNames(false);
     }
 
+    @Override
     public List<MappingValue> getValues() {
         return values;
     }
@@ -105,7 +112,7 @@ public class FeatureTypeMapping {
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty() && !hasTable(table.getTable_Name())) {
                         if (table.getOid_Col() != null && !table.getOid_Col().isEmpty()) {
                             if (table.getValue4() == null || table.getValue4().isEmpty()) {
-                                mappingTables.add(new MappingTable(table));
+                                mappingTables.add(new MappingTableImpl(table));
                             }
                         }
                     }
@@ -130,7 +137,7 @@ public class FeatureTypeMapping {
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty() && hasTable(table.getTable_Name())) {
                         if (table.getTarget() != null && !table.getTarget().isEmpty()) {
                             if (table.getValue4() != null && !table.getValue4().isEmpty()) {
-                                mappingValues.add(new MappingValue(table));
+                                mappingValues.add(new MappingValueImpl(table));
                             }
                         }
                     }

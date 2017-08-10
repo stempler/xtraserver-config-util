@@ -6,6 +6,8 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
+import de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping;
+import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,11 +16,11 @@ import java.util.List;
 /**
  * @author zahnen
  */
-public class XtraServerMapping {
+public class XtraServerMappingImpl implements de.interactive_instruments.xtraserver.config.util.api.XtraServerMapping {
     private ApplicationSchema applicationSchema;
     private List<FeatureTypeMapping> featureTypeMappings;
 
-    public XtraServerMapping(FeatureTypes featureTypes, ApplicationSchema applicationSchema) {
+    public XtraServerMappingImpl(FeatureTypes featureTypes, ApplicationSchema applicationSchema) {
         this.featureTypeMappings = new ArrayList<>();
         this.applicationSchema = applicationSchema;
 
@@ -26,7 +28,7 @@ public class XtraServerMapping {
             try {
                 FeatureType ft = (FeatureType) a;
 
-                FeatureTypeMapping ftm = new FeatureTypeMapping(ft);
+                FeatureTypeMapping ftm = new FeatureTypeMappingImpl(ft);
 
                 featureTypeMappings.add(ftm);
 
@@ -36,6 +38,7 @@ public class XtraServerMapping {
         }
     }
 
+    @Override
     public boolean hasFeatureType(String featureType) {
         System.out.println(featureType);
         return featureTypeMappings != null && !Collections2.filter(featureTypeMappings,
@@ -48,6 +51,7 @@ public class XtraServerMapping {
         ).isEmpty();
     }
 
+    @Override
     public FeatureTypeMapping getFeatureTypeMapping(String featureType) {
         if (featureTypeMappings == null) return null;
 
@@ -61,10 +65,12 @@ public class XtraServerMapping {
         );
     }
 
+    @Override
     public Collection<String> getFeatureTypeList() {
         return getFeatureTypeList(true);
     }
 
+    @Override
     public Collection<String> getFeatureTypeList(boolean includeAbstract) {
         return Collections2.transform(
                 Collections2.filter(featureTypeMappings,

@@ -1,4 +1,4 @@
-package de.interactive_instruments.xtraserver.util;
+package de.interactive_instruments.xtraserver.config.util;
 
 import org.apache.ws.commons.schema.*;
 

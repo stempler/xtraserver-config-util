@@ -6,7 +6,7 @@
 //
 
 
-package de.interactive_instruments.xtraserver.schema;
+package de.interactive_instruments.xtraserver.config.schema;
 
 import java.util.ArrayList;
 import java.util.List;

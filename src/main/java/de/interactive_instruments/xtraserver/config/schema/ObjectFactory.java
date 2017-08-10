@@ -6,7 +6,7 @@
 //
 
 
-package de.interactive_instruments.xtraserver.schema;
+package de.interactive_instruments.xtraserver.config.schema;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.annotation.XmlElementDecl;

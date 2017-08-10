@@ -1,4 +1,4 @@
-package de.interactive_instruments.xtraserver.util;
+package de.interactive_instruments.xtraserver.config.util;
 
 import java.io.File;
 import java.text.DecimalFormat;

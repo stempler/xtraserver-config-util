@@ -1,14 +1,10 @@
-import javax.xml.bind.JAXBException;
+package de.interactive_instruments.xtraserver.config.util;
 
-import de.interactive_instruments.xtraserver.config.api.XtraServerMapping;
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.config.util.MappingParser;
-import de.interactive_instruments.xtraserver.config.util.Namespaces;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-import de.interactive_instruments.xtraserver.schema.*;
 
+import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 
 public class MappingUnmarshaller
@@ -21,7 +17,7 @@ public class MappingUnmarshaller
    public void unmarshal() throws JAXBException, SAXException, FileNotFoundException {
 
       FeatureTypes featureTypes = MappingParser.unmarshal( MAPPING_SCHEMA, MAPPING, FeatureTypes.class );
-      XtraServerMapping xsm = new XtraServerMapping(featureTypes, new ApplicationSchema(APPLICATION_SCHEMA, new Namespaces()));
+      XtraServerMappingImpl xsm = new XtraServerMappingImpl(featureTypes, new ApplicationSchema(APPLICATION_SCHEMA, new Namespaces()));
       xsm.print();
    }
 }
