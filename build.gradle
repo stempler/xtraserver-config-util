@@ -7,10 +7,15 @@ repositories {
     mavenCentral()
 }
 
-mainClassName = project.hasProperty('xml')? "de.interactive_instruments.xtraserver.util.MappingMarshaller" : "de.interactive_instruments.xtraserver.util.MappingUnmarshaller"
+dependencies {
+    compile 'com.google.guava:guava:17.0'
+    compile 'org.apache.ws.xmlschema:xmlschema-core:2.2.2'
 
-run {
-    args = ["src/main/resources/XtraServer_Mapping.xsd", "src/main/resources/XtraSrvConfig_Mapping.inc.xml", "bla.xml"]
-    debug = project.hasProperty('debug')? project.debug : false
+    testCompile "junit:junit:4.12"
 }
 
+test {
+    testLogging {
+        events "PASSED", "STARTED", "FAILED", "SKIPPED", "standard_out", "standard_error"
+    }
+}
