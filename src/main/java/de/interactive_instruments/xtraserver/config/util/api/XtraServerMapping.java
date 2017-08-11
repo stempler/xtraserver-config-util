@@ -8,7 +8,7 @@ import java.util.Collection;
 public interface XtraServerMapping {
     boolean hasFeatureType(String featureType);
 
-    FeatureTypeMapping getFeatureTypeMapping(String featureType);
+    FeatureTypeMapping getFeatureTypeMapping(String featureType, boolean flattenInheritance);
 
     Collection<String> getFeatureTypeList();
 

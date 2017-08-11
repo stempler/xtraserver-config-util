@@ -40,7 +40,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
 
     @Override
     public boolean hasFeatureType(String featureType) {
-        System.out.println(featureType);
+
         return featureTypeMappings != null && !Collections2.filter(featureTypeMappings,
                 new Predicate<FeatureTypeMapping>() {
                     @Override
@@ -52,10 +52,10 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
     }
 
     @Override
-    public FeatureTypeMapping getFeatureTypeMapping(String featureType) {
+    public FeatureTypeMapping getFeatureTypeMapping(String featureType, boolean flattenInheritance) {
         if (featureTypeMappings == null) return null;
 
-        return Iterables.find(featureTypeMappings,
+        FeatureTypeMapping featureTypeMapping = Iterables.find(featureTypeMappings,
                 new Predicate<FeatureTypeMapping>() {
                     @Override
                     public boolean apply(FeatureTypeMapping ftm) {
@@ -63,6 +63,21 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                     }
                 }
         );
+
+        if (flattenInheritance) {
+            List<String> parents = applicationSchema.getAllParents(featureTypeMapping.getName());
+            List<FeatureTypeMapping> parentMappings = new ArrayList<>();
+            for (String parent : parents) {
+                if (hasFeatureType(parent)) {
+                    System.out.println(parent);
+                    parentMappings.add(getFeatureTypeMapping(parent, false));
+                }
+            }
+
+            featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings);
+        }
+
+        return featureTypeMapping;
     }
 
     @Override
@@ -94,28 +109,32 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
         System.out.println("FeatureTypes:" + featureTypeMappings.size());
         System.out.println("FeatureTypes:" + getFeatureTypeList(false));
         System.out.println("FeatureTypes:" + getFeatureTypeList(true));
-        for (FeatureTypeMapping ftm : featureTypeMappings) {
-            String name = ftm.getName();
-            String name2 = name;
-            if (applicationSchema.isAbstract(name))
-                name2 += "[abstract]";
-            //if (applicationSchema.getParent(name) != null && hasFeatureType(name))
-            //    name2 += "[" + applicationSchema.getParent(name) + "]";
-            if (!applicationSchema.getAllParents(name).isEmpty())
-                name2 += "[" + String.join(",", applicationSchema.getAllParents(name)) + "]";
-            System.out.println("Name: " + name2 + "\n");
+        for (String ft : getFeatureTypeList(true)) {
+            if (hasFeatureType(ft)) {
+                FeatureTypeMapping ftm = getFeatureTypeMapping(ft, true);
+                String name = ftm.getName();
+                String name2 = name;
+                if (applicationSchema.isAbstract(name))
+                    name2 += "[abstract]";
+                //if (applicationSchema.getParent(name) != null && hasFeatureType(name))
+                //    name2 += "[" + applicationSchema.getParent(name) + "]";
+                if (!applicationSchema.getAllParents(name).isEmpty())
+                    name2 += "[" + String.join(",", applicationSchema.getAllParents(name)) + "]";
+                System.out.println("Name: " + name2 + "\n");
 
-            Collection<String> rootTables = ftm.getPrimaryTableNames();
-            System.out.println("  Root Tables: " + rootTables.toString() + "\n");
-            System.out.println("  Joined Tables: " + ftm.getJoinedTableNames().toString() + "\n");
+                Collection<String> rootTables = ftm.getPrimaryTableNames();
+                System.out.println("  Root Tables: " + rootTables.toString() + "\n");
+                System.out.println("  Joined Value Tables: " + ftm.getJoinedTableNames().toString() + "\n");
+                System.out.println("  Joined Reference Tables: " + ftm.getReferenceTableNames().toString() + "\n");
 
-            for (MappingValue mv : ftm.getValues()) {
-                try {
-                    System.out.println("  Table: " + mv.getTable());
-                    System.out.println("  Value: " + mv.getValue());
-                    System.out.println("  Target: " + mv.getTarget() + "\n");
-                } catch (ClassCastException e) {
+                for (MappingValue mv : ftm.getValues()) {
+                    try {
+                        System.out.println("  Table: " + mv.getTable());
+                        System.out.println("  Value: " + mv.getValue());
+                        System.out.println("  Target: " + mv.getTarget() + "\n");
+                    } catch (ClassCastException e) {
 
+                    }
                 }
             }
         }

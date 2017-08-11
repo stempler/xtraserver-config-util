@@ -1,4 +1,4 @@
-apply plugin: 'application'
+apply plugin: 'java'
 
 version = '1.0.0-SNAPSHOT'
 group = 'de.interactive_instruments'

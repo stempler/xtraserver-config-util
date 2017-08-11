@@ -13,5 +13,11 @@ public interface FeatureTypeMapping {
 
     Collection<String> getJoinedTableNames();
 
+    Collection<String> getReferenceTableNames();
+
+    List<MappingTable> getTables();
+
+    List<MappingJoin> getJoins();
+
     List<MappingValue> getValues();
 }

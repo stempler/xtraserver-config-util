@@ -13,7 +13,7 @@ public interface MappingTable {
     // TODO: check if table is join target
     boolean isPrimary();
 
-    String getJoinPath();
+    MappingJoin getJoinPath();
 
-    void setJoinPath(String joinPath);
+    void setJoinPath(MappingJoin joinPath);
 }

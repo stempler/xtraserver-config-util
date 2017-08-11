@@ -7,6 +7,7 @@ import com.google.common.collect.Iterables;
 import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.schema.SQLFeatureTypeImplType;
+import de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping;
 import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
 import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
 import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * @author zahnen
  */
-public class FeatureTypeMappingImpl implements de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping {
+public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     private String name;
     private List<MappingTable> tables;
     private List<MappingJoin> joins;
@@ -31,6 +32,22 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
         this.values = extractValues(featureType);
     }
 
+    public FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings) {
+        this.name = mainMapping.getName();
+        this.tables = mainMapping.getTables();
+        this.joins = mainMapping.getJoins();
+        this.values = mainMapping.getValues();
+
+        for (FeatureTypeMapping mergedMapping: mergedMappings) {
+            // TODO: first merge joins and tables
+            for (MappingValue mappingValue: mergedMapping.getValues()) {
+                if (hasValueMappingForTable(mappingValue.getTable())) {
+                    this.values.add(this.values.size(), mappingValue);
+                }
+            }
+        }
+    }
+
     @Override
     public String getName() {
         return name;
@@ -39,13 +56,29 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
     @Override
     public Collection<String> getPrimaryTableNames() {
 
-        return getTableNames(true);
+        return getTableNames(true, false);
     }
 
     @Override
     public Collection<String> getJoinedTableNames() {
 
-        return getTableNames(false);
+        return getTableNames(false, true);
+    }
+
+    @Override
+    public Collection<String> getReferenceTableNames() {
+
+        return getTableNames(false, false);
+    }
+
+    @Override
+    public List<MappingTable> getTables() {
+        return tables;
+    }
+
+    @Override
+    public List<MappingJoin> getJoins() {
+        return joins;
     }
 
     @Override
@@ -53,14 +86,14 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
         return values;
     }
 
-    private Collection<String> getTableNames(boolean primary) {
+    private Collection<String> getTableNames(boolean primary, boolean hasValueMapping) {
 
         return Collections2.transform(
                 Collections2.filter(tables,
                         new Predicate<MappingTable>() {
                             @Override
                             public boolean apply(MappingTable table) {
-                                return primary == table.isPrimary();
+                                return primary ? table.isPrimary() : (! table.isPrimary() && hasValueMapping == hasValueMappingForTable(table.getName()));
                             }
                         }
                 ),
@@ -69,7 +102,7 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
                     public String apply(MappingTable table) {
                         String name = table.getName() + "[" + table.getOidCol() + "]";
                         if (!primary)
-                            name += "[" + table.getJoinPath() + "]";
+                            name += "[" + table.getJoinPath().toString() + "]";
                         return name;
                     }
                 }
@@ -86,7 +119,6 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
                 }
         ).isEmpty();
     }
-
     private MappingTable getTable(String name) {
         if (tables == null) return null;
 
@@ -98,6 +130,17 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
                     }
                 }
         );
+    }
+
+    private boolean hasValueMappingForTable(String name) {
+        return values != null && !Collections2.filter(values,
+                new Predicate<MappingValue>() {
+                    @Override
+                    public boolean apply(MappingValue value) {
+                        return name.equals(value.getTable()) && value.getValue() != null && !value.getValue().isEmpty();
+                    }
+                }
+        ).isEmpty();
     }
 
     private List<MappingTable> extractTables(FeatureType featureType) {
@@ -161,7 +204,7 @@ public class FeatureTypeMappingImpl implements de.interactive_instruments.xtrase
                     if (join.getJoin_Path() != null && !join.getJoin_Path().isEmpty()) {
                         String table = join.getJoin_Path().split("/")[0];
                         if (hasTable(table) && getTable(table).getTarget().equals(join.getTarget()))  {
-                            getTable(table).setJoinPath(join.getJoin_Path());
+                            getTable(table).setJoinPath(new MappingJoinImpl(join));
                         }
                     }
                 } catch (ClassCastException e) {

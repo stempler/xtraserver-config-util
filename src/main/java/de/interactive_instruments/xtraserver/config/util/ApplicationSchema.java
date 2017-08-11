@@ -51,7 +51,8 @@ public class ApplicationSchema {
         XmlSchemaElement elem = xmlSchema.getElementByName(featureType);
 
         if (elem != null) {
-            parent = getParent(elem.getSchemaType());
+            //parent = getParent(elem.getSchemaType());
+            parent = elem.getSubstitutionGroup();
         }
 
         return parent;
@@ -86,7 +87,7 @@ public class ApplicationSchema {
 
         QName ft = namespaces.getQualifiedName(featureType);
 
-        if (ft != null && getParent(ft) != null) {
+        /*if (ft != null && getParent(ft) != null) {
             parents.add(namespaces.getPrefixedName(getParent(ft)));
 
             ft = getParent(ft);
@@ -95,6 +96,11 @@ public class ApplicationSchema {
                 parents.add(namespaces.getPrefixedName(getParentForType(ft)));
                 ft = getParentForType(ft);
             }
+        }*/
+
+        while (ft != null && getParent(ft) != null) {
+            parents.add(namespaces.getPrefixedName(getParent(ft)));
+            ft = getParent(ft);
         }
 
         return parents;
