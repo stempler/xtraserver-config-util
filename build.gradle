@@ -1,6 +1,7 @@
 apply plugin: 'java'
+apply plugin: 'osgi'
 
-version = '1.0.0-SNAPSHOT'
+version = '1.0.0.' + new Date().format("yyyyMMddHHmmss")
 group = 'de.interactive_instruments'
 
 repositories {
@@ -9,8 +10,8 @@ repositories {
 
 dependencies {
     compile 'com.google.guava:guava:17.0'
-    compile 'org.apache.ws.xmlschema:xmlschema-core:2.2.2'
-
+    //compile 'org.apache.ws.xmlschema:xmlschema-core:2.2.2'
+    compile 'org.apache.ws.commons.schema:XmlSchema:1.4.7'
     testCompile "junit:junit:4.12"
 }
 

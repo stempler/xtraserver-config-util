@@ -11,6 +11,10 @@
 
 	<FeatureType>
 		<Name>ci:City</Name>
+		<PathAliases>{forall aliasnr /1/2/3/4/5/6/7/8/9/10/11/12/13/14/15/16/17/18/19/20/}{if {$xpathAliasPattern.AX_Flurstueck.{$aliasnr}}}<PathAlias externalUse="{if {$xpathAliasExternalUse.AX_Flurstueck.{$aliasnr}}}true{else}false{fi}">
+        <Pattern>{$xpathAliasPattern.AX_Flurstueck.{$aliasnr}}</Pattern>
+        <Replacement>{$xpathAliasReplacement.AX_Flurstueck.{$aliasnr}}</Replacement>
+      </PathAlias>{fi}{end}</PathAliases>
 		<PGISFeatureTypeImpl logging="false">
 			<!-- Main table of feature type City -->
 			<Table table_name="city" oid_col="id" target=""/>
@@ -99,16 +103,16 @@
 		<PGISFeatureTypeImpl>
 			<!--City-->
 			<Table oid_col="id" table_name="city" target=""/>
-			<Table table_name="city" target="@gml:id"/>
+			<Table table_name="city" target="@gml:id" value="objid"/>
 			<!--District-->
 			<Table oid_col="id" table_name="district" target=""/>
-			<Table table_name="district" target="@gml:id"/>
+			<Table table_name="district" target="@gml:id" value="objid"/>
 			<!--River-->
 			<Table oid_col="id" table_name="river" target=""/>
-			<Table table_name="river" target="@gml:id"/>
+			<Table table_name="river" target="@gml:id" value="objid"/>
 			<!--State-->
 			<Table oid_col="id" table_name="state" target=""/>
-			<Table table_name="state" target="@gml:id"/>
+			<Table table_name="state" target="@gml:id" value="objid"/>
 		</PGISFeatureTypeImpl>
 	</FeatureType>
 

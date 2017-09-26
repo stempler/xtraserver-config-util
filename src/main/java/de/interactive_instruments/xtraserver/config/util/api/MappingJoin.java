@@ -12,6 +12,8 @@ public interface MappingJoin {
 
     String getPath();
 
+    boolean isSuppressJoin();
+
     List<Condition> getJoinConditions();
 
     interface Condition {

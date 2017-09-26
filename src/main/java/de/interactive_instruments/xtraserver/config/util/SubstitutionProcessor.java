@@ -201,7 +201,7 @@ public class SubstitutionProcessor {
 
         // Falls es Savepoints gibt, aufzeichnen
         if( m_nSaved > 0 )
-            m_saved.append(ich);
+            m_saved.append(Character.toChars(ich));
 
         // Das Zeichen abliefern
         return ich;
@@ -211,7 +211,8 @@ public class SubstitutionProcessor {
     private void unreadByte( int ich )
     {
         // Auf den unread-Stack
-        m_unread.append( ich );
+        //m_unread.append( ich );
+        m_unread.append(Character.toChars(ich));
 
         // Aus den Savepoints entnehmen
         if( m_nSaved > 0 ) {
@@ -251,7 +252,7 @@ public class SubstitutionProcessor {
         {
             int ich = m_saved.charAt(m_saved.length()-1);
             m_saved.setLength(m_saved.length() - 1);
-            m_unread.append( ich );
+            m_unread.append( Character.toChars(ich) );
         }
     }
 
@@ -271,7 +272,7 @@ public class SubstitutionProcessor {
         while( (ich = getProcessedChar(input)) != -1 )
         {
             if( ich=='}' ) break;
-            key.append(ich);
+            key.append(Character.toChars(ich));
         }
 
         // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
@@ -320,46 +321,37 @@ public class SubstitutionProcessor {
     // {forall x list} Schleife durchführen. Erkannt wurde bereits die geschweifte
 // Klammer am Anfang.
     private int doForAll(Reader input) throws IOException {
-        StringBuffer unread = new StringBuffer();
 
-        // Erstmal das forall-Operationswort erkennen
-        String forall = "forall ";
         int ich, i;
-        for( i=0; i < forall.length(); i++ )
-        {
-            ich = readByte(input);
-            unread.append( ich );
-            if( ich != forall.charAt(i) ) break;
-        }
 
         // Wenn es gut gegangen ist, erkennen wir jetzt den Key und den Wert bis
         // zum }. Key und Wert werden aus dem substituierten Text geholt.
-        if( i == forall.length() )
+        if( readOperation(input, "forall ") )
         {
             // Hole Key und Value des {forall key value}
-            String[] args = new String[2];
+            StringBuilder[] args = {new StringBuilder(), new StringBuilder()};
             int iarg = 0;
             while( (ich = getProcessedChar(input)) != -1 )
             {
-                if( ich==' ' )
+                if( ich == ' ' )
                     if( iarg==0 )
                     {
                         if ( args[0].length() > 0 ) iarg = 1;
                         continue;
                     }
                 if( ich == '}' ) break;
-                args[iarg] += ich;
+                args[iarg].append(Character.toChars(ich));
             }
 
             // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
             if( ich == -1 )
-                m_unread_prd.append(ich);
+                m_unread_prd.append(Character.toChars(ich));
 
             // { forall ...}  ist erkannt, einschließlich der schließenden Klammer.
             // Das zweite Argument ist als Liste zu interpretieren und auseinander
             // zu nehmen. Das erste ist der Key.
-            String key = args[0];
-            String valueList = args[1];
+            String key = args[0].toString();
+            String valueList = args[1].toString();
             char dlm = ' ';
             if( valueList.length() > 0 )
             {
@@ -405,7 +397,7 @@ public class SubstitutionProcessor {
                 // Jetzt den verarbeiteten Input lesen, bis EOF oder {end} auftaucht
                 while( (ich = getProcessedChar(input)) != -1 )
                 {
-                    record.append( ich );
+                    record.append( Character.toChars(ich) );
                     if( record.toString().endsWith("{end}") ) {
                         record.setLength(record.length() - 5);
                         break;
@@ -437,16 +429,9 @@ public class SubstitutionProcessor {
         }
 
 
-        // Fehlerbehandlung: Alles, was wir nicht verstanden haben, einschließlich
-        // der {, muss zurück
-        while( unread.length() > 0 )
-        {
-            ich = unread.charAt(unread.length()-1);
-            unread.setLength(unread.length() - 1);
-            unreadByte( ich );
-        }
-        unreadByte( '{' );
-        return readByte(input);
+        // {forall konnte nicht gelesen werden, das letzte gelesene Zeichen war das
+        // { davon.
+        return '{';
     }
 
     // {if value1 == value2}...{else}...{fi} bzw. {if value1 != value2}...{else}...{fi}
@@ -470,7 +455,7 @@ public class SubstitutionProcessor {
         if( readOperation(input, "if") )
         {
             // Hole Values
-            String[] args = new String[2];
+            String[] args = {"", ""};
             int iarg = -1; // Index bzgl. args
             CompType compType = CompType.none;
 
@@ -506,16 +491,16 @@ public class SubstitutionProcessor {
                 }
 
                 // Ende der if-Klammer
-                if( ich=='}' ) break;
+                if( ich == '}' ) break;
 
                 // Argument lesen
                 if (iarg > -1)
-                    args[iarg] += ich;
+                    args[iarg] += Character.toChars(ich);
             }
 
             // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
             if( ich == -1 )
-                m_unread_prd.append( ich );
+                m_unread_prd.append( Character.toChars(ich) );
 
             // Die Ergebnisse festhalten
             StringBuffer recordIf = new StringBuffer();
@@ -527,7 +512,7 @@ public class SubstitutionProcessor {
             {
                 if (!isElse)
                 {
-                    recordIf.append( ich );
+                    recordIf.append( Character.toChars(ich) );
                     if( recordIf.toString().endsWith("{fi}") ) {
                         recordIf.setLength( recordIf.length() - 4 );
                         break;
@@ -539,7 +524,7 @@ public class SubstitutionProcessor {
                 }
                 else
                 {
-                    recordElse.append( ich );
+                    recordElse.append( Character.toChars(ich) );
                     if( recordElse.toString().endsWith("{fi}") ) {
                         recordElse.setLength( recordElse.length() - 4 );
                         break;
@@ -619,7 +604,7 @@ public class SubstitutionProcessor {
         String xi = "xi:include";
         while( (ich=getProcessedChar(input)) != -1 )
         {
-            buffer.append(ich);
+            buffer.append(Character.toChars(ich));
             if( ich != xi.charAt(i++) )
             {
                 restoreSavepoint(savepoint);
@@ -639,11 +624,11 @@ public class SubstitutionProcessor {
                     //unreadByte( ich );
                     break;
                 }
-                file.append(ich);
+                file.append(Character.toChars(ich));
 
             }
             else
-                buffer.append(ich);
+                buffer.append(Character.toChars(ich));
             if( ich=='>' )
             {
                 restoreSavepoint(savepoint);
@@ -688,7 +673,7 @@ public class SubstitutionProcessor {
         for( i=0; i < op.length(); i++ )
         {
             ich = readByte(input);
-            unread.append( ich );
+            unread.append( Character.toChars(ich) );
             if( ich != op.charAt(i) ) break;
         }
 

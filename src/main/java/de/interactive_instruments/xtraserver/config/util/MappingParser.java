@@ -1,6 +1,6 @@
 package de.interactive_instruments.xtraserver.config.util;
 
-import java.io.File;
+import java.io.*;
 import java.text.DecimalFormat;
 import javax.xml.XMLConstants;
 import javax.xml.bind.*;
@@ -30,6 +30,61 @@ public class MappingParser
       Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
       unmarshaller.setSchema( schema );
       return clss.cast( unmarshaller.unmarshal( new File( xmlDatei ) ) );
+   }
+
+   public static <T> T unmarshal( String xsdSchema, InputStream inputStream, Class<T> clss )
+           throws JAXBException, SAXException, IOException {
+      // Schema und JAXBContext sind multithreadingsicher ("thread safe"):
+      SchemaFactory schemaFactory = SchemaFactory.newInstance( XMLConstants.W3C_XML_SCHEMA_NS_URI );
+      Schema        schema        = ( xsdSchema == null || xsdSchema.trim().length() == 0 )
+              ? null : schemaFactory.newSchema( new File( xsdSchema ) );
+      JAXBContext   jaxbContext   = JAXBContext.newInstance( clss.getPackage().getName() );
+      return unmarshal( jaxbContext, schema, inputStream, clss );
+   }
+
+   public static <T> T unmarshal(JAXBContext jaxbContext, Schema schema, InputStream inputStream, Class<T> clss )
+           throws JAXBException, IOException {
+
+      PipedInputStream in = new PipedInputStream();
+      PipedOutputStream out2 = new PipedOutputStream(in);
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+      SubstitutionProcessor substitutionProcessor = new SubstitutionProcessor();
+      substitutionProcessor.addParameter("xpathAliasPattern.AX_Flurstueck.15", "foo");
+      substitutionProcessor.addParameter("xpathAliasReplacement.AX_Flurstueck.15", "bar");
+      new Thread(
+              new Runnable(){
+                 public void run(){
+                    try {
+                       substitutionProcessor.process(new InputStreamReader(inputStream), new OutputStreamWriter(out2));
+                    } catch (IOException e) {
+                       e.printStackTrace();
+                    }
+                 }
+              }
+      ).start();
+
+      /*System.out.println("BLA");
+         System.out.println(out.toString());
+
+
+      new Thread(
+            new Runnable(){
+             public void run(){
+              try {
+                 out2.write(out.toByteArray());
+            } catch (IOException e) {
+             e.printStackTrace();
+        }
+      }
+      }
+      ).start();
+*/
+
+      // Unmarshaller ist nicht multithreadingsicher:
+      Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+      unmarshaller.setSchema( schema );
+      return clss.cast( unmarshaller.unmarshal( in ) );
    }
 
    public static void marshal( String xsdSchema, String xmlDatei, Object jaxbElement )

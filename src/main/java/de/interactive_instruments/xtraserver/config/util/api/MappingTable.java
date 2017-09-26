@@ -1,5 +1,7 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
+import java.util.List;
+
 /**
  * @author zahnen
  */
@@ -10,10 +12,16 @@ public interface MappingTable {
 
     String getTarget();
 
+    boolean hasTarget();
+
+    void setTarget(String target);
+
     // TODO: check if table is join target
     boolean isPrimary();
 
-    MappingJoin getJoinPath();
+    void addJoinPath(MappingJoin joinPath);
 
-    void setJoinPath(MappingJoin joinPath);
+    List<MappingJoin> getJoinPaths();
+
+    boolean hasJoinPath();
 }

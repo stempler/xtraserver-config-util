@@ -23,7 +23,7 @@ public class ApplicationSchema {
 
         InputStream is = new FileInputStream(fileName);
         XmlSchemaCollection schemaCol = new XmlSchemaCollection();
-        this.xmlSchema = schemaCol.read(new StreamSource(is));
+        this.xmlSchema = schemaCol.read(new StreamSource(is), new ValidationEventHandler());
     }
 
     public boolean isAbstract(String featureType) {
@@ -56,6 +56,22 @@ public class ApplicationSchema {
         }
 
         return parent;
+    }
+
+    public QName getType(String featureType) {
+        System.out.println("TYPE === " + featureType);
+        QName ft = namespaces.getQualifiedName(featureType);
+        if (ft != null) {
+            XmlSchemaElement elem = xmlSchema.getElementByName(ft);
+            if (elem!= null) {
+                return elem.getSchemaType().getQName();
+            }
+        }
+        return null;
+    }
+
+    public Namespaces getNamespaces() {
+        return namespaces;
     }
 
     private QName getParentForType(QName featureType) {
