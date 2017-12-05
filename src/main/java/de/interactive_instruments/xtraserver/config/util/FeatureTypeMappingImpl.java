@@ -30,7 +30,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     private List<MappingValue> values;
     private ApplicationSchema applicationSchema;
 
-    public FeatureTypeMappingImpl(FeatureType featureType, ApplicationSchema applicationSchema) {
+    FeatureTypeMappingImpl(FeatureType featureType, ApplicationSchema applicationSchema) {
         this.name = featureType.getName();
 
         MappingsSequenceType mappings = extractMappings(featureType);
@@ -41,7 +41,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         this.applicationSchema = applicationSchema;
     }
 
-    public FeatureTypeMappingImpl(AdditionalMappings additionalMappings, ApplicationSchema applicationSchema) {
+    FeatureTypeMappingImpl(AdditionalMappings additionalMappings, ApplicationSchema applicationSchema) {
         this.name = additionalMappings.getRootElementName();
         this.tables = new ArrayList<>();
         extractTables(additionalMappings.getMappings());
@@ -50,7 +50,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         this.applicationSchema = applicationSchema;
     }
 
-    public FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, ApplicationSchema applicationSchema) {
+    FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, ApplicationSchema applicationSchema) {
         this.name = mainMapping.getName();
         this.tables = mainMapping.getTables();
         this.joins = mainMapping.getJoins();

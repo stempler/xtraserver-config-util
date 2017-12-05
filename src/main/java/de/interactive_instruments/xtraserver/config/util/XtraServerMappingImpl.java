@@ -168,7 +168,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
         );
     }
 
-    public Collection<String> getTypeList(boolean includeAbstract) {
+    private Collection<String> getTypeList(boolean includeAbstract) {
         Set<String> typeList = new HashSet<>();
 
         typeList.addAll(getFeatureTypeList(includeAbstract));
@@ -193,7 +193,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
         return typeList;
     }
 
-    public void print() {
+    void print() {
         System.out.println("FeatureTypes:" + featureTypeMappings.size());
         System.out.println("FeatureTypes:" + getTypeList(false));
         System.out.println("FeatureTypes:" + getTypeList(true));
@@ -265,7 +265,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
         }
     }
 
-    public Collection<String> getDecoratedTableNames(Collection<String> tableNames, FeatureTypeMapping ftm) {
+    private Collection<String> getDecoratedTableNames(Collection<String> tableNames, FeatureTypeMapping ftm) {
         return Collections2.transform(tableNames, new Function<String, String>() {
             @Override
             public String apply(String tableName) {

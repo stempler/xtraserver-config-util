@@ -20,7 +20,7 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
     private String dbValues;
     private Namespaces namespaces;
 
-    public MappingValueImpl(MappingsSequenceType.Table table, Namespaces namespaces) {
+    MappingValueImpl(MappingsSequenceType.Table table, Namespaces namespaces) {
         this.table = table.getTable_Name();
         this.target = table.getTarget();
         this.value = table.getValue4();

@@ -17,7 +17,7 @@ public class MappingJoinImpl implements MappingJoin {
     private List<Condition> joinConditions;
     private boolean suppressJoin;
 
-    public MappingJoinImpl(MappingsSequenceType.Join join) {
+    MappingJoinImpl(MappingsSequenceType.Join join) {
         this.target = join.getTarget();
         this.axis = join.getAxis();
         this.path = join.getJoin_Path();
@@ -109,7 +109,7 @@ public class MappingJoinImpl implements MappingJoin {
         private String targetTable;
         private String targetField;
 
-        public ConditionImpl(String sourceTable, String sourceField, String targetTable, String targetField) {
+        ConditionImpl(String sourceTable, String sourceField, String targetTable, String targetField) {
             this.sourceTable = sourceTable;
             this.sourceField = sourceField;
             this.targetTable = targetTable;

@@ -8,29 +8,89 @@ import java.util.List;
  * @author zahnen
  */
 public interface FeatureTypeMapping {
+
+    /**
+     * Get the local name of the FeatureType
+     * @return
+     */
     String getName();
 
+    /**
+     * Get the qualified name of the FeatureType
+     * @return
+     */
     QName getQName();
 
+    /**
+     * Get the list of primary tables, i.e. tables that are mapped to the FeatureType without a join
+     * @return
+     */
     Collection<String> getPrimaryTableNames();
 
+    /**
+     * Get the list of joined tables, i.e. tables that are mapped to the FeatureType with a join and provide at least one value mapping
+     * @return
+     */
     Collection<String> getJoinedTableNames();
 
+    /**
+     * Get the list of reference tables, i.e. tables that are mapped to the FeatureType with a join, but do not provide values, just references to other Features
+     * @return
+     */
     Collection<String> getReferenceTableNames();
 
+    /**
+     * Get all table mappings for primary, joined and reference tables
+     * @return
+     */
     List<MappingTable> getTables();
 
+    /**
+     * Get all join mappings
+     * @return
+     */
     List<MappingJoin> getJoins();
 
+    /**
+     * Get all value mappings
+     * @return
+     */
     List<MappingValue> getValues();
 
+    /**
+     * Does a table mapping exist for the given table?
+     * @param name
+     * @return
+     */
     boolean hasTable(String name);
 
+    /**
+     * Get the table mapping for the given table
+     * @param name
+     * @return
+     */
     MappingTable getTable(String name);
 
+    /**
+     * Does a value mapping exist for the given table?
+     * @param name
+     * @return
+     */
     boolean hasValueMappingForTable(String name);
 
+    /**
+     * Does a value mapping exist for the given table and target path?
+     * @param name
+     * @param target
+     * @return
+     */
     boolean hasValueMappingForTable(String name, String target);
 
+    /**
+     * Does a reference mapping exist for the given table and target path?
+     * @param name
+     * @param target
+     * @return
+     */
     boolean hasReferenceMappingForTable(String name, String target);
 }

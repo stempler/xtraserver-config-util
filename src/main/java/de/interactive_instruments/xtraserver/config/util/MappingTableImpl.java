@@ -21,7 +21,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
 
     private List<MappingJoin> joinPaths;
 
-    public MappingTableImpl(MappingsSequenceType.Table table) {
+    MappingTableImpl(MappingsSequenceType.Table table) {
         this.name = table.getTable_Name();
         if (this.name.contains("[")) {
             System.out.println("PREDICATE " + name);
@@ -35,7 +35,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
         this.joinPaths = new ArrayList<>();
     }
 
-    public MappingTableImpl(MappingTable mappingTable, String target) {
+    MappingTableImpl(MappingTable mappingTable, String target) {
         this.name = mappingTable.getName();
         this.oidCol = mappingTable.getOidCol();
         this.target = target;
@@ -47,7 +47,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
         }));
     }
 
-    public MappingTableImpl(MappingTable mappingTable, MappingJoin join) {
+    MappingTableImpl(MappingTable mappingTable, MappingJoin join) {
         this.name = mappingTable.getName();
         this.oidCol = mappingTable.getOidCol();
         this.target = join.getTarget();
