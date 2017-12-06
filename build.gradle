@@ -1,5 +1,18 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'osgi'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 
 version = '1.0.0.' + new Date().format("yyyyMMddHHmmss")
 group = 'de.interactive_instruments'
@@ -18,5 +31,42 @@ dependencies {
 test {
     testLogging {
         events "PASSED", "STARTED", "FAILED", "SKIPPED", "standard_out", "standard_error"
+    }
+}
+
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+    }
+}
+
+bintray {
+    user = project.bintrayUser
+    key = project.bintrayApiKey
+    publications = ['maven']
+    publish = true
+    pkg {
+        repo = 'maven'
+        name = project.name
+        userOrg = 'iide'
+        licenses = ['Apache-2.0']
+        websiteUrl = "https://github.com/interactive-instruments/${project.name}"
+        issueTrackerUrl = "https://github.com/interactive-instruments/${project.name}/issues"
+        vcsUrl = "https://github.com/interactive-instruments/${project.name}.git"
+        githubRepo = "interactive-instruments/${project.name}"
+        githubReleaseNotesFile = 'README.md'
+        version {
+            name = project.version
+        }
     }
 }
