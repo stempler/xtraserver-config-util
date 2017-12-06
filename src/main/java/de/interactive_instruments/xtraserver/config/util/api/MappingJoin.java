@@ -3,6 +3,8 @@ package de.interactive_instruments.xtraserver.config.util.api;
 import java.util.List;
 
 /**
+ * A join definition
+ *
  * @author zahnen
  */
 public interface MappingJoin {
@@ -16,6 +18,9 @@ public interface MappingJoin {
 
     List<Condition> getJoinConditions();
 
+    /**
+     * A join condition
+     */
     interface Condition {
         String getSourceTable();
 

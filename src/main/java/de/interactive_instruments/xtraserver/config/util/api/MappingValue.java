@@ -4,6 +4,8 @@ import javax.xml.namespace.QName;
 import java.util.List;
 
 /**
+ * A value mapping
+ *
  * @author zahnen
  */
 public interface MappingValue {

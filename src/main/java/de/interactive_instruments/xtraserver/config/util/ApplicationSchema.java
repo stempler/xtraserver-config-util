@@ -14,8 +14,15 @@ import java.util.List;
  * @author zahnen
  */
 public class ApplicationSchema {
-    XmlSchema xmlSchema;
-    Namespaces namespaces;
+    private final static String APPLICATION_SCHEMA = "/home/zahnen/development/XSProjects/AAA-Suite/www/schema/NAS/6.0/schema/AAA-Fachschema.xsd";
+
+    private XmlSchema xmlSchema;
+    private Namespaces namespaces;
+
+    public ApplicationSchema() throws FileNotFoundException {
+
+        this(APPLICATION_SCHEMA, new Namespaces());
+    }
 
     public ApplicationSchema(String fileName, Namespaces namespaces) throws FileNotFoundException {
 

@@ -21,11 +21,16 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    doclava
+}
+
 dependencies {
     compile 'com.google.guava:guava:17.0'
     //compile 'org.apache.ws.xmlschema:xmlschema-core:2.2.2'
     compile 'org.apache.ws.commons.schema:XmlSchema:1.4.7'
     testCompile "junit:junit:4.12"
+    doclava 'com.google.doclava:doclava:1.0.6'
 }
 
 test {
@@ -33,6 +38,14 @@ test {
         events "PASSED", "STARTED", "FAILED", "SKIPPED", "standard_out", "standard_error"
     }
 }
+
+javadoc {
+    include 'de/interactive_instruments/xtraserver/config/util/api/*'
+    options.doclet = "com.google.doclava.Doclava"
+    options.docletpath = configurations.doclava.files.asType(List)
+    title = null
+}
+tasks.javadoc.dependsOn configurations.doclava
 
 task sourceJar(type: Jar) {
     from sourceSets.main.allSource

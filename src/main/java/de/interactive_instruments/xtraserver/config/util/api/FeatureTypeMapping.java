@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * A collection of mappings related to a specific FeatureType
  * @author zahnen
  */
 public interface FeatureTypeMapping {
