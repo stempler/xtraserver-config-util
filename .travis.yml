@@ -13,6 +13,7 @@ script:
 - "./gradlew check -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_PASS"
 after_success:
 - "./gradlew bintrayUpload -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_PASS"
+- "./gradlew javadoc -PbintrayUser=$BINTRAY_USER -PbintrayApiKey=$BINTRAY_PASS"
 - cd build/docs/javadoc
 - git init && git config user.name "${GH_USER_NAME}" && git config user.email "{GH_USER_EMAIL}"
 - git add . ; git commit -m "Deploy to GitHub Pages"
