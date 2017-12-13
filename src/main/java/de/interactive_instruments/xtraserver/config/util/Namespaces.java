@@ -9,7 +9,7 @@ import javax.xml.namespace.QName;
  * @author zahnen
  */
 public class Namespaces {
-    BiMap<String, String> namespaces;
+    private BiMap<String, String> namespaces;
 
     public Namespaces() {
         this.namespaces = HashBiMap.create();

@@ -30,6 +30,8 @@ dependencies {
     //compile 'org.apache.ws.xmlschema:xmlschema-core:2.2.2'
     compile 'org.apache.ws.commons.schema:XmlSchema:1.4.7'
     testCompile "junit:junit:4.12"
+    testCompile "org.xmlunit:xmlunit-core:2.5.1"
+    testCompile "org.xmlunit:xmlunit-matchers:2.5.1"
     doclava 'com.google.doclava:doclava:1.0.6'
 }
 

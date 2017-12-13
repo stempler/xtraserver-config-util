@@ -1,5 +1,7 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
+import de.interactive_instruments.xtraserver.config.util.MappingTableImpl;
+
 import java.util.List;
 
 /**
@@ -8,6 +10,16 @@ import java.util.List;
  * @author zahnen
  */
 public interface MappingTable {
+
+    /**
+     * factory method
+     *
+     * @return
+     */
+    static MappingTable create() {
+        return new MappingTableImpl();
+    }
+
     String getName();
 
     String getOidCol();
@@ -15,6 +27,10 @@ public interface MappingTable {
     String getTarget();
 
     boolean hasTarget();
+
+    void setName(String name);
+
+    void setOidCol(String oidCol);
 
     void setTarget(String target);
 
@@ -26,4 +42,6 @@ public interface MappingTable {
     List<MappingJoin> getJoinPaths();
 
     boolean hasJoinPath();
+
+    List<MappingValue> getValues();
 }

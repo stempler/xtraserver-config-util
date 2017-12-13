@@ -5,25 +5,36 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
-import de.interactive_instruments.xtraserver.config.schema.AdditionalMappings;
-import de.interactive_instruments.xtraserver.config.schema.FeatureType;
-import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
-import de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping;
-import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
-import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
-import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
+import de.interactive_instruments.xtraserver.config.schema.*;
+import de.interactive_instruments.xtraserver.config.util.api.*;
+import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author zahnen
  */
-public class XtraServerMappingImpl implements de.interactive_instruments.xtraserver.config.util.api.XtraServerMapping {
-    private final ApplicationSchema applicationSchema;
-    private List<FeatureTypeMapping> featureTypeMappings;
-    private List<FeatureTypeMapping> additionalMappings;
+public class XtraServerMappingImpl implements XtraServerMapping {
+    private ApplicationSchema applicationSchema;
+    private final List<FeatureTypeMapping> featureTypeMappings;
+    private final List<FeatureTypeMapping> additionalMappings;
 
-    public XtraServerMappingImpl(FeatureTypes featureTypes, ApplicationSchema applicationSchema) {
+    public XtraServerMappingImpl() {
+        this.featureTypeMappings = new ArrayList<>();
+        this.additionalMappings = new ArrayList<>();
+    }
+
+    public XtraServerMappingImpl(ApplicationSchema applicationSchema) {
+        this();
+        this.applicationSchema = applicationSchema;
+    }
+
+    /*public XtraServerMappingImpl(FeatureTypes featureTypes, ApplicationSchema applicationSchema) {
         this.featureTypeMappings = new ArrayList<>();
         this.additionalMappings = new ArrayList<>();
         this.applicationSchema = applicationSchema;
@@ -49,7 +60,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                 }
             }
         }
-    }
+    }*/
 
     @Override
     public boolean hasFeatureType(String featureType) {
@@ -97,7 +108,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                 }
             }
 
-            featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings, applicationSchema);
+            featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings, applicationSchema.getNamespaces());
         }
 
         return featureTypeMapping;
@@ -132,7 +143,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                         }
                     }
 
-                    featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings, applicationSchema);
+                    featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings, applicationSchema.getNamespaces());
                 }
 
             } catch (NoSuchElementException e2) {
@@ -166,6 +177,100 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                     }
                 }
         );
+    }
+
+    @Override
+    public void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping) {
+        featureTypeMappings.add(featureTypeMapping);
+    }
+
+    @Override
+    public void writeToStream(OutputStream outputStream) throws IOException, JAXBException, SAXException {
+        MappingParser.marshal(outputStream, this.toJaxb());
+    }
+
+    private FeatureTypes toJaxb() {
+        ObjectFactory objectFactory = new ObjectFactory();
+        FeatureTypes featureTypes = objectFactory.createFeatureTypes();
+
+        featureTypes.getFeatureTypeOrAdditionalMappings().addAll(
+                additionalMappings.stream().map(additionalMapping -> {
+                    MappingsSequenceType mappingsSequenceType = objectFactory.createMappingsSequenceType();
+
+                    mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
+                      additionalMapping.getTables().stream().map(mappingTable -> {
+                          MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
+                          table.setTable_Name(mappingTable.getName());
+                          table.setOid_Col(mappingTable.getOidCol());
+                          return table;
+                      }).collect(Collectors.toList())
+                    );
+
+                    AdditionalMappings jaxbAdditionalMappings = objectFactory.createAdditionalMappings();
+                    jaxbAdditionalMappings.setRootElementName(additionalMapping.getName());
+                    jaxbAdditionalMappings.setMappings(mappingsSequenceType);
+
+                    return jaxbAdditionalMappings;
+                }).collect(Collectors.toList())
+        );
+
+        featureTypes.getFeatureTypeOrAdditionalMappings().addAll(
+                featureTypeMappings.stream().map(featureTypeMapping -> {
+                    SQLFeatureTypeImplType sqlFeatureTypeImplType = objectFactory.createSQLFeatureTypeImplType();
+
+                    featureTypeMapping.getTables().forEach(mappingTable -> {
+                        sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
+                                mappingTable.getJoinPaths().stream().map(mappingJoin -> {
+                                    MappingsSequenceType.Join join = objectFactory.createMappingsSequenceTypeJoin();
+                                    join.setAxis(mappingJoin.getAxis());
+                                    join.setTarget(mappingJoin.getTarget());
+                                    join.setJoin_Path(mappingJoin.getPath());
+                                    return join;
+                                }).collect(Collectors.toList())
+                        );
+
+                        MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
+                        table.setTable_Name(mappingTable.getName());
+                        table.setOid_Col(mappingTable.getOidCol());
+                        table.setTarget(mappingTable.getTarget());
+
+                        sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().add(table);
+
+                        sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
+                                mappingTable.getValues().stream().map(mappingValue -> {
+                                    MappingsSequenceType.Table value = objectFactory.createMappingsSequenceTypeTable();
+                                    value.setTable_Name(mappingValue.getTable());
+                                    value.setTarget(mappingValue.getTarget());
+                                    value.setValue4(mappingValue.getValue());
+                                    value.setValue_Type(mappingValue.getValueType());
+                                    value.setMapping_Mode(mappingValue.getMappingMode());
+                                    value.setDb_Codes(mappingValue.getDbCodes());
+                                    value.setSchema_Codes(mappingValue.getDbValues());
+                                    return value;
+                                }).collect(Collectors.toList())
+                        );
+                    });
+                    /*sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
+                            featureTypeMapping.getTables().stream().map(mappingTable -> {
+                                MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
+                                table.setTable_Name(mappingTable.getName());
+                                table.setOid_Col(mappingTable.getOidCol());
+                                table.setTarget(mappingTable.getTarget());
+                                return table;
+                            }).collect(Collectors.toList())
+                    );*/
+
+
+
+                    FeatureType featureType = objectFactory.createFeatureType();
+                    featureType.setName(featureTypeMapping.getName());
+                    featureType.setPGISFeatureTypeImpl(sqlFeatureTypeImplType);
+
+                    return featureType;
+                }).collect(Collectors.toList())
+        );
+
+        return featureTypes;
     }
 
     private Collection<String> getTypeList(boolean includeAbstract) {
@@ -220,13 +325,13 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                                     @Override
                                     public boolean apply(MappingTable table) {
                                         return Collections2.filter(table.getJoinPaths(),
-                                                    new Predicate<MappingJoin>() {
-                                                        @Override
-                                                        public boolean apply(MappingJoin join) {
-                                                            return join.getJoinConditions().size() > 1;
-                                                        }
+                                                new Predicate<MappingJoin>() {
+                                                    @Override
+                                                    public boolean apply(MappingJoin join) {
+                                                        return join.getJoinConditions().size() > 1;
                                                     }
-                                            ).size() > 0;
+                                                }
+                                        ).size() > 0;
                                     }
                                 }
                         ),
@@ -246,7 +351,7 @@ public class XtraServerMappingImpl implements de.interactive_instruments.xtraser
                 );
 
                 System.out.println("  Root Tables: \n" + Joiner.on("\n").join(rootTables) + "\n");
-                System.out.println("  Self Joins: \n" + Joiner.on("\n").join(ftm.getTable((String)ftm.getPrimaryTableNames().toArray()[0]).getJoinPaths()) + "\n");
+                System.out.println("  Self Joins: \n" + Joiner.on("\n").join(ftm.getTable((String) ftm.getPrimaryTableNames().toArray()[0]).getJoinPaths()) + "\n");
                 System.out.println("  Multi Joins: \n" + Joiner.on("\n").join(multiJoins) + "\n");
                 System.out.println("  Joined Value Tables: \n" + Joiner.on("\n").join(joinedTables) + "\n");
                 System.out.println("  Joined Reference Tables: \n" + Joiner.on("\n").join(referenceTables) + "\n");

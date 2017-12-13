@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
 import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
+import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,14 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     private String oidCol;
     private String target;
 
-    private List<MappingJoin> joinPaths;
+    private final List<MappingJoin> joinPaths;
+    private final List<MappingValue> values;
+
+    public MappingTableImpl() {
+        this.joinPaths = new ArrayList<>();
+        this.values = new ArrayList<>();
+        this.target = "";
+    }
 
     MappingTableImpl(MappingsSequenceType.Table table) {
         this.name = table.getTable_Name();
@@ -33,6 +41,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
         }
         this.target = table.getTarget();
         this.joinPaths = new ArrayList<>();
+        this.values = new ArrayList<>();
     }
 
     MappingTableImpl(MappingTable mappingTable, String target) {
@@ -45,6 +54,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
                 return join.getTarget().equals(target);
             }
         }));
+        this.values = new ArrayList<>();
     }
 
     MappingTableImpl(MappingTable mappingTable, MappingJoin join) {
@@ -52,6 +62,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
         this.oidCol = mappingTable.getOidCol();
         this.target = join.getTarget();
         this.joinPaths = Lists.newArrayList(join);
+        this.values = new ArrayList<>();
     }
 
     @Override
@@ -70,12 +81,22 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     }
 
     @Override
-    public boolean hasTarget() {return target != null && !target.isEmpty();}
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void setOidCol(String oidCol) {
+        this.oidCol = oidCol;
+    }
 
     @Override
     public void setTarget(String target) {
         this.target = target;
     }
+
+    @Override
+    public boolean hasTarget() {return target != null && !target.isEmpty();}
 
     // TODO: check if table is join target
     @Override
@@ -96,5 +117,14 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     @Override
     public boolean hasJoinPath() {
         return !this.joinPaths.isEmpty();
+    }
+
+    void addValue(MappingValue value) {
+        values.add(value);
+    }
+
+    @Override
+    public List<MappingValue> getValues() {
+        return values;
     }
 }

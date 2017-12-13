@@ -57,19 +57,23 @@ public class MappingParser {
         return clss.cast(unmarshaller.unmarshal(in));
     }
 
-    private static void marshal(String xsdSchema, String xmlDatei, Object jaxbElement) throws JAXBException, SAXException {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = (xsdSchema == null || xsdSchema.trim().length() == 0) ? null : schemaFactory.newSchema(new File(xsdSchema));
-        JAXBContext jaxbContext = JAXBContext.newInstance(jaxbElement.getClass().getPackage().getName());
-        marshal(jaxbContext, schema, xmlDatei, jaxbElement);
+    public static void marshal(OutputStream outputStream, FeatureTypes featureTypes) throws JAXBException, SAXException, IOException {
+        MappingParser.marshal(MAPPING_SCHEMA, outputStream, featureTypes);
     }
 
-    private static void marshal(JAXBContext jaxbContext, Schema schema, String xmlDatei, Object jaxbElement) throws JAXBException {
+    private static void marshal(String xsdSchema, OutputStream outputStream, Object jaxbElement) throws JAXBException, SAXException {
+        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        Schema schema = (xsdSchema == null || xsdSchema.trim().length() == 0) ? null : schemaFactory.newSchema(Resources.getResource(xsdSchema));
+        JAXBContext jaxbContext = JAXBContext.newInstance(jaxbElement.getClass().getPackage().getName());
+        marshal(jaxbContext, schema, outputStream, jaxbElement);
+    }
+
+    private static void marshal(JAXBContext jaxbContext, Schema schema, OutputStream outputStream, Object jaxbElement) throws JAXBException {
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setSchema(schema);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.marshal(jaxbElement, new File(xmlDatei));
+        marshaller.marshal(jaxbElement, outputStream);
     }
 
 }

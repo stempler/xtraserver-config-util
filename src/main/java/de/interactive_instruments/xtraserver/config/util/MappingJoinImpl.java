@@ -2,10 +2,10 @@ package de.interactive_instruments.xtraserver.config.util;
 
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
+import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author zahnen
@@ -16,6 +16,11 @@ public class MappingJoinImpl implements MappingJoin {
     private String path;
     private List<Condition> joinConditions;
     private boolean suppressJoin;
+
+    public MappingJoinImpl() {
+        this.axis = "parent";
+        this.joinConditions = new ArrayList<>();
+    }
 
     MappingJoinImpl(MappingsSequenceType.Join join) {
         this.target = join.getTarget();
@@ -57,6 +62,24 @@ public class MappingJoinImpl implements MappingJoin {
         return pathTables;
     }
 
+    private String buildJoinPath(List<Condition> conditions) {
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (Condition condition: conditions) {
+            if (stringBuilder.length() == 0) {
+                stringBuilder.insert(0, condition.getSourceTable());
+            }
+            stringBuilder.insert(0, ")::");
+            stringBuilder.insert(0, condition.getSourceField());
+            stringBuilder.insert(0, ":");
+            stringBuilder.insert(0, condition.getTargetField());
+            stringBuilder.insert(0, "/ref(");
+            stringBuilder.insert(0, condition.getTargetTable());
+        }
+
+        return stringBuilder.toString();
+    }
+
     @Override
     public String getTarget() {
         return target;
@@ -69,7 +92,16 @@ public class MappingJoinImpl implements MappingJoin {
 
     @Override
     public String getPath() {
-        return path;
+        if (path != null) {
+            return path;
+        }
+
+        return buildJoinPath(getJoinConditions());
+    }
+
+    @Override
+    public void setTarget(String target) {
+        this.target = target;
     }
 
     @Override
@@ -109,6 +141,10 @@ public class MappingJoinImpl implements MappingJoin {
         private String targetTable;
         private String targetField;
 
+        public ConditionImpl() {
+
+        }
+
         ConditionImpl(String sourceTable, String sourceField, String targetTable, String targetField) {
             this.sourceTable = sourceTable;
             this.sourceField = sourceField;
@@ -134,6 +170,26 @@ public class MappingJoinImpl implements MappingJoin {
         @Override
         public String getTargetField() {
             return targetField;
+        }
+
+        @Override
+        public void setSourceTable(MappingTable sourceTable) {
+            this.sourceTable = sourceTable.getName();
+        }
+
+        @Override
+        public void setSourceField(String sourceField) {
+            this.sourceField = sourceField;
+        }
+
+        @Override
+        public void setTargetTable(MappingTable targetTable) {
+            this.targetTable = targetTable.getName();
+        }
+
+        @Override
+        public void setTargetField(String targetField) {
+            this.targetField = targetField;
         }
 
         @Override

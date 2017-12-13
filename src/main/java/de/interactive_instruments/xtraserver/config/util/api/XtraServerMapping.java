@@ -1,16 +1,16 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
+import de.interactive_instruments.xtraserver.config.schema.AdditionalMappings;
+import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.config.util.MappingParser;
-import de.interactive_instruments.xtraserver.config.util.Namespaces;
-import de.interactive_instruments.xtraserver.config.util.XtraServerMappingImpl;
+import de.interactive_instruments.xtraserver.config.util.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 /**
@@ -21,18 +21,48 @@ import java.util.Collection;
 public interface XtraServerMapping {
 
     /**
-     * Parse mappings from InputStream
+     * Factory method, parses mappings from InputStream
      * @param inputStream
      * @return
      * @throws JAXBException
      * @throws SAXException
      * @throws IOException
      */
-    static XtraServerMapping fromStream(InputStream inputStream) throws JAXBException, SAXException, IOException {
+    static XtraServerMapping createFromStream(InputStream inputStream) throws JAXBException, SAXException, IOException {
         FeatureTypes featureTypes = MappingParser.unmarshal( inputStream );
-        XtraServerMapping xsm = new XtraServerMappingImpl(featureTypes, new ApplicationSchema());
+        ApplicationSchema applicationSchema = new ApplicationSchema();
 
-        return xsm;
+        XtraServerMapping xtraServerMapping = new XtraServerMappingImpl(applicationSchema);
+
+        for (Object a : featureTypes.getFeatureTypeOrAdditionalMappings()) {
+            try {
+                FeatureType ft = (FeatureType) a;
+
+                FeatureTypeMapping ftm = new FeatureTypeMappingImpl(ft, applicationSchema.getType(ft.getName()), applicationSchema.getNamespaces());
+
+                xtraServerMapping.addFeatureTypeMapping(ftm);
+
+            } catch (ClassCastException e) {
+                try {
+                    AdditionalMappings am = (AdditionalMappings) a;
+
+                    FeatureTypeMapping ftm = new FeatureTypeMappingImpl(am, applicationSchema.getType(am.getRootElementName()), applicationSchema.getNamespaces());
+
+                    xtraServerMapping.addFeatureTypeMapping(ftm);
+
+                } catch (ClassCastException e2) {
+                    // ignore
+                }
+            }
+        }
+
+        return xtraServerMapping;
+    }
+
+    static XtraServerMapping create() {
+        XtraServerMapping xtraServerMapping = new XtraServerMappingImpl();
+
+        return xtraServerMapping;
     }
 
     /**
@@ -71,4 +101,18 @@ public interface XtraServerMapping {
      * @return
      */
     Collection<String> getFeatureTypeList(boolean includeAbstract);
+
+    /**
+     * Add mappings for a specific FeatureType
+     *
+     * @param featureTypeMapping
+     */
+    void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping);
+
+    /**
+     * Write mappings to OutputStream
+     *
+     * @param outputStream
+     */
+    void writeToStream(OutputStream outputStream) throws IOException, JAXBException, SAXException;
 }

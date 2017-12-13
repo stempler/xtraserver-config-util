@@ -1,6 +1,7 @@
 package de.interactive_instruments.xtraserver.config.util;
 
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
+import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
 import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
 
 import javax.xml.namespace.QName;
@@ -19,6 +20,10 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
     private String dbCodes;
     private String dbValues;
     private Namespaces namespaces;
+
+    public MappingValueImpl() {
+
+    }
 
     MappingValueImpl(MappingsSequenceType.Table table, Namespaces namespaces) {
         this.table = table.getTable_Name();
@@ -93,6 +98,42 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
     @Override
     public String getDbValues() {
         return dbValues;
+    }
+
+    @Override
+    public void setTable(MappingTable table) {
+        this.table = table.getName();
+        ((MappingTableImpl)table).addValue(this);
+    }
+
+    @Override
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    @Override
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    @Override
+    public void setValueType(String valueType) {
+        this.valueType = valueType;
+    }
+
+    @Override
+    public void setMappingMode(String mappingMode) {
+        this.mappingMode = mappingMode;
+    }
+
+    @Override
+    public void setDbCodes(String dbCodes) {
+        this.dbCodes = dbCodes;
+    }
+
+    @Override
+    public void setDbValues(String dbValues) {
+        this.dbValues = dbValues;
     }
 
     @Override

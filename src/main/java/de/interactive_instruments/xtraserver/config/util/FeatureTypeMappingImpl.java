@@ -25,37 +25,50 @@ import java.util.List;
  */
 public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     private String name;
+    private QName qualifiedTypeName;
     private List<MappingTable> tables;
     private List<MappingJoin> joins;
     private List<MappingValue> values;
-    private ApplicationSchema applicationSchema;
+    private Namespaces namespaces;
 
-    FeatureTypeMappingImpl(FeatureType featureType, ApplicationSchema applicationSchema) {
+    public FeatureTypeMappingImpl(String name, QName qualifiedTypeName) {
+        this.name = name;
+        this.qualifiedTypeName = qualifiedTypeName;
+        this.tables = new ArrayList<>();
+        this.joins = new ArrayList<>();
+        this.values = new ArrayList<>();
+    }
+
+    public FeatureTypeMappingImpl(FeatureType featureType, QName qualifiedTypeName, Namespaces namespaces) {
         this.name = featureType.getName();
+        this.qualifiedTypeName = qualifiedTypeName;
 
         MappingsSequenceType mappings = extractMappings(featureType);
         this.tables = new ArrayList<>();
         extractTables(mappings);
         extractJoins(mappings);
         this.values = extractValues(mappings);
-        this.applicationSchema = applicationSchema;
+        this.namespaces = namespaces;
     }
 
-    FeatureTypeMappingImpl(AdditionalMappings additionalMappings, ApplicationSchema applicationSchema) {
+    public FeatureTypeMappingImpl(AdditionalMappings additionalMappings, QName qualifiedTypeName, Namespaces namespaces) {
         this.name = additionalMappings.getRootElementName();
+        this.qualifiedTypeName = qualifiedTypeName;
+
         this.tables = new ArrayList<>();
         extractTables(additionalMappings.getMappings());
         extractJoins(additionalMappings.getMappings());
         this.values = extractValues(additionalMappings.getMappings());
-        this.applicationSchema = applicationSchema;
+        this.namespaces = namespaces;
     }
 
-    FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, ApplicationSchema applicationSchema) {
+    public FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, Namespaces namespaces) {
         this.name = mainMapping.getName();
+        this.qualifiedTypeName = mainMapping.getQName();
         this.tables = mainMapping.getTables();
         this.joins = mainMapping.getJoins();
         this.values = mainMapping.getValues();
-        this.applicationSchema = applicationSchema;
+        this.namespaces = namespaces;
 
 
         for (FeatureTypeMapping mergedMapping : mergedMappings) {
@@ -87,7 +100,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
 
     @Override
     public QName getQName() {
-        return applicationSchema.getType(name);
+        return qualifiedTypeName;
     }
 
     @Override
@@ -209,6 +222,21 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         ).isEmpty();
     }
 
+    @Override
+    public void addTable(MappingTable mappingTable) {
+        tables.add(mappingTable);
+    }
+
+    @Override
+    public void addJoin(MappingJoin mappingJoin) {
+        joins.add(mappingJoin);
+    }
+
+    @Override
+    public void addValue(MappingValue mappingValue) {
+        values.add(mappingValue);
+    }
+
     private List<MappingTable> extractTables(MappingsSequenceType mappings) {
         List<MappingTable> mappingTables = new ArrayList<>();
 
@@ -250,7 +278,6 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                         if (table.getTarget() != null && !table.getTarget().isEmpty() &&
                                 table.getTarget().startsWith(getTable(table.getTable_Name()).getTarget())) {
                             if (table.getValue4() != null && !table.getValue4().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) {
-                                Namespaces namespaces = applicationSchema != null ? applicationSchema.getNamespaces() : new Namespaces();
                                 MappingValue mappingValue = new MappingValueImpl(table, namespaces);
                                 if (!mappingValues.contains(mappingValue)) {
                                     mappingValues.add(mappingValue);

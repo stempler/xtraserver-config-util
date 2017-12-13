@@ -2,7 +2,7 @@
 
 <!--
 	This file is a part of XtraServer SimpleDemo configuration
-	
+
 	Copyright (c) 2012-2014, interactive instruments GmbH
 -->
 
@@ -46,7 +46,7 @@
 			<Table table_name="city" value="Germany" value_type="constant" target="ci:country"/>
 
 			<!-- function : nillable property -->
-			<Table table_name="city" value="'urn:ci:function::' || $T$.function" target="ci:function"/>
+			<Table table_name="city" value="'urn:ci:function::' || $T$.function" target="ci:function" value_type="expression"/>
 			<Table table_name="city" value="function" mapping_mode="nil" db_codes="1 2 3 NULL" schema_codes="'unknown' 'other:unpopulated' 'withheld'" target="ci:function"/>
 
 			<!-- alternativeName : DataType of multiple occurrence -->
@@ -60,7 +60,7 @@
 			<Join target="ci:passingRiver" axis="parent" join_path="river/ref(id:rid)::city_river/ref(cid:id)::city"/>
 			<Table table_name="river" oid_col="id" target="ci:passingRiver"/>
 			<Table table_name="river" target="ci:passingRiver/@xlink:href"/>
-			<AssociationTarget object_ref="ci:River" target="ci:passingRiver"/>
+			<!--TODO AssociationTarget object_ref="ci:River" target="ci:passingRiver"/-->
 
 		</PGISFeatureTypeImpl>
 	</FeatureType>

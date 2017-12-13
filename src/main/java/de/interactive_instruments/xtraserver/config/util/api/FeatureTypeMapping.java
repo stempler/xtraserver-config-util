@@ -1,5 +1,7 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
+import de.interactive_instruments.xtraserver.config.util.FeatureTypeMappingImpl;
+
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.List;
@@ -9,6 +11,11 @@ import java.util.List;
  * @author zahnen
  */
 public interface FeatureTypeMapping {
+
+    static FeatureTypeMapping create(String name, QName qualifiedTypeName) {
+
+        return new FeatureTypeMappingImpl(name, qualifiedTypeName);
+    }
 
     /**
      * Get the local name of the FeatureType
@@ -94,4 +101,25 @@ public interface FeatureTypeMapping {
      * @return
      */
     boolean hasReferenceMappingForTable(String name, String target);
+
+    /**
+     * Add a table mapping
+     *
+     * @param mappingTable
+     */
+    void addTable(MappingTable mappingTable);
+
+    /**
+     * Add a join mapping
+     *
+     * @param mappingJoin
+     */
+    void addJoin(MappingJoin mappingJoin);
+
+    /**
+     * Add a value mapping
+     *
+     * @param mappingValue
+     */
+    void addValue(MappingValue mappingValue);
 }
