@@ -185,6 +185,10 @@ public class XtraServerMappingTest {
         riverHref.setTable(river);
         riverHref.setTarget("ci:passingRiver/@xlink:href");
 
+        AssociationTarget riverType = AssociationTarget.create();
+        riverType.setObjectRef("ci:River");
+        riverType.setTarget("ci:passingRiver");
+
         FeatureTypeMapping featureTypeMapping = FeatureTypeMapping.create("ci:City", new QName("http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities", "CityType", "ci"));
         featureTypeMapping.addTable(city);
         featureTypeMapping.addValue(cityLocation);
@@ -198,6 +202,7 @@ public class XtraServerMappingTest {
         featureTypeMapping.addJoin(city2RiverJoin);
         featureTypeMapping.addTable(river);
         featureTypeMapping.addValue(riverHref);
+        featureTypeMapping.addAssociationTarget(riverType);
 
         return featureTypeMapping;
     }

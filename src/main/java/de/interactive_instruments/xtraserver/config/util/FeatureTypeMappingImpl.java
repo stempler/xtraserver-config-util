@@ -10,10 +10,7 @@ import de.interactive_instruments.xtraserver.config.schema.AdditionalMappings;
 import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.schema.SQLFeatureTypeImplType;
-import de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping;
-import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
-import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
-import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
+import de.interactive_instruments.xtraserver.config.util.api.*;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -29,6 +26,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     private List<MappingTable> tables;
     private List<MappingJoin> joins;
     private List<MappingValue> values;
+    private List<AssociationTarget> associationTargets;
     private Namespaces namespaces;
 
     public FeatureTypeMappingImpl(String name, QName qualifiedTypeName) {
@@ -37,6 +35,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         this.tables = new ArrayList<>();
         this.joins = new ArrayList<>();
         this.values = new ArrayList<>();
+        this.associationTargets = new ArrayList<>();
     }
 
     public FeatureTypeMappingImpl(FeatureType featureType, QName qualifiedTypeName, Namespaces namespaces) {
@@ -134,6 +133,11 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     @Override
     public List<MappingValue> getValues() {
         return values;
+    }
+
+    @Override
+    public List<AssociationTarget> getAssociationTargets() {
+        return associationTargets;
     }
 
     private Collection<String> getTableNames(boolean primary, boolean hasValueMapping) {
@@ -235,6 +239,11 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     @Override
     public void addValue(MappingValue mappingValue) {
         values.add(mappingValue);
+    }
+
+    @Override
+    public void addAssociationTarget(AssociationTarget associationTarget) {
+        associationTargets.add(associationTarget);
     }
 
     private List<MappingTable> extractTables(MappingsSequenceType mappings) {

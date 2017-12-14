@@ -66,6 +66,12 @@ public interface FeatureTypeMapping {
     List<MappingValue> getValues();
 
     /**
+     * Get all AssociationTargets
+     * @return
+     */
+    List<AssociationTarget> getAssociationTargets();
+
+    /**
      * Does a table mapping exist for the given table?
      * @param name
      * @return
@@ -122,4 +128,11 @@ public interface FeatureTypeMapping {
      * @param mappingValue
      */
     void addValue(MappingValue mappingValue);
+
+    /**
+     * Add an AssociationTarget
+     *
+     * @param associationTarget
+     */
+    void addAssociationTarget(AssociationTarget associationTarget);
 }

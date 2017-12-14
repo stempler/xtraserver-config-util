@@ -60,7 +60,7 @@
 			<Join target="ci:passingRiver" axis="parent" join_path="river/ref(id:rid)::city_river/ref(cid:id)::city"/>
 			<Table table_name="river" oid_col="id" target="ci:passingRiver"/>
 			<Table table_name="river" target="ci:passingRiver/@xlink:href"/>
-			<!--TODO AssociationTarget object_ref="ci:River" target="ci:passingRiver"/-->
+			<AssociationTarget object_ref="ci:River" target="ci:passingRiver"/>
 
 		</PGISFeatureTypeImpl>
 	</FeatureType>

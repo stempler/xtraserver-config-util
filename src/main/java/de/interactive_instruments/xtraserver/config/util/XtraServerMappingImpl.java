@@ -250,6 +250,16 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                                 }).collect(Collectors.toList())
                         );
                     });
+
+                    sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
+                            featureTypeMapping.getAssociationTargets().stream().map(associationTarget -> {
+                                MappingsSequenceType.AssociationTarget associationTarget1 = objectFactory.createMappingsSequenceTypeAssociationTarget();
+                                associationTarget1.setObject_Ref(associationTarget.getObjectRef());
+                                associationTarget1.setTarget(associationTarget.getTarget());
+                                return associationTarget1;
+                            }).collect(Collectors.toList())
+                    );
+
                     /*sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
                             featureTypeMapping.getTables().stream().map(mappingTable -> {
                                 MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
