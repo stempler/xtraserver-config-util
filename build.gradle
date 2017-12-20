@@ -65,23 +65,25 @@ publishing {
     }
 }
 
-bintray {
-    user = project.bintrayUser
-    key = project.bintrayApiKey
-    publications = ['maven']
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = project.name
-        userOrg = 'iide'
-        licenses = ['Apache-2.0']
-        websiteUrl = "https://github.com/interactive-instruments/${project.name}"
-        issueTrackerUrl = "https://github.com/interactive-instruments/${project.name}/issues"
-        vcsUrl = "https://github.com/interactive-instruments/${project.name}.git"
-        githubRepo = "interactive-instruments/${project.name}"
-        githubReleaseNotesFile = 'README.md'
-        version {
-            name = project.version
-        }
-    }
+if(project.hasProperty('bintrayUser')) {
+  bintray {
+      user = project.bintrayUser
+      key = project.bintrayApiKey
+      publications = ['maven']
+      publish = true
+      pkg {
+          repo = 'maven'
+          name = project.name
+          userOrg = 'iide'
+          licenses = ['Apache-2.0']
+          websiteUrl = "https://github.com/interactive-instruments/${project.name}"
+          issueTrackerUrl = "https://github.com/interactive-instruments/${project.name}/issues"
+          vcsUrl = "https://github.com/interactive-instruments/${project.name}.git"
+          githubRepo = "interactive-instruments/${project.name}"
+          githubReleaseNotesFile = 'README.md'
+          version {
+              name = project.version
+          }
+      }
+  }
 }
