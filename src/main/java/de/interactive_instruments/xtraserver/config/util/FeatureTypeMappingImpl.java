@@ -1,33 +1,30 @@
 package de.interactive_instruments.xtraserver.config.util;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
 import de.interactive_instruments.xtraserver.config.schema.AdditionalMappings;
 import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
-import de.interactive_instruments.xtraserver.config.schema.SQLFeatureTypeImplType;
 import de.interactive_instruments.xtraserver.config.util.api.*;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * @author zahnen
  */
 public class FeatureTypeMappingImpl implements FeatureTypeMapping {
-    private String name;
-    private QName qualifiedTypeName;
-    private List<MappingTable> tables;
+    private final String name;
+    private final QName qualifiedTypeName;
+    private final List<MappingTable> tables;
     private List<MappingJoin> joins;
-    private List<MappingValue> values;
-    private List<AssociationTarget> associationTargets;
-    private Namespaces namespaces;
+    private final List<MappingValue> values;
+    private final List<AssociationTarget> associationTargets;
+    private final Namespaces namespaces;
 
     public FeatureTypeMappingImpl(String name, QName qualifiedTypeName) {
         this.name = name;
@@ -36,6 +33,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         this.joins = new ArrayList<>();
         this.values = new ArrayList<>();
         this.associationTargets = new ArrayList<>();
+        this.namespaces = null;
     }
 
     public FeatureTypeMappingImpl(FeatureType featureType, QName qualifiedTypeName, Namespaces namespaces) {
@@ -47,6 +45,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         extractTables(mappings);
         extractJoins(mappings);
         this.values = extractValues(mappings);
+        this.associationTargets = new ArrayList<>();
         this.namespaces = namespaces;
     }
 
@@ -58,18 +57,20 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         extractTables(additionalMappings.getMappings());
         extractJoins(additionalMappings.getMappings());
         this.values = extractValues(additionalMappings.getMappings());
+        this.associationTargets = new ArrayList<>();
         this.namespaces = namespaces;
     }
 
-    public FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, Namespaces namespaces) {
+    FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, Namespaces namespaces) {
         this.name = mainMapping.getName();
         this.qualifiedTypeName = mainMapping.getQName();
         this.tables = mainMapping.getTables();
         this.joins = mainMapping.getJoins();
         this.values = mainMapping.getValues();
+        this.associationTargets = mainMapping.getAssociationTargets();
         this.namespaces = namespaces;
 
-
+        //TODO: merge AssociationTargets???
         for (FeatureTypeMapping mergedMapping : mergedMappings) {
             // TODO: first merge joins and tables
             List<MappingTable> referencedTables = extractJoinedTables(mergedMapping);
@@ -90,6 +91,33 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                 }
             }
         }
+    }
+
+    private Collection<String> getTableNames(boolean primary, boolean hasValueMapping) {
+        return tables.stream()
+                .filter(
+                        table -> primary ? table.isPrimary() : (!table.isPrimary() && hasValueMapping == hasValueMappingForTable(table.getName()))
+                )
+                .map(MappingTable::getName)
+                .collect(Collectors.toList());
+    }
+
+    private Optional<MappingTable> getTableOptional(String tableName) {
+        return tables.stream()
+                .filter(
+                        table -> tableName.equals(table.getName())
+                )
+                .findFirst();
+    }
+
+    private Collection<MappingValue> getTableValues(String tableName, boolean isReference, String target) {
+        return values.stream()
+                .filter(
+                        value -> tableName.equals(value.getTable()) && value.getValue() != null && !value.getValue().isEmpty()
+                                && isReference == value.getTarget().endsWith("/@xlink:href")
+                                && (target == null || value.getTarget().startsWith(target))
+                )
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -140,90 +168,29 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         return associationTargets;
     }
 
-    private Collection<String> getTableNames(boolean primary, boolean hasValueMapping) {
-
-        return Collections2.transform(
-                Collections2.filter(tables,
-                        new Predicate<MappingTable>() {
-                            @Override
-                            public boolean apply(MappingTable table) {
-                                return primary ? table.isPrimary() : (!table.isPrimary() && hasValueMapping == hasValueMappingForTable(table.getName()));
-                            }
-                        }
-                ),
-                new Function<MappingTable, String>() {
-                    @Override
-                    public String apply(MappingTable table) {
-                        return table.getName();
-                        /*String name = table.getName() + "[" + table.getOidCol() + "]";
-                        if (!primary)
-                            name += "[" + table.getJoinPaths().get(0).toString() + "]";
-                        return name;*/
-                    }
-                }
-        );
-    }
-
     @Override
     public boolean hasTable(String name) {
-        return tables != null && !Collections2.filter(tables,
-                new Predicate<MappingTable>() {
-                    @Override
-                    public boolean apply(MappingTable table) {
-                        return name.equals(table.getName());
-                    }
-                }
-        ).isEmpty();
+        return getTableOptional(name).isPresent();
     }
 
     @Override
     public MappingTable getTable(String name) {
-        if (tables == null) return null;
-
-        return Iterables.find(tables,
-                new Predicate<MappingTable>() {
-                    @Override
-                    public boolean apply(MappingTable table) {
-                        return name.equals(table.getName());
-                    }
-                }
-        );
+        return getTableOptional(name).orElse(null);
     }
 
     @Override
     public boolean hasValueMappingForTable(String name) {
-        return values != null && !Collections2.filter(values,
-                new Predicate<MappingValue>() {
-                    @Override
-                    public boolean apply(MappingValue value) {
-                        return name.equals(value.getTable()) && value.getValue() != null && !value.getValue().isEmpty() && !value.getTarget().endsWith("/@xlink:href");
-                    }
-                }
-        ).isEmpty();
+        return !getTableValues(name, false, null).isEmpty();
     }
 
     @Override
     public boolean hasValueMappingForTable(String name, String target) {
-        return values != null && !Collections2.filter(values,
-                new Predicate<MappingValue>() {
-                    @Override
-                    public boolean apply(MappingValue value) {
-                        return name.equals(value.getTable()) && value.getValue() != null && !value.getValue().isEmpty() && !value.getTarget().endsWith("/@xlink:href") && value.getTarget().startsWith(target);
-                    }
-                }
-        ).isEmpty();
+        return !getTableValues(name, false, target).isEmpty();
     }
 
     @Override
     public boolean hasReferenceMappingForTable(String name, String target) {
-        return values != null && !Collections2.filter(values,
-                new Predicate<MappingValue>() {
-                    @Override
-                    public boolean apply(MappingValue value) {
-                        return name.equals(value.getTable()) && value.getValue() != null && !value.getValue().isEmpty() && value.getTarget().endsWith("/@xlink:href") && value.getTarget().startsWith(target);
-                    }
-                }
-        ).isEmpty();
+        return !getTableValues(name, true, target).isEmpty();
     }
 
     @Override

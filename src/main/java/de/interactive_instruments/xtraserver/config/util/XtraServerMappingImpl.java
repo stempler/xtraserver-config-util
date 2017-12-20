@@ -1,15 +1,11 @@
 package de.interactive_instruments.xtraserver.config.util;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterables;
-import de.interactive_instruments.xtraserver.config.schema.*;
 import de.interactive_instruments.xtraserver.config.util.api.*;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -20,98 +16,70 @@ import java.util.stream.Collectors;
  * @author zahnen
  */
 public class XtraServerMappingImpl implements XtraServerMapping {
-    private ApplicationSchema applicationSchema;
+    private final ApplicationSchema applicationSchema;
     private final List<FeatureTypeMapping> featureTypeMappings;
     private final List<FeatureTypeMapping> additionalMappings;
 
     public XtraServerMappingImpl() {
-        this.featureTypeMappings = new ArrayList<>();
-        this.additionalMappings = new ArrayList<>();
+        this(null);
     }
 
-    public XtraServerMappingImpl(ApplicationSchema applicationSchema) {
-        this();
-        this.applicationSchema = applicationSchema;
-    }
-
-    /*public XtraServerMappingImpl(FeatureTypes featureTypes, ApplicationSchema applicationSchema) {
+    XtraServerMappingImpl(ApplicationSchema applicationSchema) {
         this.featureTypeMappings = new ArrayList<>();
         this.additionalMappings = new ArrayList<>();
         this.applicationSchema = applicationSchema;
+    }
 
-        for (Object a : featureTypes.getFeatureTypeOrAdditionalMappings()) {
-            try {
-                FeatureType ft = (FeatureType) a;
+    List<FeatureTypeMapping> getFeatureTypeMappings() {
+        return featureTypeMappings;
+    }
 
-                FeatureTypeMapping ftm = new FeatureTypeMappingImpl(ft, applicationSchema);
+    List<FeatureTypeMapping> getAdditionalMappings() {
+        return additionalMappings;
+    }
 
-                featureTypeMappings.add(ftm);
+    private Collection<String> getTypeNames(Collection<FeatureTypeMapping> typeList, boolean includeAbstract) {
+        return typeList.stream()
+                .filter(
+                        featureTypeMapping -> includeAbstract || !applicationSchema.isAbstract(featureTypeMapping.getName())
+                )
+                .map(FeatureTypeMapping::getName)
+                .collect(Collectors.toList());
+    }
 
-            } catch (ClassCastException e) {
-                try {
-                    AdditionalMappings am = (AdditionalMappings) a;
+    private Optional<FeatureTypeMapping> getTypeMappingOptional(Collection<FeatureTypeMapping> typeList, String typeName) {
+        return getTypeMappingOptional(typeList, typeName, false);
+    }
 
-                    FeatureTypeMapping ftm = new FeatureTypeMappingImpl(am, applicationSchema);
+    private Optional<FeatureTypeMapping> getTypeMappingOptional(Collection<FeatureTypeMapping> typeList, String typeName, boolean flattenInheritance) {
+        Optional<FeatureTypeMapping> featureTypeMappingOptional = typeList.stream()
+                .filter(
+                        featureTypeMapping -> typeName.equals(featureTypeMapping.getName())
+                ).findFirst();
 
-                    additionalMappings.add(ftm);
-
-                } catch (ClassCastException e2) {
-                    // ignore
-                }
-            }
+        if (featureTypeMappingOptional.isPresent() && flattenInheritance) {
+            List<String> parents = applicationSchema.getAllParents(featureTypeMappingOptional.get().getName());
+            List<FeatureTypeMapping> parentMappings = parents.stream().filter(this::hasType).map(this::getTypeMapping).collect(Collectors.toList());
+            featureTypeMappingOptional = Optional.of(new FeatureTypeMappingImpl(featureTypeMappingOptional.get(), parentMappings, applicationSchema.getNamespaces()));
         }
-    }*/
+
+        return featureTypeMappingOptional;
+    }
 
     @Override
     public boolean hasFeatureType(String featureType) {
-
-        return !Collections2.filter(featureTypeMappings,
-                new Predicate<FeatureTypeMapping>() {
-                    @Override
-                    public boolean apply(FeatureTypeMapping ftm) {
-                        return featureType.equals(ftm.getName());
-                    }
-                }
-        ).isEmpty();
+        return getTypeMappingOptional(featureTypeMappings, featureType).isPresent();
     }
 
     @Override
     public boolean hasType(String type) {
-
-        return hasFeatureType(type) || !Collections2.filter(additionalMappings,
-                new Predicate<FeatureTypeMapping>() {
-                    @Override
-                    public boolean apply(FeatureTypeMapping ftm) {
-                        return type.equals(ftm.getName());
-                    }
-                }
-        ).isEmpty();
+        return hasFeatureType(type) || getTypeMappingOptional(additionalMappings, type).isPresent();
     }
 
+    //TODO: return Optional
     @Override
     public FeatureTypeMapping getFeatureTypeMapping(String featureType, boolean flattenInheritance) {
-        FeatureTypeMapping featureTypeMapping = Iterables.find(featureTypeMappings,
-                new Predicate<FeatureTypeMapping>() {
-                    @Override
-                    public boolean apply(FeatureTypeMapping ftm) {
-                        return featureType.equals(ftm.getName());
-                    }
-                }
-        );
-
-        if (flattenInheritance) {
-            List<String> parents = applicationSchema.getAllParents(featureTypeMapping.getName());
-            List<FeatureTypeMapping> parentMappings = new ArrayList<>();
-            for (String parent : parents) {
-                if (hasType(parent)) {
-                    parentMappings.add(getTypeMapping(parent));
-                }
-            }
-
-            featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings, applicationSchema.getNamespaces());
-        }
-
-        return featureTypeMapping;
+        return getTypeMappingOptional(featureTypeMappings, featureType, flattenInheritance).orElse(null);
     }
 
     private FeatureTypeMapping getTypeMapping(String type) {
@@ -119,39 +87,8 @@ public class XtraServerMappingImpl implements XtraServerMapping {
     }
 
     private FeatureTypeMapping getTypeMapping(String type, boolean flattenInheritance) {
-        FeatureTypeMapping featureTypeMapping = null;
-
-        try {
-            featureTypeMapping = getFeatureTypeMapping(type, flattenInheritance);
-        } catch (NoSuchElementException e) {
-            try {
-                featureTypeMapping = Iterables.find(additionalMappings,
-                        new Predicate<FeatureTypeMapping>() {
-                            @Override
-                            public boolean apply(FeatureTypeMapping ftm) {
-                                return type.equals(ftm.getName());
-                            }
-                        }
-                );
-
-                if (flattenInheritance) {
-                    List<String> parents = applicationSchema.getAllParents(featureTypeMapping.getName());
-                    List<FeatureTypeMapping> parentMappings = new ArrayList<>();
-                    for (String parent : parents) {
-                        if (hasType(parent)) {
-                            parentMappings.add(getTypeMapping(parent));
-                        }
-                    }
-
-                    featureTypeMapping = new FeatureTypeMappingImpl(featureTypeMapping, parentMappings, applicationSchema.getNamespaces());
-                }
-
-            } catch (NoSuchElementException e2) {
-                // ignore
-            }
-        }
-
-        return featureTypeMapping;
+        return getTypeMappingOptional(featureTypeMappings, type, flattenInheritance)
+                .orElse(getTypeMappingOptional(additionalMappings, type, flattenInheritance).orElse(null));
     }
 
     @Override
@@ -161,22 +98,16 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     @Override
     public Collection<String> getFeatureTypeList(boolean includeAbstract) {
-        return Collections2.transform(
-                Collections2.filter(featureTypeMappings,
-                        new Predicate<FeatureTypeMapping>() {
-                            @Override
-                            public boolean apply(FeatureTypeMapping ftm) {
-                                return includeAbstract || !applicationSchema.isAbstract(ftm.getName());
-                            }
-                        }
-                ),
-                new Function<FeatureTypeMapping, String>() {
-                    @Override
-                    public String apply(FeatureTypeMapping ftm) {
-                        return ftm.getName();
-                    }
-                }
-        );
+        return getTypeNames(featureTypeMappings, includeAbstract);
+    }
+
+    private Collection<String> getTypeList(boolean includeAbstract) {
+        Set<String> typeList = new HashSet<>();
+
+        typeList.addAll(getFeatureTypeList(includeAbstract));
+        typeList.addAll(getTypeNames(additionalMappings, includeAbstract));
+
+        return typeList;
     }
 
     @Override
@@ -186,126 +117,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     @Override
     public void writeToStream(OutputStream outputStream) throws IOException, JAXBException, SAXException {
-        MappingParser.marshal(outputStream, this.toJaxb());
-    }
-
-    private FeatureTypes toJaxb() {
-        ObjectFactory objectFactory = new ObjectFactory();
-        FeatureTypes featureTypes = objectFactory.createFeatureTypes();
-
-        featureTypes.getFeatureTypeOrAdditionalMappings().addAll(
-                additionalMappings.stream().map(additionalMapping -> {
-                    MappingsSequenceType mappingsSequenceType = objectFactory.createMappingsSequenceType();
-
-                    mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
-                      additionalMapping.getTables().stream().map(mappingTable -> {
-                          MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
-                          table.setTable_Name(mappingTable.getName());
-                          table.setOid_Col(mappingTable.getOidCol());
-                          return table;
-                      }).collect(Collectors.toList())
-                    );
-
-                    AdditionalMappings jaxbAdditionalMappings = objectFactory.createAdditionalMappings();
-                    jaxbAdditionalMappings.setRootElementName(additionalMapping.getName());
-                    jaxbAdditionalMappings.setMappings(mappingsSequenceType);
-
-                    return jaxbAdditionalMappings;
-                }).collect(Collectors.toList())
-        );
-
-        featureTypes.getFeatureTypeOrAdditionalMappings().addAll(
-                featureTypeMappings.stream().map(featureTypeMapping -> {
-                    SQLFeatureTypeImplType sqlFeatureTypeImplType = objectFactory.createSQLFeatureTypeImplType();
-
-                    featureTypeMapping.getTables().forEach(mappingTable -> {
-                        sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
-                                mappingTable.getJoinPaths().stream().map(mappingJoin -> {
-                                    MappingsSequenceType.Join join = objectFactory.createMappingsSequenceTypeJoin();
-                                    join.setAxis(mappingJoin.getAxis());
-                                    join.setTarget(mappingJoin.getTarget());
-                                    join.setJoin_Path(mappingJoin.getPath());
-                                    return join;
-                                }).collect(Collectors.toList())
-                        );
-
-                        MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
-                        table.setTable_Name(mappingTable.getName());
-                        table.setOid_Col(mappingTable.getOidCol());
-                        table.setTarget(mappingTable.getTarget());
-
-                        sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().add(table);
-
-                        sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
-                                mappingTable.getValues().stream().map(mappingValue -> {
-                                    MappingsSequenceType.Table value = objectFactory.createMappingsSequenceTypeTable();
-                                    value.setTable_Name(mappingValue.getTable());
-                                    value.setTarget(mappingValue.getTarget());
-                                    value.setValue4(mappingValue.getValue());
-                                    value.setValue_Type(mappingValue.getValueType());
-                                    value.setMapping_Mode(mappingValue.getMappingMode());
-                                    value.setDb_Codes(mappingValue.getDbCodes());
-                                    value.setSchema_Codes(mappingValue.getDbValues());
-                                    return value;
-                                }).collect(Collectors.toList())
-                        );
-                    });
-
-                    sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
-                            featureTypeMapping.getAssociationTargets().stream().map(associationTarget -> {
-                                MappingsSequenceType.AssociationTarget associationTarget1 = objectFactory.createMappingsSequenceTypeAssociationTarget();
-                                associationTarget1.setObject_Ref(associationTarget.getObjectRef());
-                                associationTarget1.setTarget(associationTarget.getTarget());
-                                return associationTarget1;
-                            }).collect(Collectors.toList())
-                    );
-
-                    /*sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
-                            featureTypeMapping.getTables().stream().map(mappingTable -> {
-                                MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
-                                table.setTable_Name(mappingTable.getName());
-                                table.setOid_Col(mappingTable.getOidCol());
-                                table.setTarget(mappingTable.getTarget());
-                                return table;
-                            }).collect(Collectors.toList())
-                    );*/
-
-
-
-                    FeatureType featureType = objectFactory.createFeatureType();
-                    featureType.setName(featureTypeMapping.getName());
-                    featureType.setPGISFeatureTypeImpl(sqlFeatureTypeImplType);
-
-                    return featureType;
-                }).collect(Collectors.toList())
-        );
-
-        return featureTypes;
-    }
-
-    private Collection<String> getTypeList(boolean includeAbstract) {
-        Set<String> typeList = new HashSet<>();
-
-        typeList.addAll(getFeatureTypeList(includeAbstract));
-
-        typeList.addAll(Collections2.transform(
-                Collections2.filter(additionalMappings,
-                        new Predicate<FeatureTypeMapping>() {
-                            @Override
-                            public boolean apply(FeatureTypeMapping ftm) {
-                                return includeAbstract || !applicationSchema.isAbstract(ftm.getName());
-                            }
-                        }
-                ),
-                new Function<FeatureTypeMapping, String>() {
-                    @Override
-                    public String apply(FeatureTypeMapping ftm) {
-                        return ftm.getName();
-                    }
-                }
-        ));
-
-        return typeList;
+        JaxbReaderWriter.writeToStream(outputStream, this);
     }
 
     void print() {
@@ -331,33 +143,13 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
                 Collection<String> multiJoins = Collections2.transform(
                         Collections2.filter(ftm.getTables(),
-                                new Predicate<MappingTable>() {
-                                    @Override
-                                    public boolean apply(MappingTable table) {
-                                        return Collections2.filter(table.getJoinPaths(),
-                                                new Predicate<MappingJoin>() {
-                                                    @Override
-                                                    public boolean apply(MappingJoin join) {
-                                                        return join.getJoinConditions().size() > 1;
-                                                    }
-                                                }
-                                        ).size() > 0;
-                                    }
-                                }
+                                table -> Collections2.filter(table.getJoinPaths(),
+                                        join -> join.getJoinConditions().size() > 1
+                                ).size() > 0
                         ),
-                        new Function<MappingTable, String>() {
-                            @Override
-                            public String apply(MappingTable table) {
-                                return Joiner.on("\n").join(Collections2.filter(table.getJoinPaths(),
-                                        new Predicate<MappingJoin>() {
-                                            @Override
-                                            public boolean apply(MappingJoin join) {
-                                                return join.getJoinConditions().size() > 1;
-                                            }
-                                        }
-                                ));
-                            }
-                        }
+                        table -> Joiner.on("\n").join(Collections2.filter(table.getJoinPaths(),
+                                (Predicate<MappingJoin>) join -> join.getJoinConditions().size() > 1
+                        ))
                 );
 
                 System.out.println("  Root Tables: \n" + Joiner.on("\n").join(rootTables) + "\n");
@@ -381,16 +173,13 @@ public class XtraServerMappingImpl implements XtraServerMapping {
     }
 
     private Collection<String> getDecoratedTableNames(Collection<String> tableNames, FeatureTypeMapping ftm) {
-        return Collections2.transform(tableNames, new Function<String, String>() {
-            @Override
-            public String apply(String tableName) {
-                MappingTable table = ftm.getTable(tableName);
-                String name = table.getName() + "[" + table.getOidCol() + "]";
-                if (!table.isPrimary())
-                    name += "[" + table.getJoinPaths().get(0).toString() + "]";
-                name += "[" + table.getTarget() + "]";
-                return name;
-            }
+        return Collections2.transform(tableNames, tableName -> {
+            MappingTable table = ftm.getTable(tableName);
+            String name = table.getName() + "[" + table.getOidCol() + "]";
+            if (!table.isPrimary())
+                name += "[" + table.getJoinPaths().get(0).toString() + "]";
+            name += "[" + table.getTarget() + "]";
+            return name;
         });
     }
 }
