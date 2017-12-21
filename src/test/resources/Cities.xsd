@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema 
- targetNamespace="http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities"
- xmlns:ci="http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities"
- xmlns="http://www.w3.org/2001/XMLSchema"
- xmlns:ogc="http://www.opengis.net/ogc" 
- xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
- xmlns:gml="http://www.opengis.net/gml/3.2" 
- elementFormDefault="qualified" version="2.0">
+<schema
+		targetNamespace="http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities"
+		xmlns:ci="http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities"
+		xmlns="http://www.w3.org/2001/XMLSchema"
+		xmlns:ogc="http://www.opengis.net/ogc"
+		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+		xmlns:gml="http://www.opengis.net/gml/3.2"
+		elementFormDefault="qualified" version="2.0">
 
 	<import namespace="http://www.opengis.net/gml/3.2" schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
-	
+
 	<!-- (c) 2012-2014 by interactive instruments GmbH -->
 
 	<!-- NamedGeoObject (abstract) -->
@@ -62,10 +62,17 @@
 							<documentation>The number of inhabitants</documentation>
 						</annotation>
 					</element>
-					<element name="function" type="string" nillable="true">
+					<element name="function" nillable="true">
 						<annotation>
 							<documentation>Special function of City. Example of a nillable property.</documentation>
 						</annotation>
+						<complexType>
+							<simpleContent>
+								<extension base="string">
+									<attribute name="nilReason" type="gml:NilReasonType"/>
+								</extension>
+							</simpleContent>
+						</complexType>
 					</element>
 					<element name="district" type="ci:DistrictPropertyType" minOccurs="0" maxOccurs="unbounded">
 						<annotation>
@@ -75,6 +82,16 @@
 					<element name="passingRiver" type="gml:ReferenceType" minOccurs="0" maxOccurs="unbounded">
 						<annotation>
 							<documentation>References to river objects passing the city</documentation>
+						</annotation>
+					</element>
+					<element name="area" type="double">
+						<annotation>
+							<documentation>The area of the city</documentation>
+						</annotation>
+					</element>
+					<element name="beginLifespan" type="dateTime">
+						<annotation>
+							<documentation>The founding date of the city</documentation>
 						</annotation>
 					</element>
 				</sequence>
@@ -105,7 +122,7 @@
 		<sequence>
 			<element ref="ci:District"/>
 		</sequence>
-	</complexType>	
+	</complexType>
 
 	<!-- Rivers -->
 	<element name="River" substitutionGroup="ci:NamedGeoObject" type="ci:RiverType">
@@ -136,7 +153,7 @@
 			<element ref="ci:River"/>
 		</sequence>
 	</complexType>
-	
+
 	<!-- States -->
 	<element name="State" substitutionGroup="ci:NamedGeoObject" type="ci:StateType">
 		<annotation>

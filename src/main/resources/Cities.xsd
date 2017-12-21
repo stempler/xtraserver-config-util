@@ -62,10 +62,17 @@
 							<documentation>The number of inhabitants</documentation>
 						</annotation>
 					</element>
-					<element name="function" type="string" nillable="true">
+					<element name="function" nillable="true">
 						<annotation>
 							<documentation>Special function of City. Example of a nillable property.</documentation>
 						</annotation>
+						<complexType>
+							<simpleContent>
+								<extension base="string">
+									<attribute name="nilReason" type="gml:NilReasonType"/>
+								</extension>
+							</simpleContent>
+						</complexType>
 					</element>
 					<element name="district" type="ci:DistrictPropertyType" minOccurs="0" maxOccurs="unbounded">
 						<annotation>
@@ -75,6 +82,16 @@
 					<element name="passingRiver" type="gml:ReferenceType" minOccurs="0" maxOccurs="unbounded">
 						<annotation>
 							<documentation>References to river objects passing the city</documentation>
+						</annotation>
+					</element>
+					<element name="area" type="double">
+						<annotation>
+							<documentation>The area of the city</documentation>
+						</annotation>
+					</element>
+					<element name="beginLifespan" type="dateTime">
+						<annotation>
+							<documentation>The founding date of the city</documentation>
 						</annotation>
 					</element>
 				</sequence>

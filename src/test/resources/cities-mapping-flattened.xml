@@ -23,14 +23,19 @@
 
 			<!-- function : nillable property -->
 			<Table table_name="city" value="'urn:ci:function::' || $T$.function" target="ci:function" value_type="expression"/>
-			<Table table_name="city" value="function" mapping_mode="nil" db_codes="1 2 3 NULL" schema_codes="'unknown' 'other:unpopulated' 'withheld'" target="ci:function"/>
+			<Table table_name="city" value="function_void" mapping_mode="nil" db_codes="1 2 3 NULL" schema_codes="'unknown' 'other:unpopulated' 'withheld'" target="ci:function"/>
+
+			<!-- area -->
+			<Table table_name="city" value="$T$.width * $T$.height" target="ci:area" value_type="expression"/>
+
+			<!-- beginLifespan -->
+			<Table table_name="city" value="regexp_replace(begin_lifespan, '([0-9]{4})([0-9]{2})([0-9]{2})', '\\1-\\2-\\3 00:00:00', 'g')" target="ci:beginLifespan" value_type="expression"/>
 
 			<!-- alternativeName : DataType of multiple occurrence -->
 			<Join target="ci:alternativeName" axis="parent" join_path="alternativename/ref(cid:id)::city"/>
 			<Table table_name="alternativename" oid_col="id" target="ci:alternativeName"/>
 			<Table table_name="alternativename" value="name" target="ci:alternativeName/ci:AlternativeName/ci:name"/>
 			<Table table_name="alternativename" value="language" target="ci:alternativeName/ci:AlternativeName/ci:language"/>
-
 
 			<!-- river : FeatureType, multiple occurrence linked by reference -->
 			<Join target="ci:passingRiver" axis="parent" join_path="river/ref(id:rid)::city_river/ref(cid:id)::city"/>
@@ -40,7 +45,7 @@
 
 			<!-- merged from superclasses -->
 			<Table table_name="city" value="name" target="ci:name"/>
-			<Table table_name="city" target="@gml:id" value="objid"/>
+			<Table table_name="city" target="@gml:id" value="id"/>
 
 		</PGISFeatureTypeImpl>
 	</FeatureType>
@@ -57,7 +62,7 @@
 
 			<!-- merged from superclasses -->
 			<Table table_name="river" value="name" target="ci:name"/>
-			<Table table_name="river" target="@gml:id" value="objid"/>
+			<Table table_name="river" target="@gml:id" value="id"/>
 		</PGISFeatureTypeImpl>
 	</FeatureType>
 

@@ -126,12 +126,12 @@ public class XtraServerMappingTest {
         MappingValue cityId = MappingValue.create(namespaces);
         cityId.setTable(city);
         cityId.setTarget("@gml:id");
-        cityId.setValue("objid");
+        cityId.setValue("id");
 
         MappingValue riverId = MappingValue.create(namespaces);
         riverId.setTable(river);
         riverId.setTarget("@gml:id");
-        riverId.setValue("objid");
+        riverId.setValue("id");
 
         FeatureTypeMapping featureTypeMapping = FeatureTypeMapping.create("gml:AbstractFeature", new QName("http://www.opengis.net/gml/3.2", "AbstractFeatureType", "gml"), namespaces);
         featureTypeMapping.addTable(city);
@@ -184,7 +184,7 @@ public class XtraServerMappingTest {
         MappingValue cityId = MappingValue.create(namespaces);
         cityId.setTable(city);
         cityId.setTarget("@gml:id");
-        cityId.setValue("objid");
+        cityId.setValue("id");
 
         cityMapping.addValue(cityName);
         cityMapping.addValue(cityId);
@@ -218,10 +218,22 @@ public class XtraServerMappingTest {
         MappingValue cityFunctionNil = MappingValue.create(namespaces);
         cityFunctionNil.setTable(city);
         cityFunctionNil.setTarget("ci:function");
-        cityFunctionNil.setValue("function");
+        cityFunctionNil.setValue("function_void");
         cityFunctionNil.setMappingMode("nil");
         cityFunctionNil.setDbCodes("1 2 3 NULL");
         cityFunctionNil.setDbValues("'unknown' 'other:unpopulated' 'withheld'");
+
+        MappingValue cityArea = MappingValue.create(namespaces);
+        cityArea.setTable(city);
+        cityArea.setTarget("ci:area");
+        cityArea.setValue("$T$.width * $T$.height");
+        cityArea.setValueType("expression");
+
+        MappingValue cityBeginLifespan = MappingValue.create(namespaces);
+        cityBeginLifespan.setTable(city);
+        cityBeginLifespan.setTarget("ci:beginLifespan");
+        cityBeginLifespan.setValue("regexp_replace(begin_lifespan, '([0-9]{4})([0-9]{2})([0-9]{2})', '\\\\1-\\\\2-\\\\3 00:00:00', 'g')");
+        cityBeginLifespan.setValueType("expression");
 
         MappingTable alternativeName = MappingTable.create();
         alternativeName.setName("alternativename");
@@ -280,6 +292,7 @@ public class XtraServerMappingTest {
         MappingValue riverHref = MappingValue.create(namespaces);
         riverHref.setTable(river);
         riverHref.setTarget("ci:passingRiver/@xlink:href");
+        riverHref.setValue("");
 
         AssociationTarget riverType = AssociationTarget.create();
         riverType.setObjectRef("ci:River");
@@ -291,6 +304,8 @@ public class XtraServerMappingTest {
         featureTypeMapping.addValue(cityCountry);
         featureTypeMapping.addValue(cityFunction);
         featureTypeMapping.addValue(cityFunctionNil);
+        featureTypeMapping.addValue(cityArea);
+        featureTypeMapping.addValue(cityBeginLifespan);
         featureTypeMapping.addJoin(city2alternativeNameJoin);
         featureTypeMapping.addTable(alternativeName);
         featureTypeMapping.addValue(alternativeNameName);
@@ -316,7 +331,7 @@ public class XtraServerMappingTest {
         MappingValue riverId = MappingValue.create(namespaces);
         riverId.setTable(river);
         riverId.setTarget("@gml:id");
-        riverId.setValue("objid");
+        riverId.setValue("id");
 
         riverMapping.addValue(riverName);
         riverMapping.addValue(riverId);
