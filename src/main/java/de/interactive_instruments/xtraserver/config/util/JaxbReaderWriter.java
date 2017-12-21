@@ -1,6 +1,6 @@
 package de.interactive_instruments.xtraserver.config.util;
 
-import com.google.common.io.Resources;
+import com.google.common.base.Objects;
 import de.interactive_instruments.xtraserver.config.schema.*;
 import de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping;
 import de.interactive_instruments.xtraserver.config.util.api.XtraServerMapping;
@@ -14,7 +14,10 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
+import java.net.URL;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * Helper methods for JAXB marshalling and unmarshalling
@@ -149,7 +152,7 @@ public class JaxbReaderWriter {
 
     private static FeatureTypes unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(Resources.getResource(MAPPING_SCHEMA));
+        Schema schema = schemaFactory.newSchema(getResource(JaxbReaderWriter.class, MAPPING_SCHEMA));
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
 
         PipedInputStream in = new PipedInputStream();
@@ -176,7 +179,7 @@ public class JaxbReaderWriter {
 
     private static void marshal(OutputStream outputStream, FeatureTypes featureTypes) throws JAXBException, SAXException, IOException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(Resources.getResource(MAPPING_SCHEMA));
+        Schema schema = schemaFactory.newSchema(getResource(JaxbReaderWriter.class, MAPPING_SCHEMA));
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
 
         Marshaller marshaller = jaxbContext.createMarshaller();
@@ -198,6 +201,19 @@ public class JaxbReaderWriter {
         }
 
         return mappings;
+    }
+
+    static URL getResource(final Class<?> contextClass, String resourceName) {
+        // googles Resource api does not take all classloaders into account
+        URL url = contextClass.getResource(resourceName);
+        if(url==null) {
+            url = Objects.firstNonNull(
+                    Thread.currentThread().getContextClassLoader(),
+                    contextClass.getClassLoader()).getResource(resourceName);
+        }
+        checkArgument(url != null, "resource %s relative to %s not found.",
+                resourceName, contextClass.getName());
+        return url;
     }
 
 }

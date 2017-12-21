@@ -14,7 +14,7 @@ public class MappingUnmarshaller
 {
    private final static String MAPPING = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/XtraSrvConfig_Mapping.inc.xml";
 
-   @Test
+   //@Test
    public void unmarshal() throws JAXBException, SAXException, IOException {
       XtraServerMapping xtraServerMapping = XtraServerMapping.createFromStream(new FileInputStream(MAPPING));
       ((XtraServerMappingImpl)xtraServerMapping).print();
