@@ -109,8 +109,8 @@ public class JaxbReaderWriter {
                                     MappingsSequenceType.Table value = objectFactory.createMappingsSequenceTypeTable();
                                     value.setTable_Name(mappingValue.getTable());
                                     value.setTarget(mappingValue.getTarget());
-                                    value.setValue4(mappingValue.getValue());
-                                    value.setValue_Type(mappingValue.getValueType());
+                                    if (mappingValue.getValue() != null && !mappingValue.getValue().equals("")) value.setValue4(mappingValue.getValue());
+                                    if (mappingValue.getValueType() != null && !mappingValue.getValueType().equals("value")) value.setValue_Type(mappingValue.getValueType());
                                     value.setMapping_Mode(mappingValue.getMappingMode());
                                     value.setDb_Codes(mappingValue.getDbCodes());
                                     value.setSchema_Codes(mappingValue.getDbValues());

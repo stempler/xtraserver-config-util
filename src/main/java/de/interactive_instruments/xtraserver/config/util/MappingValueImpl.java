@@ -23,7 +23,7 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
     private Namespaces namespaces;
 
     public MappingValueImpl(Namespaces namespaces) {
-        //this.valueType = "value";
+        this.valueType = "value";
         //this.mappingMode = "value";
         this.namespaces = namespaces;
     }
@@ -42,8 +42,11 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
             if (value != null && (value.contains("$T$") || value.contains("||"))) {
                 this.valueType = "expression";
             } else {
-                //this.valueType = "value";
+                this.valueType = "value";
             }
+        }
+        if (value == null) {
+            this.value = "";
         }
     }
 

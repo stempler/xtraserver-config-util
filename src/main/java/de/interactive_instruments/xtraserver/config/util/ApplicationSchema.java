@@ -29,7 +29,7 @@ public class ApplicationSchema {
     public ApplicationSchema() throws IOException {
 
         //this(new FileInputStream(APPLICATION_SCHEMA), new Namespaces());
-        this(Resources.asByteSource(Resources.getResource("Cities.xsd")).openBufferedStream(), new Namespaces());
+        this(Resources.asByteSource(Resources.getResource(ApplicationSchema.class, "/Cities.xsd")).openBufferedStream(), new Namespaces());
     }
 
     public ApplicationSchema(InputStream is, Namespaces namespaces) {
