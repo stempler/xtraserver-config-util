@@ -6,19 +6,21 @@ import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zahnen
  */
 public class MappingJoinImpl implements MappingJoin {
     private String target;
-    private String axis;
-    private String path;
-    private List<Condition> joinConditions;
+    private final String axis;
+    private final String path;
+    private final List<Condition> joinConditions;
     private boolean suppressJoin;
 
     public MappingJoinImpl() {
         this.axis = "parent";
+        this.path = null;
         this.joinConditions = new ArrayList<>();
     }
 
@@ -123,16 +125,42 @@ public class MappingJoinImpl implements MappingJoin {
     }
 
     @Override
-    public boolean equals(Object o) {
-        MappingJoin mappingJoin = (MappingJoin)o;
-        return target.equals(mappingJoin.getTarget()) &&
-                axis.equals(mappingJoin.getAxis()) &&
-                path.equals(mappingJoin.getPath());
+    public List<Condition> getJoinConditions() {
+        return joinConditions;
     }
 
     @Override
-    public List<Condition> getJoinConditions() {
-        return joinConditions;
+    public String getSourceTable() {
+        if (joinConditions.isEmpty()) {
+            return null;
+        }
+
+        return joinConditions.get(0).getSourceTable();
+    }
+
+    @Override
+    public String getTargetTable() {
+        if (joinConditions.isEmpty()) {
+            return null;
+        }
+
+        return joinConditions.get(joinConditions.size() - 1).getTargetTable();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MappingJoinImpl that = (MappingJoinImpl) o;
+        return Objects.equals(target, that.target) &&
+                Objects.equals(axis, that.axis) &&
+                Objects.equals(getPath(), that.getPath());
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(target, axis, getPath());
     }
 
     public static class ConditionImpl implements Condition {

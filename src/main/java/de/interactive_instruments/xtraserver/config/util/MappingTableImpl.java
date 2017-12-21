@@ -10,6 +10,7 @@ import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zahnen
@@ -126,5 +127,34 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     @Override
     public List<MappingValue> getValues() {
         return values;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MappingTableImpl that = (MappingTableImpl) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(oidCol, that.oidCol) &&
+                Objects.equals(target, that.target) &&
+                Objects.equals(joinPaths, that.joinPaths) &&
+                Objects.equals(values, that.values);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(name, oidCol, target, joinPaths, values);
+    }
+
+    @Override
+    public String toString() {
+        return "\nMappingTableImpl{" +
+                "\nname='" + name + '\'' +
+                "\n, oidCol='" + oidCol + '\'' +
+                "\n, target='" + target + '\'' +
+                "\n, joinPaths=" + joinPaths +
+                "\n, values=" + values +
+                "\n}";
     }
 }

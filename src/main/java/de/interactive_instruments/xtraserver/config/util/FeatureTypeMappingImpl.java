@@ -8,10 +8,7 @@ import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.util.api.*;
 
 import javax.xml.namespace.QName;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -21,44 +18,32 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     private final String name;
     private final QName qualifiedTypeName;
     private final List<MappingTable> tables;
-    private List<MappingJoin> joins;
+    private final List<MappingJoin> joins;
     private final List<MappingValue> values;
     private final List<AssociationTarget> associationTargets;
     private final Namespaces namespaces;
 
-    public FeatureTypeMappingImpl(String name, QName qualifiedTypeName) {
+    public FeatureTypeMappingImpl(String name, QName qualifiedTypeName, Namespaces namespaces) {
         this.name = name;
         this.qualifiedTypeName = qualifiedTypeName;
         this.tables = new ArrayList<>();
         this.joins = new ArrayList<>();
         this.values = new ArrayList<>();
         this.associationTargets = new ArrayList<>();
-        this.namespaces = null;
+        this.namespaces = namespaces;
     }
 
-    public FeatureTypeMappingImpl(FeatureType featureType, QName qualifiedTypeName, Namespaces namespaces) {
-        this.name = featureType.getName();
+    FeatureTypeMappingImpl(MappingsSequenceType mappings, String name, QName qualifiedTypeName, Namespaces namespaces) {
+        this.name = name;
         this.qualifiedTypeName = qualifiedTypeName;
+        this.namespaces = namespaces;
 
-        MappingsSequenceType mappings = extractMappings(featureType);
         this.tables = new ArrayList<>();
-        extractTables(mappings);
-        extractJoins(mappings);
+        //this.joins = new ArrayList<>();
+        /*this.tables =*/ extractTables(mappings);
+        this.joins = extractJoins(mappings);
         this.values = extractValues(mappings);
-        this.associationTargets = new ArrayList<>();
-        this.namespaces = namespaces;
-    }
-
-    public FeatureTypeMappingImpl(AdditionalMappings additionalMappings, QName qualifiedTypeName, Namespaces namespaces) {
-        this.name = additionalMappings.getRootElementName();
-        this.qualifiedTypeName = qualifiedTypeName;
-
-        this.tables = new ArrayList<>();
-        extractTables(additionalMappings.getMappings());
-        extractJoins(additionalMappings.getMappings());
-        this.values = extractValues(additionalMappings.getMappings());
-        this.associationTargets = new ArrayList<>();
-        this.namespaces = namespaces;
+        this.associationTargets = extractAssociationTargets(mappings);
     }
 
     FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, Namespaces namespaces) {
@@ -87,6 +72,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                     if ((hasTable(mappingValue.getTable()) && hasValueMappingForTable(mappingValue.getTable(), getTable(mappingValue.getTable()).getTarget())) ||
                             (hasTable(mappingValue.getTable()) && mappingValue.getTarget().startsWith(getTable(mappingValue.getTable()).getTarget()))) {
                         this.values.add(this.values.size(), mappingValue);
+                        getTable(mappingValue.getTable()).getValues().add(mappingValue);
                     }
                 }
             }
@@ -195,6 +181,10 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
 
     @Override
     public void addTable(MappingTable mappingTable) {
+        if (tables.contains(mappingTable)) {
+            tables.remove(mappingTable);
+        }
+
         tables.add(mappingTable);
     }
 
@@ -234,7 +224,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                         }
                     }
                 } catch (ClassCastException e) {
-
+                    //ignore
                 }
             }
         }
@@ -251,10 +241,12 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                     MappingsSequenceType.Table table = (MappingsSequenceType.Table) mapping;
 
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty() && hasTable(table.getTable_Name())) {
-                        if (table.getTarget() != null && !table.getTarget().isEmpty() &&
-                                table.getTarget().startsWith(getTable(table.getTable_Name()).getTarget())) {
-                            if (table.getValue4() != null && !table.getValue4().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) {
+                        if (table.getTarget() != null && !table.getTarget().isEmpty() &&  table.getTarget().startsWith(getTable(table.getTable_Name()).getTarget())) {
+                            if ((table.getValue4() != null && !table.getValue4().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) || table.getTarget().endsWith("/@xlink:href")) {
                                 MappingValue mappingValue = new MappingValueImpl(table, namespaces);
+                                if (hasTable(table.getTable_Name())) {
+                                    getTable(table.getTable_Name()).getValues().add(mappingValue);
+                                }
                                 if (!mappingValues.contains(mappingValue)) {
                                     mappingValues.add(mappingValue);
                                 }
@@ -262,7 +254,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                         }
                     }
                 } catch (ClassCastException e) {
-
+                    //ignore
                 }
             }
         }
@@ -270,9 +262,9 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         return mappingValues;
     }
 
-    private void extractJoins(MappingsSequenceType mappings) {
-
-        boolean disableMultiJoins = true;
+    private List<MappingJoin> extractJoins(MappingsSequenceType mappings) {
+        List<MappingJoin> mappingJoins = new ArrayList<>();
+        boolean disableMultiJoins = false;
 
         if (mappings != null) {
             for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
@@ -289,6 +281,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                             MappingJoin mappingJoin = new MappingJoinImpl(join);
                             if (!disableMultiJoins || mappingJoin.getJoinConditions().size() == 1) {
                                 getTable(table).addJoinPath(mappingJoin);
+                                mappingJoins.add(mappingJoin);
                             }
                         }
                     }
@@ -297,12 +290,38 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                 }
             }
         }
+
+        return mappingJoins;
+    }
+
+    private List<AssociationTarget> extractAssociationTargets(MappingsSequenceType mappings) {
+        List<AssociationTarget> associationTargets = new ArrayList<>();
+
+        if (mappings != null) {
+            for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
+                try {
+                    MappingsSequenceType.AssociationTarget associationTarget = (MappingsSequenceType.AssociationTarget) mapping;
+
+                    if (associationTarget.getObject_Ref() != null && !associationTarget.getObject_Ref().isEmpty() && associationTarget.getTarget() != null && !associationTarget.getTarget().isEmpty()) {
+                        AssociationTarget associationTarget1 = new AssociationTargetImpl();
+                        associationTarget1.setObjectRef(associationTarget.getObject_Ref());
+                        associationTarget1.setTarget(associationTarget.getTarget());
+                        associationTargets.add(associationTarget1);
+                    }
+                } catch (ClassCastException e) {
+                    //ignore
+                }
+            }
+        }
+
+        return associationTargets;
     }
 
     private List<MappingTable> extractJoinedTables(FeatureTypeMapping mergedMapping) {
-        List<String> joinedTables = new ArrayList<>();
-        List<String> joinedTables2 = new ArrayList<>();
+        List<String> referencedTablesString = new ArrayList<>();
         List<MappingTable> referencedTables = new ArrayList<>();
+        List<String> joinedTables = new ArrayList<>();
+        List<String> joinedTablesString = new ArrayList<>();
 
         if (mergedMapping != null && mergedMapping.getTables() != null) {
             boolean added;
@@ -310,40 +329,39 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                 added = false;
                 for (MappingTable mappingTable : mergedMapping.getTables()) {
                     for (MappingJoin join : mappingTable.getJoinPaths()) {
+                        String sourceTableName = join.getSourceTable();
+                        String targetTableName = join.getTargetTable();
+
                         if (mappingTable.getName().equals("o51009")) {
                             System.out.println("FOO " + join.toString() + " " + join.getTarget());
-                            System.out.println("BAR " + join.getJoinConditions().get(0).getSourceTable() + (hasTable(join.getJoinConditions().get(0).getSourceTable()) ? join.getTarget().startsWith(getTable(join.getJoinConditions().get(0).getSourceTable()).getTarget()) : "NOPE"));
+                            System.out.println("BAR " + sourceTableName + (hasTable(sourceTableName) ? join.getTarget().startsWith(getTable(sourceTableName).getTarget()) : "NOPE"));
                         }
-                        if (!join.getJoinConditions().isEmpty()
-                                && (/*joinedTables.contains(join.getJoinConditions().get(0).getSourceTable()) ||*/ hasTable(join.getJoinConditions().get(0).getSourceTable()) && join.getTarget().startsWith(getTable(join.getJoinConditions().get(0).getSourceTable()).getTarget()))) {
-                            // for (MappingJoin.Condition condition : join.getJoinConditions()) {
-                            //     String targetTableName = condition.getTargetTable();
-                            String targetTableName = join.getJoinConditions().get(join.getJoinConditions().size() - 1).getTargetTable();
+
+                        // merged join can be connected to existing table and target
+                        if (!join.getJoinConditions().isEmpty() && hasTable(sourceTableName) && join.getTarget().startsWith(getTable(sourceTableName).getTarget())) {
+
                             if (targetTableName.equals("o51009")) {
                                 System.out.println("BLA " + targetTableName + " " + mergedMapping.hasTable(targetTableName) + " " + hasTable(targetTableName));
                             }
-                            if (mergedMapping.hasTable(targetTableName)) {
-                                if (/*mergedMapping.getTable(targetTableName).hasTarget() ||*/ mergedMapping.hasValueMappingForTable(targetTableName, join.getTarget())) {
-                                    //if (!joinedTables.contains(targetTableName)) {
 
-                                        /*for (MappingTable mappingTable : mergedMapping.getTables()) {
-                                            if (joinedTables.contains(mappingTable.getName()) && !hasTable(mappingTable.getName())) {
-                                                this.tables.add(this.tables.size(), mappingTable);
-                                            }
-                                        }*/
+                            if (mergedMapping.hasTable(targetTableName)) {
+                                //merged join is needed for a value mapping
+                                if (mergedMapping.hasValueMappingForTable(targetTableName, join.getTarget())) {
                                     if (!hasTable(targetTableName)) {
                                         this.tables.add(new MappingTableImpl(mergedMapping.getTable(targetTableName), join.getTarget()));
-                                        joinedTables2.add(targetTableName + "[" + join.getTarget() + "]");
+                                        joinedTablesString.add(targetTableName + "[" + join.getTarget() + "]");
 
-                                        //joinedTables.add(targetTableName);
                                         added = true;
                                     }
-                                } else if (mergedMapping.hasReferenceMappingForTable(targetTableName, join.getTarget())) {
+                                }
+                                //merged join is needed for a reference mapping
+                                else if (mergedMapping.hasReferenceMappingForTable(targetTableName, join.getTarget())) {
+                                    // merged join target table is added if it does not exist yet
                                     if (!hasTable(targetTableName)) {
-                                        joinedTables.add(targetTableName + "[" + join.getTarget() + "]" + "[" + join.getJoinConditions().get(0).getSourceTable() + "]" + "[" + join.getJoinConditions().get(0).getSourceTable() + "]");
+                                        referencedTablesString.add(targetTableName + "[" + join.getTarget() + "]" + "[" + sourceTableName + "]" + "[" + sourceTableName + "]");
                                         referencedTables.add(new MappingTableImpl(mappingTable, join));
                                     } else {
-                                        // self join
+                                        // if it does exist, we have self join, which is added to the target table
                                         if (!getTable(targetTableName).getJoinPaths().contains(join)) {
                                             System.out.println("SELF JOIN " + targetTableName);
                                             getTable(targetTableName).addJoinPath(join);
@@ -360,23 +378,40 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
             } while (added);
         }
 
-        System.out.println(mergedMapping.getName() + " JOINED " + Joiner.on(" | ").join(joinedTables2));
-        System.out.println(mergedMapping.getName() + " REFERENCED " + Joiner.on(" | ").join(joinedTables));
+        System.out.println(mergedMapping.getName() + " JOINED " + Joiner.on(" | ").join(joinedTablesString));
+        System.out.println(mergedMapping.getName() + " REFERENCED " + Joiner.on(" | ").join(referencedTablesString));
 
         return referencedTables;
     }
 
-    private MappingsSequenceType extractMappings(FeatureType featureType) {
-        MappingsSequenceType mappings = null;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FeatureTypeMappingImpl that = (FeatureTypeMappingImpl) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(qualifiedTypeName, that.qualifiedTypeName) &&
+                Objects.equals(tables, that.tables) &&
+                Objects.equals(joins, that.joins) &&
+                Objects.equals(values, that.values) &&
+                Objects.equals(associationTargets, that.associationTargets);
+    }
 
-        if (featureType.getPGISFeatureTypeImpl() != null) {
-            mappings = featureType.getPGISFeatureTypeImpl();
-        } else if (featureType.getOraSFeatureTypeImpl() != null) {
-            mappings = featureType.getOraSFeatureTypeImpl();
-        } else if (featureType.getGDBSQLFeatureTypeImpl() != null) {
-            mappings = featureType.getGDBSQLFeatureTypeImpl();
-        }
+    @Override
+    public int hashCode() {
 
-        return mappings;
+        return Objects.hash(name, qualifiedTypeName, tables, joins, values, associationTargets);
+    }
+
+    @Override
+    public String toString() {
+        return "\nFeatureTypeMappingImpl{" +
+                "\nname='" + name + '\'' +
+                "\n, qualifiedTypeName=" + qualifiedTypeName +
+                "\n, tables=" + tables +
+                "\n, joins=" + joins +
+                "\n, values=" + values +
+                "\n, associationTargets=" + associationTargets +
+                "\n}";
     }
 }

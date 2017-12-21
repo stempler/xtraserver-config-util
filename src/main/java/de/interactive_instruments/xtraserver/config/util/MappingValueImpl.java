@@ -7,6 +7,7 @@ import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author zahnen
@@ -21,8 +22,10 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
     private String dbValues;
     private Namespaces namespaces;
 
-    public MappingValueImpl() {
-
+    public MappingValueImpl(Namespaces namespaces) {
+        //this.valueType = "value";
+        //this.mappingMode = "value";
+        this.namespaces = namespaces;
     }
 
     MappingValueImpl(MappingsSequenceType.Table table, Namespaces namespaces) {
@@ -36,10 +39,10 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
         this.namespaces = namespaces;
 
         if (valueType == null) {
-            if (value.contains("$T$") || value.contains("||")) {
+            if (value != null && (value.contains("$T$") || value.contains("||"))) {
                 this.valueType = "expression";
             } else {
-                this.valueType = "value";
+                //this.valueType = "value";
             }
         }
     }
@@ -138,10 +141,34 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
 
     @Override
     public boolean equals(Object o) {
-        MappingValue mappingValue = (MappingValue)o;
-        return target.equals(mappingValue.getTarget()) &&
-                table.equals(mappingValue.getTable()) &&
-                value.equals(mappingValue.getValue()) &&
-                valueType.equals(mappingValue.getValueType());
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MappingValueImpl that = (MappingValueImpl) o;
+        return Objects.equals(table, that.table) &&
+                Objects.equals(target, that.target) &&
+                Objects.equals(value, that.value) &&
+                Objects.equals(valueType, that.valueType) &&
+                Objects.equals(mappingMode, that.mappingMode) &&
+                Objects.equals(dbCodes, that.dbCodes) &&
+                Objects.equals(dbValues, that.dbValues);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(table, target, value, valueType, mappingMode, dbCodes, dbValues);
+    }
+
+    @Override
+    public String toString() {
+        return "\nMappingValueImpl{" +
+                "\ntable='" + table + '\'' +
+                "\n, target='" + target + '\'' +
+                "\n, value='" + value + '\'' +
+                "\n, valueType='" + valueType + '\'' +
+                "\n, mappingMode='" + mappingMode + '\'' +
+                "\n, dbCodes='" + dbCodes + '\'' +
+                "\n, dbValues='" + dbValues + '\'' +
+                "\n}";
     }
 }

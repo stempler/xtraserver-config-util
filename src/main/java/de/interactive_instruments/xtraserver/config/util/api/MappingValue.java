@@ -1,6 +1,7 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
 import de.interactive_instruments.xtraserver.config.util.MappingValueImpl;
+import de.interactive_instruments.xtraserver.config.util.Namespaces;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -17,8 +18,8 @@ public interface MappingValue {
      *
      * @return
      */
-    static MappingValue create() {
-        return new MappingValueImpl();
+    static MappingValue create(Namespaces namespaces) {
+        return new MappingValueImpl(namespaces);
     }
 
     String getTable();

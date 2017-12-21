@@ -31,6 +31,10 @@ public interface MappingJoin {
 
     List<Condition> getJoinConditions();
 
+    String getSourceTable();
+
+    String getTargetTable();
+
     /**
      * A join condition
      */

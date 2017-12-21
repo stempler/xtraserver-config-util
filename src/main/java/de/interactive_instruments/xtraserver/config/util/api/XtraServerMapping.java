@@ -30,7 +30,7 @@ public interface XtraServerMapping {
         return JaxbReaderWriter.readFromStream(inputStream);
     }
 
-    static XtraServerMapping create() {
+    static XtraServerMapping create() throws IOException {
         XtraServerMapping xtraServerMapping = new XtraServerMappingImpl();
 
         return xtraServerMapping;
@@ -82,6 +82,8 @@ public interface XtraServerMapping {
      * @param featureTypeMapping
      */
     void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping);
+
+    void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping, boolean fanOutInheritance);
 
     /**
      * Write mappings to OutputStream

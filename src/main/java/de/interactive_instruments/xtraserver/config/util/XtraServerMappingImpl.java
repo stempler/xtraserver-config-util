@@ -4,9 +4,12 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import de.interactive_instruments.xtraserver.config.util.api.*;
+import org.apache.ws.commons.schema.XmlSchemaComplexType;
+import org.apache.ws.commons.schema.XmlSchemaElement;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -20,8 +23,8 @@ public class XtraServerMappingImpl implements XtraServerMapping {
     private final List<FeatureTypeMapping> featureTypeMappings;
     private final List<FeatureTypeMapping> additionalMappings;
 
-    public XtraServerMappingImpl() {
-        this(null);
+    public XtraServerMappingImpl() throws IOException {
+        this(new ApplicationSchema());
     }
 
     XtraServerMappingImpl(ApplicationSchema applicationSchema) {
@@ -112,7 +115,70 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     @Override
     public void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping) {
-        featureTypeMappings.add(featureTypeMapping);
+        addFeatureTypeMapping(featureTypeMapping, false);
+    }
+
+    @Override
+    public void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping, boolean fanOutInheritance) {
+        if (fanOutInheritance) {
+            //List<XmlSchemaComplexType> types = applicationSchema.getAllTypes(featureTypeMapping.getQName());
+            List<XmlSchemaElement> types = applicationSchema.getAllElements(featureTypeMapping.getQName());
+            System.out.println("FeatureTypes:" + types);
+
+            //for (XmlSchemaComplexType type : types) {
+            for (XmlSchemaElement element : types) {
+                if (element.getQName().getLocalPart().equals("AbstractFeature")) continue;
+
+                XmlSchemaComplexType type = (XmlSchemaComplexType) element.getSchemaType();
+
+                //String typeName = applicationSchema.getNamespaces().getPrefixedName(type.getQName());
+                //typeName = typeName.replace("AbstractGMLType", "AbstractFeatureType");
+                String typeName = applicationSchema.getNamespaces().getPrefixedName(element.getQName());
+                typeName = typeName.replace("AbstractGML", "AbstractFeature");
+                FeatureTypeMapping featureTypeMapping1 = getTypeMappingOptional(featureTypeMappings, typeName).orElse(new FeatureTypeMappingImpl(typeName, type.getQName(), applicationSchema.getNamespaces()));
+
+                for (MappingTable mappingTable : featureTypeMapping.getTables()) {
+                    if (mappingTable.getTarget() != null && !mappingTable.getTarget().isEmpty()) {
+                        QName property = applicationSchema.getNamespaces().getQualifiedName(mappingTable.getTarget().split("/")[0]);
+                        if (property != null && applicationSchema.hasProperty(type, property)) {
+                            System.out.println("Property:" + mappingTable.getTarget() + " || " + type.getName());
+                            featureTypeMapping1.addTable(mappingTable);
+                        }
+                    } else {
+                        MappingTable mappingTable1 = new MappingTableImpl();
+                        mappingTable1.setOidCol(mappingTable.getOidCol());
+                        mappingTable1.setName(mappingTable.getName());
+                        featureTypeMapping1.addTable(mappingTable1);
+
+                        for (MappingValue mappingValue : mappingTable.getValues()) {
+                            if (mappingValue.getTarget() != null && !mappingValue.getTarget().isEmpty()) {
+                                QName property = applicationSchema.getNamespaces().getQualifiedName(mappingValue.getTarget().split("/")[0]);
+                                if (property != null && applicationSchema.hasProperty(type, property)) {
+                                    System.out.println("Property:" + mappingValue.getTarget() + " || " + type.getName());
+                                    mappingTable1.getValues().add(mappingValue);
+                                }
+                            }
+                        }
+                    }
+                }
+                for (AssociationTarget associationTarget : featureTypeMapping.getAssociationTargets()) {
+                    if (associationTarget.getTarget() != null && !associationTarget.getTarget().isEmpty()) {
+                        QName property = applicationSchema.getNamespaces().getQualifiedName(associationTarget.getTarget().split("/")[0]);
+                        if (property != null && applicationSchema.hasProperty(type, property)) {
+                            System.out.println("AssociationTarget:" + associationTarget.getTarget() + " || " + type.getName());
+                            featureTypeMapping1.addAssociationTarget(associationTarget);
+                        }
+                    }
+                }
+
+                if (!hasFeatureType(typeName)) {
+                    featureTypeMappings.add(featureTypeMapping1);
+                }
+            }
+        } else {
+            featureTypeMappings.add(featureTypeMapping);
+        }
+
     }
 
     @Override
@@ -181,5 +247,28 @@ public class XtraServerMappingImpl implements XtraServerMapping {
             name += "[" + table.getTarget() + "]";
             return name;
         });
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        XtraServerMappingImpl that = (XtraServerMappingImpl) o;
+        return Objects.equals(featureTypeMappings, that.featureTypeMappings) &&
+                Objects.equals(additionalMappings, that.additionalMappings);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(featureTypeMappings, additionalMappings);
+    }
+
+    @Override
+    public String toString() {
+        return "\nXtraServerMappingImpl{" +
+                "\nfeatureTypeMappings=" + featureTypeMappings +
+                "\n, additionalMappings=" + additionalMappings +
+                "\n}";
     }
 }

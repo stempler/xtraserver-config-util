@@ -1,6 +1,7 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
 import de.interactive_instruments.xtraserver.config.util.FeatureTypeMappingImpl;
+import de.interactive_instruments.xtraserver.config.util.Namespaces;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
@@ -12,9 +13,9 @@ import java.util.List;
  */
 public interface FeatureTypeMapping {
 
-    static FeatureTypeMapping create(String name, QName qualifiedTypeName) {
+    static FeatureTypeMapping create(String name, QName qualifiedTypeName, Namespaces namespaces) {
 
-        return new FeatureTypeMappingImpl(name, qualifiedTypeName);
+        return new FeatureTypeMappingImpl(name, qualifiedTypeName, namespaces);
     }
 
     /**

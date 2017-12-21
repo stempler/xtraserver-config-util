@@ -33,7 +33,7 @@ public class JaxbReaderWriter {
             try {
                 FeatureType ft = (FeatureType) a;
 
-                FeatureTypeMapping ftm = new FeatureTypeMappingImpl(ft, applicationSchema.getType(ft.getName()), applicationSchema.getNamespaces());
+                FeatureTypeMapping ftm = new FeatureTypeMappingImpl(extractMappings(ft), ft.getName(), applicationSchema.getType(ft.getName()), applicationSchema.getNamespaces());
 
                 xtraServerMapping.addFeatureTypeMapping(ftm);
 
@@ -41,7 +41,7 @@ public class JaxbReaderWriter {
                 try {
                     AdditionalMappings am = (AdditionalMappings) a;
 
-                    FeatureTypeMapping ftm = new FeatureTypeMappingImpl(am, applicationSchema.getType(am.getRootElementName()), applicationSchema.getNamespaces());
+                    FeatureTypeMapping ftm = new FeatureTypeMappingImpl(am.getMappings(), am.getRootElementName(), applicationSchema.getType(am.getRootElementName()), applicationSchema.getNamespaces());
 
                     xtraServerMapping.addFeatureTypeMapping(ftm);
 
@@ -184,6 +184,20 @@ public class JaxbReaderWriter {
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(featureTypes, outputStream);
+    }
+
+    private static MappingsSequenceType extractMappings(FeatureType featureType) {
+        MappingsSequenceType mappings = null;
+
+        if (featureType.getPGISFeatureTypeImpl() != null) {
+            mappings = featureType.getPGISFeatureTypeImpl();
+        } else if (featureType.getOraSFeatureTypeImpl() != null) {
+            mappings = featureType.getOraSFeatureTypeImpl();
+        } else if (featureType.getGDBSQLFeatureTypeImpl() != null) {
+            mappings = featureType.getGDBSQLFeatureTypeImpl();
+        }
+
+        return mappings;
     }
 
 }
