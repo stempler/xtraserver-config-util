@@ -4,17 +4,20 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import javax.xml.namespace.QName;
+import java.util.Map;
 
 /**
  * @author zahnen
  */
 public class Namespaces {
-    private BiMap<String, String> namespaces;
+    private final BiMap<String, String> namespaces;
 
     public Namespaces() {
         this.namespaces = HashBiMap.create();
 
+        // TODO remove this
         namespaces.put("gml", "http://www.opengis.net/gml/3.2");
+        // TODO remove this
         namespaces.put("ci", "http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities");
 
         namespaces.put("gmlx", "http://www.opengis.net/gml");
@@ -36,6 +39,12 @@ public class Namespaces {
         namespaces.put("fg", "http://www.interactive-instruments.de/ns/aaa/flurgema");
         namespaces.put("dnm", "http://www.interactive-instruments.de/namespaces/XtraServer/addons/dnm");
         namespaces.put("xpalias", "http://www.interactive-instruments.de/namespaces/XtraServer/addons/XPathAlias");
+    }
+
+    public Namespaces(final Map<String, String> prefixNamespaceMap) {
+        // TODO make this ctor package private and construct the obj from ApplicationSchema ?
+        this();
+        prefixNamespaceMap.forEach((key, value) -> this.namespaces.put(key, value));
     }
 
     public QName getQualifiedName(String prefixedName) {
