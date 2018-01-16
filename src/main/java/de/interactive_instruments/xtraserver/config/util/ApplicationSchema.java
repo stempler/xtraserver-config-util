@@ -1,19 +1,17 @@
 package de.interactive_instruments.xtraserver.config.util;
 
 import com.google.common.collect.Lists;
-import com.google.common.io.Resources;
 import org.apache.ws.commons.schema.*;
 import org.apache.ws.commons.schema.utils.NamespacePrefixList;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Paths;
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -24,15 +22,32 @@ public class ApplicationSchema {
     public final XmlSchema xmlSchema;
     private final Namespaces namespaces;
 
-    public ApplicationSchema(final InputStream is) {
-        XmlSchemaCollection schemaCol = new XmlSchemaCollection();
-        this.xmlSchema = schemaCol.read(new StreamSource(is), new ValidationEventHandler());
+    public ApplicationSchema(final StreamSource streamSource) {
+        final XmlSchemaCollection schemaCol = new XmlSchemaCollection();
+
+        this.xmlSchema = schemaCol.read(streamSource, new ValidationEventHandler());
         final NamespacePrefixList nsc = this.xmlSchema.getNamespaceContext();
         final Map<String, String> namespaceUriToPrefixMap = new HashMap<>();
         for (final String prefix : nsc.getDeclaredPrefixes()) {
             namespaceUriToPrefixMap.put(nsc.getNamespaceURI(prefix), prefix);
         }
         this.namespaces = new Namespaces(namespaceUriToPrefixMap);
+    }
+
+    public ApplicationSchema(final InputStream inputStream) {
+        this(new StreamSource(inputStream));
+    }
+
+    public ApplicationSchema(final URI inputUri) throws IOException {
+        this(toStreamSource(inputUri));
+    }
+
+    private static StreamSource toStreamSource(final URI uri) throws IOException {
+        if("file".equalsIgnoreCase(uri.getScheme())) {
+            final File file = new File(uri.isAbsolute() ? uri : Paths.get(uri).toUri());
+            return new StreamSource(file);
+        }
+        return new StreamSource(uri.toURL().openStream());
     }
 
     public boolean isAbstract(String featureType) {
