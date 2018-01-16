@@ -70,6 +70,13 @@ public class Namespaces {
         if (namespaces.inverse().get(qualifiedName.getNamespaceURI()) != null) {
             return namespaces.inverse().get(qualifiedName.getNamespaceURI()) + ":" + qualifiedName.getLocalPart();
         }
-        return null;
+        if("".equals(qualifiedName.getNamespaceURI())) {
+            if(!"".equals(qualifiedName.getPrefix())) {
+                return qualifiedName.getPrefix()+ ":" +qualifiedName.getLocalPart();
+            }
+            return qualifiedName.getLocalPart();
+        }else{
+            return qualifiedName.getNamespaceURI() + ":" + qualifiedName.getLocalPart();
+        }
     }
 }
