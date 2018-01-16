@@ -23,11 +23,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
     private final List<FeatureTypeMapping> featureTypeMappings;
     private final List<FeatureTypeMapping> additionalMappings;
 
-    public XtraServerMappingImpl() throws IOException {
-        this(new ApplicationSchema());
-    }
-
-    XtraServerMappingImpl(ApplicationSchema applicationSchema) {
+    public XtraServerMappingImpl(ApplicationSchema applicationSchema) {
         this.featureTypeMappings = new ArrayList<>();
         this.additionalMappings = new ArrayList<>();
         this.applicationSchema = applicationSchema;

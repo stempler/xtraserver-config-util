@@ -27,17 +27,19 @@ import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 public class XtraServerMappingTest {
 
-    Namespaces namespaces;
+    private Namespaces namespaces;
+    private ApplicationSchema applicationSchema;
 
     @Before
-    public void setup() {
-        this.namespaces = new Namespaces();
+    public void setup() throws IOException {
+        this.applicationSchema = new ApplicationSchema(Resources.asByteSource(Resources.getResource("Cities.xsd")).openBufferedStream());
+        this.namespaces = applicationSchema.getNamespaces();
     }
 
     @Test
     public void testImport() throws JAXBException, IOException, SAXException {
 
-        XtraServerMapping actual = XtraServerMapping.createFromStream(Resources.asByteSource(Resources.getResource("cities-mapping.xml")).openBufferedStream());
+        XtraServerMapping actual = XtraServerMapping.createFromStream(Resources.asByteSource(Resources.getResource("cities-mapping.xml")).openBufferedStream(), applicationSchema);
 
         XtraServerMapping expected = buildCitiesMapping();
 
@@ -48,11 +50,11 @@ public class XtraServerMappingTest {
     @Test
     public void testImportFlatten() throws JAXBException, IOException, SAXException {
 
-        XtraServerMapping actual = XtraServerMapping.createFromStream(Resources.asByteSource(Resources.getResource("cities-mapping-flattened.xml")).openBufferedStream());
+        XtraServerMapping actual = XtraServerMapping.createFromStream(Resources.asByteSource(Resources.getResource("cities-mapping-flattened.xml")).openBufferedStream(), applicationSchema);
 
         XtraServerMapping xtraServerMapping = buildCitiesMapping();
 
-        XtraServerMapping expected = XtraServerMapping.create();
+        XtraServerMapping expected = XtraServerMapping.create(applicationSchema);
         for (String featureType: xtraServerMapping.getFeatureTypeList(false)) {
             expected.addFeatureTypeMapping(xtraServerMapping.getFeatureTypeMapping(featureType, true));
         }
@@ -94,7 +96,7 @@ public class XtraServerMappingTest {
     }
 
     private XtraServerMapping buildCitiesMapping() throws IOException {
-        XtraServerMapping xtraServerMapping = XtraServerMapping.create();
+        XtraServerMapping xtraServerMapping = XtraServerMapping.create(this.applicationSchema);
         xtraServerMapping.addFeatureTypeMapping(buildAbstractFeature());
         xtraServerMapping.addFeatureTypeMapping(buildNamedGeoObject());
         xtraServerMapping.addFeatureTypeMapping(buildCity());
@@ -104,9 +106,8 @@ public class XtraServerMappingTest {
     }
 
     private XtraServerMapping buildCitiesMappingFlat() throws IOException {
-        ApplicationSchema applicationSchema = new ApplicationSchema();
 
-        XtraServerMapping xtraServerMapping = XtraServerMapping.create();
+        XtraServerMapping xtraServerMapping = XtraServerMapping.create(this.applicationSchema);
         xtraServerMapping.addFeatureTypeMapping(buildCityFlat(), true);
         xtraServerMapping.addFeatureTypeMapping(buildRiverFlat(), true);
 

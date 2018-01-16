@@ -3,6 +3,7 @@ package de.interactive_instruments.xtraserver.config.util;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import org.apache.ws.commons.schema.*;
+import org.apache.ws.commons.schema.utils.NamespacePrefixList;
 
 import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
@@ -10,9 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,23 +20,19 @@ import java.util.stream.Collectors;
  * @author zahnen
  */
 public class ApplicationSchema {
-    private final static String APPLICATION_SCHEMA = "/home/zahnen/development/XSProjects/AAA-Suite/www/schema/NAS/6.0/schema/AAA-Fachschema.xsd";
 
-    public XmlSchema xmlSchema;
-    private Namespaces namespaces;
+    public final XmlSchema xmlSchema;
+    private final Namespaces namespaces;
 
-    public ApplicationSchema() throws IOException {
-
-        //this(new FileInputStream(APPLICATION_SCHEMA), new Namespaces());
-        this(Resources.asByteSource(Resources.getResource(ApplicationSchema.class, "/Cities.xsd")).openBufferedStream(), new Namespaces());
-    }
-
-    public ApplicationSchema(InputStream is, Namespaces namespaces) {
-
-        this.namespaces = namespaces;
-
+    public ApplicationSchema(final InputStream is) {
         XmlSchemaCollection schemaCol = new XmlSchemaCollection();
         this.xmlSchema = schemaCol.read(new StreamSource(is), new ValidationEventHandler());
+        final NamespacePrefixList nsc = this.xmlSchema.getNamespaceContext();
+        final Map<String, String> namespaceUriToPrefixMap = new HashMap<>();
+        for (final String prefix : nsc.getDeclaredPrefixes()) {
+            namespaceUriToPrefixMap.put(nsc.getNamespaceURI(prefix), prefix);
+        }
+        this.namespaces = new Namespaces(namespaceUriToPrefixMap);
     }
 
     public boolean isAbstract(String featureType) {
