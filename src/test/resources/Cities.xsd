@@ -82,6 +82,9 @@
 					<element name="passingRiver" type="gml:ReferenceType" minOccurs="0" maxOccurs="unbounded">
 						<annotation>
 							<documentation>References to river objects passing the city</documentation>
+							<appinfo>
+								<targetElement xmlns="http://www.opengis.net/gml/3.2">ci:River</targetElement>
+							</appinfo>
 						</annotation>
 					</element>
 					<element name="area" type="double">
