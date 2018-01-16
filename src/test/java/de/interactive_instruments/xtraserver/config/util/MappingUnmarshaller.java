@@ -10,14 +10,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * TODO
+ */
 public class MappingUnmarshaller
 {
    private final static String MAPPING = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/XtraSrvConfig_Mapping.inc.xml";
 
    //@Test
    public void unmarshal() throws JAXBException, SAXException, IOException {
-      XtraServerMapping xtraServerMapping = XtraServerMapping.createFromStream(new FileInputStream(MAPPING));
-      ((XtraServerMappingImpl)xtraServerMapping).print();
+      // XtraServerMapping xtraServerMapping = XtraServerMapping.createFromStream(new FileInputStream(MAPPING));
+      // ((XtraServerMappingImpl)xtraServerMapping).print();
 
       //FeatureTypes featureTypes = MappingParser.unmarshal( new FileInputStream(MAPPING) );
       //XtraServerMappingImpl xsm = new XtraServerMappingImpl(featureTypes, new ApplicationSchema(APPLICATION_SCHEMA, new Namespaces()));
