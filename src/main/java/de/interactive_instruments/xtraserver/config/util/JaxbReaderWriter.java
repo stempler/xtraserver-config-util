@@ -26,10 +26,9 @@ public class JaxbReaderWriter {
 
     private final static String MAPPING_SCHEMA = "XtraServer_Mapping.xsd";
 
-    public static XtraServerMapping readFromStream(InputStream inputStream) throws IOException, JAXBException, SAXException {
+    public static XtraServerMapping readFromStream(final InputStream inputStream, final ApplicationSchema applicationSchema) throws IOException, JAXBException, SAXException {
         FeatureTypes featureTypes = unmarshal( inputStream );
 
-        ApplicationSchema applicationSchema = new ApplicationSchema();
         XtraServerMapping xtraServerMapping = new XtraServerMappingImpl(applicationSchema);
 
         for (Object a : featureTypes.getFeatureTypeOrAdditionalMappings()) {

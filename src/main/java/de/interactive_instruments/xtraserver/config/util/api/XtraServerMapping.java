@@ -1,5 +1,6 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
+import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
 import de.interactive_instruments.xtraserver.config.util.JaxbReaderWriter;
 import de.interactive_instruments.xtraserver.config.util.XtraServerMappingImpl;
 import org.xml.sax.SAXException;
@@ -20,20 +21,25 @@ public interface XtraServerMapping {
     /**
      * Factory method, parses mappings from InputStream
      *
-     * @param inputStream
-     * @return
+     * @param inputStream input mapping
+     * @param applicationSchema Application Schema for the mapping
+     * @return XtraServerMapping
      * @throws JAXBException
      * @throws SAXException
      * @throws IOException
      */
-    static XtraServerMapping createFromStream(InputStream inputStream) throws JAXBException, SAXException, IOException {
-        return JaxbReaderWriter.readFromStream(inputStream);
+    static XtraServerMapping createFromStream(final InputStream inputStream, final ApplicationSchema applicationSchema) throws JAXBException, SAXException, IOException {
+        return JaxbReaderWriter.readFromStream(inputStream, applicationSchema);
     }
 
-    static XtraServerMapping create() throws IOException {
-        XtraServerMapping xtraServerMapping = new XtraServerMappingImpl();
-
-        return xtraServerMapping;
+    /**
+     * Create a new empty XtraServerMapping
+     *
+     * @param applicationSchema ApplicationSchema to use
+     * @return new, empty XtraServerMapping
+     */
+    static XtraServerMapping create(final ApplicationSchema applicationSchema) {
+        return new XtraServerMappingImpl(applicationSchema);
     }
 
     /**

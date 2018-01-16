@@ -12,13 +12,8 @@ import java.util.Map;
 public class Namespaces {
     private final BiMap<String, String> namespaces;
 
-    public Namespaces() {
+    private Namespaces() {
         this.namespaces = HashBiMap.create();
-
-        // TODO remove this
-        namespaces.put("gml", "http://www.opengis.net/gml/3.2");
-        // TODO remove this
-        namespaces.put("ci", "http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities");
 
         namespaces.put("gmlx", "http://www.opengis.net/gml");
         namespaces.put("gco", "http://www.isotc211.org/2005/gco");
@@ -41,10 +36,21 @@ public class Namespaces {
         namespaces.put("xpalias", "http://www.interactive-instruments.de/namespaces/XtraServer/addons/XPathAlias");
     }
 
-    public Namespaces(final Map<String, String> prefixNamespaceMap) {
-        // TODO make this ctor package private and construct the obj from ApplicationSchema ?
+    /**
+     * Construct a Namespaces object and add namespaces URIs to namespace prefixes mappings.
+     * Predefined, existing prefixes are not overridden.
+     *
+     * @param namespaceUriToPrefixMapping a map with namespace URI keys and the associated prefixes
+     */
+    Namespaces(final Map<String, String> namespaceUriToPrefixMapping) {
         this();
-        prefixNamespaceMap.forEach((key, value) -> this.namespaces.put(key, value));
+        namespaceUriToPrefixMapping.forEach((key, value) -> {
+            // containsValue() check required as bimap does not handle putIfAbsent for values
+            if(key!=null && !key.isEmpty() && !this.namespaces.containsValue(key)) {
+                // Change NS URI -> prefix to internal representation prefix -> NS URI
+                this.namespaces.putIfAbsent(value, key);
+            }
+        });
     }
 
     public QName getQualifiedName(String prefixedName) {
