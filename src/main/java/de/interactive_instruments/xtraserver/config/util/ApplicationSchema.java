@@ -24,13 +24,12 @@ public class ApplicationSchema {
 
     public ApplicationSchema(final StreamSource streamSource) {
         final XmlSchemaCollection schemaCol = new XmlSchemaCollection();
-
         this.xmlSchema = schemaCol.read(streamSource, new ValidationEventHandler());
-        final NamespacePrefixList nsc = this.xmlSchema.getNamespaceContext();
+
         final Map<String, String> namespaceUriToPrefixMap = new HashMap<>();
-        for (final String prefix : nsc.getDeclaredPrefixes()) {
-            namespaceUriToPrefixMap.put(nsc.getNamespaceURI(prefix), prefix);
-        }
+        Arrays.stream(schemaCol.getXmlSchemas()).forEach(s -> addNamespaces(
+                s.getNamespaceContext(), namespaceUriToPrefixMap));
+        addNamespaces(this.xmlSchema.getNamespaceContext(), namespaceUriToPrefixMap);
         this.namespaces = new Namespaces(namespaceUriToPrefixMap);
     }
 
@@ -48,6 +47,14 @@ public class ApplicationSchema {
             return new StreamSource(file);
         }
         return new StreamSource(uri.toURL().openStream());
+    }
+
+    private static void addNamespaces(final NamespacePrefixList nsc, final Map<String, String> namespaceUriToPrefixMap) {
+        if(nsc!=null) {
+            for (final String prefix : nsc.getDeclaredPrefixes()) {
+                namespaceUriToPrefixMap.put(nsc.getNamespaceURI(prefix), prefix);
+            }
+        }
     }
 
     public boolean isAbstract(String featureType) {
