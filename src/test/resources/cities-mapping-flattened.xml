@@ -63,6 +63,7 @@
 			<!-- merged from superclasses -->
 			<Table table_name="river" value="name" target="ci:name"/>
 			<Table table_name="river" target="@gml:id" value="id"/>
+			<Table table_name="river" target="gml:identifier" value="id"/>
 		</PGISFeatureTypeImpl>
 	</FeatureType>
 

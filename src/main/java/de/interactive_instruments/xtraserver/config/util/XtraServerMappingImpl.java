@@ -180,7 +180,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                         }
                     }
                 }
-                if (element.isAbstract()) {
+                if (element.isAbstract() && !typeName.endsWith("AbstractFeature")) {
                     if (!hasAbstractType(typeName)) {
                         additionalMappings.add(featureTypeMapping1);
                     }
@@ -190,7 +190,11 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                 }
             }
         } else {
-            featureTypeMappings.add(featureTypeMapping);
+            if(applicationSchema.isAbstract(featureTypeMapping.getName()) && !featureTypeMapping.getName().endsWith("AbstractFeature")) {
+                additionalMappings.add(featureTypeMapping);
+            } else {
+                featureTypeMappings.add(featureTypeMapping);
+            }
         }
 
     }

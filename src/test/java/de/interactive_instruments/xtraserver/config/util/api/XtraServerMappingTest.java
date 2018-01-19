@@ -3,6 +3,7 @@ package de.interactive_instruments.xtraserver.config.util.api;
 import com.google.common.io.Resources;
 import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
 import de.interactive_instruments.xtraserver.config.util.Namespaces;
+import de.interactive_instruments.xtraserver.config.util.XtraServerMappingImpl;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -134,11 +135,17 @@ public class XtraServerMappingTest {
         riverId.setTarget("@gml:id");
         riverId.setValue("id");
 
+        MappingValue riverIdentifier = MappingValue.create(namespaces);
+        riverIdentifier.setTable(river);
+        riverIdentifier.setTarget("gml:identifier");
+        riverIdentifier.setValue("id");
+
         FeatureTypeMapping featureTypeMapping = FeatureTypeMapping.create("gml:AbstractFeature", new QName("http://www.opengis.net/gml/3.2", "AbstractFeatureType", "gml"), namespaces);
         featureTypeMapping.addTable(city);
         featureTypeMapping.addTable(river);
         featureTypeMapping.addValue(cityId);
         featureTypeMapping.addValue(riverId);
+        featureTypeMapping.addValue(riverIdentifier);
 
         return featureTypeMapping;
     }
@@ -316,8 +323,14 @@ public class XtraServerMappingTest {
         riverId.setTarget("@gml:id");
         riverId.setValue("id");
 
+        MappingValue riverIdentifier = MappingValue.create(namespaces);
+        riverIdentifier.setTable(river);
+        riverIdentifier.setTarget("gml:identifier");
+        riverIdentifier.setValue("id");
+
         riverMapping.addValue(riverName);
         riverMapping.addValue(riverId);
+        riverMapping.addValue(riverIdentifier);
 
         return riverMapping;
     }

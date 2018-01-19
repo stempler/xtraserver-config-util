@@ -18,6 +18,7 @@
 			<!--River-->
 			<Table oid_col="id" table_name="river" target=""/>
 			<Table table_name="river" target="@gml:id" value="id"/>
+			<Table table_name="river" target="gml:identifier" value="id"/>
 		</PGISFeatureTypeImpl>
 	</FeatureType>
 

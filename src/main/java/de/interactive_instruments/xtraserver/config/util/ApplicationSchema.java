@@ -242,6 +242,8 @@ public class ApplicationSchema {
                         }
                     }
                 }
+            } else if (type.getName().endsWith("AbstractGMLType") && propertyName.getLocalPart().equals("identifier") &&propertyName.getNamespaceURI().equals(type.getQName().getNamespaceURI())) {
+                return true;
             }
 
             // check if property is contained in the attributes of the type
