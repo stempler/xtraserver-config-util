@@ -58,7 +58,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
         if (featureTypeMappingOptional.isPresent() && flattenInheritance) {
             List<String> parents = applicationSchema.getAllParents(featureTypeMappingOptional.get().getName());
-            List<FeatureTypeMapping> parentMappings = parents.stream().filter(this::hasType).map(this::getTypeMapping).collect(Collectors.toList());
+            List<FeatureTypeMapping> parentMappings = parents.stream().filter(this::hasType).map(this::getTypeMapping).map(Optional::get).collect(Collectors.toList());
             featureTypeMappingOptional = Optional.of(new FeatureTypeMappingImpl(featureTypeMappingOptional.get(), parentMappings, applicationSchema.getNamespaces()));
         }
 
@@ -72,22 +72,30 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     @Override
     public boolean hasType(String type) {
-        return hasFeatureType(type) || getTypeMappingOptional(additionalMappings, type).isPresent();
+        return hasFeatureType(type) || hasAbstractType(type);
     }
 
-    //TODO: return Optional
+    private boolean hasAbstractType(String type) {
+        return getTypeMappingOptional(additionalMappings, type).isPresent();
+    }
+
     @Override
-    public FeatureTypeMapping getFeatureTypeMapping(String featureType, boolean flattenInheritance) {
-        return getTypeMappingOptional(featureTypeMappings, featureType, flattenInheritance).orElse(null);
+    public Optional<FeatureTypeMapping> getFeatureTypeMapping(String featureType, boolean flattenInheritance) {
+        return getTypeMappingOptional(featureTypeMappings, featureType, flattenInheritance);
     }
 
-    private FeatureTypeMapping getTypeMapping(String type) {
+    private Optional<FeatureTypeMapping> getTypeMapping(String type) {
         return getTypeMapping(type, false);
     }
 
-    private FeatureTypeMapping getTypeMapping(String type, boolean flattenInheritance) {
-        return getTypeMappingOptional(featureTypeMappings, type, flattenInheritance)
-                .orElse(getTypeMappingOptional(additionalMappings, type, flattenInheritance).orElse(null));
+    private Optional<FeatureTypeMapping> getTypeMapping(String type, boolean flattenInheritance) {
+        Optional<FeatureTypeMapping> optionalFeatureTypeMapping = getTypeMappingOptional(featureTypeMappings, type, flattenInheritance);
+
+        if (!optionalFeatureTypeMapping.isPresent()) {
+            optionalFeatureTypeMapping = getTypeMappingOptional(additionalMappings, type, flattenInheritance);
+        }
+
+        return optionalFeatureTypeMapping;
     }
 
     @Override
@@ -116,6 +124,10 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     @Override
     public void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping, boolean fanOutInheritance) {
+        if (hasFeatureType(featureTypeMapping.getName())) {
+            throw new IllegalArgumentException("A mapping for FeatureType '" + featureTypeMapping.getName() + "' does already exist");
+        }
+
         if (fanOutInheritance) {
             //List<XmlSchemaComplexType> types = applicationSchema.getAllTypes(featureTypeMapping.getQName());
             List<XmlSchemaElement> types = applicationSchema.getAllElements(featureTypeMapping.getQName());
@@ -131,7 +143,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                 //typeName = typeName.replace("AbstractGMLType", "AbstractFeatureType");
                 String typeName = applicationSchema.getNamespaces().getPrefixedName(element.getQName());
                 typeName = typeName.replace("AbstractGML", "AbstractFeature");
-                FeatureTypeMapping featureTypeMapping1 = getTypeMappingOptional(featureTypeMappings, typeName).orElse(new FeatureTypeMappingImpl(typeName, type.getQName(), applicationSchema.getNamespaces()));
+                FeatureTypeMapping featureTypeMapping1 = getTypeMappingOptional(element.isAbstract() ? additionalMappings : featureTypeMappings, typeName).orElse(new FeatureTypeMappingImpl(typeName, type.getQName(), applicationSchema.getNamespaces()));
 
                 for (MappingTable mappingTable : featureTypeMapping.getTables()) {
                     if (mappingTable.getTarget() != null && !mappingTable.getTarget().isEmpty()) {
@@ -139,6 +151,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                         if (property != null && applicationSchema.hasProperty(type, property)) {
                             System.out.println("Property:" + mappingTable.getTarget() + " || " + type.getName());
                             featureTypeMapping1.addTable(mappingTable);
+                            mappingTable.getValues().forEach(featureTypeMapping1::addValue);
                         }
                     } else {
                         MappingTable mappingTable1 = new MappingTableImpl();
@@ -150,8 +163,9 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                             if (mappingValue.getTarget() != null && !mappingValue.getTarget().isEmpty()) {
                                 QName property = applicationSchema.getNamespaces().getQualifiedName(mappingValue.getTarget().split("/")[0]);
                                 if (property != null && applicationSchema.hasProperty(type, property)) {
-                                    System.out.println("Property:" + mappingValue.getTarget() + " || " + type.getName());
+                                    System.out.println("Property2:" + mappingValue.getTarget() + " || " + type.getName());
                                     mappingTable1.getValues().add(mappingValue);
+                                    featureTypeMapping1.addValue(mappingValue);
                                 }
                             }
                         }
@@ -166,8 +180,12 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                         }
                     }
                 }
-
-                if (!hasFeatureType(typeName)) {
+                if (element.isAbstract()) {
+                    if (!hasAbstractType(typeName)) {
+                        additionalMappings.add(featureTypeMapping1);
+                    }
+                }
+                else if (!hasFeatureType(typeName)) {
                     featureTypeMappings.add(featureTypeMapping1);
                 }
             }
@@ -178,7 +196,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
     }
 
     @Override
-    public void writeToStream(OutputStream outputStream) throws IOException, JAXBException, SAXException {
+    public void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException {
         JaxbReaderWriter.writeToStream(outputStream, this);
     }
 
@@ -188,7 +206,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
         System.out.println("FeatureTypes:" + getTypeList(true));
         for (String ft : getTypeList(true)) {
             if (hasType(ft) && (ft.endsWith("adv:AX_Leitung"))) {
-                FeatureTypeMapping ftm = getTypeMapping(ft, true);
+                FeatureTypeMapping ftm = getTypeMapping(ft, true).get();
                 String name = ftm.getName();
                 String name2 = name;
                 if (applicationSchema.isAbstract(name))

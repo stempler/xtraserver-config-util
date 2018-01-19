@@ -30,21 +30,6 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
         this.target = "";
     }
 
-    MappingTableImpl(MappingsSequenceType.Table table) {
-        this.name = table.getTable_Name();
-        if (this.name.contains("[")) {
-            System.out.println("PREDICATE " + name);
-            this.name = name.substring(0, name.indexOf("["));
-        }
-        this.oidCol = table.getOid_Col();
-        if (this.oidCol.contains(":=SEQUENCE")) {
-            this.oidCol = oidCol.substring(0, oidCol.indexOf(":=SEQUENCE"));
-        }
-        this.target = table.getTarget();
-        this.joinPaths = new ArrayList<>();
-        this.values = new ArrayList<>();
-    }
-
     MappingTableImpl(MappingTable mappingTable, String target) {
         this.name = mappingTable.getName();
         this.oidCol = mappingTable.getOidCol();

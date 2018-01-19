@@ -22,18 +22,6 @@
 	</FeatureType>
 
 	<FeatureType>
-		<Name>ci:NamedGeoObject</Name>
-		<PGISFeatureTypeImpl>
-			<!--City-->
-			<Table table_name="city" oid_col="id" target=""/>
-			<Table table_name="city" value="name" target="ci:name"/>
-			<!--River-->
-			<Table table_name="river" oid_col="id" target=""/>
-			<Table table_name="river" value="name" target="ci:name"/>
-		</PGISFeatureTypeImpl>
-	</FeatureType>
-
-	<FeatureType>
 		<Name>ci:City</Name>
 		<PGISFeatureTypeImpl>
 			<!-- Main table of feature type City -->
@@ -81,5 +69,17 @@
 			<Table table_name="river" value="length" target="ci:length"/>
 		</PGISFeatureTypeImpl>
 	</FeatureType>
+
+	<AdditionalMappings>
+		<RootElementName>ci:NamedGeoObject</RootElementName>
+		<Mappings>
+			<!--City-->
+			<Table table_name="city" oid_col="id" target=""/>
+			<Table table_name="city" value="name" target="ci:name"/>
+			<!--River-->
+			<Table table_name="river" oid_col="id" target=""/>
+			<Table table_name="river" value="name" target="ci:name"/>
+		</Mappings>
+	</AdditionalMappings>
 
 </FeatureTypes>

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * A collection of FeatureType mappings
@@ -65,7 +66,7 @@ public interface XtraServerMapping {
      * @param flattenInheritance If true mappings from supertypes will be merged down
      * @return
      */
-    FeatureTypeMapping getFeatureTypeMapping(String featureType, boolean flattenInheritance);
+    Optional<FeatureTypeMapping> getFeatureTypeMapping(String featureType, boolean flattenInheritance);
 
     /**
      * Get the list of non-abstract FeatureTypes
@@ -96,5 +97,5 @@ public interface XtraServerMapping {
      *
      * @param outputStream
      */
-    void writeToStream(OutputStream outputStream) throws IOException, JAXBException, SAXException;
+    void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException;
 }

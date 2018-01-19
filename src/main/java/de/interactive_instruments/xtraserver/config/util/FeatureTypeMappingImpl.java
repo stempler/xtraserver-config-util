@@ -33,19 +33,6 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         this.namespaces = namespaces;
     }
 
-    FeatureTypeMappingImpl(MappingsSequenceType mappings, String name, QName qualifiedTypeName, Namespaces namespaces) {
-        this.name = name;
-        this.qualifiedTypeName = qualifiedTypeName;
-        this.namespaces = namespaces;
-
-        this.tables = new ArrayList<>();
-        //this.joins = new ArrayList<>();
-        /*this.tables =*/ extractTables(mappings);
-        this.joins = extractJoins(mappings);
-        this.values = extractValues(mappings);
-        this.associationTargets = extractAssociationTargets(mappings);
-    }
-
     FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, Namespaces namespaces) {
         this.name = mainMapping.getName();
         this.qualifiedTypeName = mainMapping.getQName();
@@ -181,6 +168,13 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
 
     @Override
     public void addTable(MappingTable mappingTable) {
+        if (mappingTable.getName() == null || mappingTable.getName().isEmpty()) {
+            throw new IllegalArgumentException("Table has no name");
+        }
+        if (mappingTable.getOidCol() == null || mappingTable.getOidCol().isEmpty()) {
+            throw new IllegalArgumentException("Table has no oidCol");
+        }
+
         if (tables.contains(mappingTable)) {
             tables.remove(mappingTable);
         }
@@ -190,131 +184,62 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
 
     @Override
     public void addJoin(MappingJoin mappingJoin) {
+        if (mappingJoin.getJoinConditions().size() == 0) {
+            throw new IllegalArgumentException("Join has no conditions");
+        }
+
+        final String targetTableName = mappingJoin.getTargetTable();
+        final MappingTable targetTable = getTable(targetTableName);
+
+        if (targetTable == null) {
+            throw new IllegalArgumentException("Join target table '" + targetTableName + "' does not exist");
+        }
+        if (getTable(mappingJoin.getSourceTable()) == null) {
+            throw new IllegalArgumentException("Join source table '" + targetTableName + "' does not exist");
+        }
+
+        mappingJoin.setTarget(targetTable.getTarget());
+        targetTable.addJoinPath(mappingJoin);
         joins.add(mappingJoin);
     }
 
     @Override
     public void addValue(MappingValue mappingValue) {
+        if (mappingValue.getTable() == null || mappingValue.getTable().isEmpty()) {
+            throw new IllegalArgumentException("Value mapping has no table name");
+        }
+        if (mappingValue.getValue() == null) {
+            throw new IllegalArgumentException("Value mapping has no value");
+        }
+        if (mappingValue.getTarget() == null || mappingValue.getTarget().isEmpty()) {
+            throw new IllegalArgumentException("Value mapping has no target");
+        }
+
         values.add(mappingValue);
     }
 
     @Override
     public void addAssociationTarget(AssociationTarget associationTarget) {
+        if (associationTarget.getObjectRef() == null || associationTarget.getObjectRef().isEmpty()) {
+            throw new IllegalArgumentException("Association target has no object reference");
+        }
+        if (associationTarget.getTarget() == null || associationTarget.getTarget().isEmpty()) {
+            throw new IllegalArgumentException("Association target has no target");
+        }
+
+        Optional<MappingValue> mappingValue = values.stream()
+                .filter(
+                        value -> value.getTarget().equals(associationTarget.getTarget() + "/@xlink:href")
+                )
+                .findFirst();
+
+        if (!mappingValue.isPresent()) {
+            throw new IllegalArgumentException("No value mapping found for given association target");
+        }
+
+        mappingValue.get().setValue("");
+
         associationTargets.add(associationTarget);
-    }
-
-    private List<MappingTable> extractTables(MappingsSequenceType mappings) {
-        List<MappingTable> mappingTables = new ArrayList<>();
-
-        if (mappings != null) {
-            for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
-                try {
-                    MappingsSequenceType.Table table = (MappingsSequenceType.Table) mapping;
-
-                    if (table.getTable_Name() != null && !table.getTable_Name().isEmpty()) {
-                        if (table.getOid_Col() != null && !table.getOid_Col().isEmpty()) {
-                            //if (table.getValue4() == null || table.getValue4().isEmpty()) {
-                            if (!hasTable(table.getTable_Name())) {
-                                tables.add(new MappingTableImpl(table));
-                            } else {
-                                MappingTable mappingTable = getTable(table.getTable_Name());
-                                String newTarget = Strings.commonPrefix(table.getTarget(), mappingTable.getTarget());
-                                mappingTable.setTarget(newTarget);
-                            }
-                        }
-                    }
-                } catch (ClassCastException e) {
-                    //ignore
-                }
-            }
-        }
-
-        return mappingTables;
-    }
-
-    private List<MappingValue> extractValues(MappingsSequenceType mappings) {
-        List<MappingValue> mappingValues = new ArrayList<>();
-
-        if (mappings != null) {
-            for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
-                try {
-                    MappingsSequenceType.Table table = (MappingsSequenceType.Table) mapping;
-
-                    if (table.getTable_Name() != null && !table.getTable_Name().isEmpty() && hasTable(table.getTable_Name())) {
-                        if (table.getTarget() != null && !table.getTarget().isEmpty() &&  table.getTarget().startsWith(getTable(table.getTable_Name()).getTarget())) {
-                            if ((table.getValue4() != null && !table.getValue4().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) || table.getTarget().endsWith("/@xlink:href")) {
-                                MappingValue mappingValue = new MappingValueImpl(table, namespaces);
-                                if (hasTable(table.getTable_Name())) {
-                                    getTable(table.getTable_Name()).getValues().add(mappingValue);
-                                }
-                                if (!mappingValues.contains(mappingValue)) {
-                                    mappingValues.add(mappingValue);
-                                }
-                            }
-                        }
-                    }
-                } catch (ClassCastException e) {
-                    //ignore
-                }
-            }
-        }
-
-        return mappingValues;
-    }
-
-    private List<MappingJoin> extractJoins(MappingsSequenceType mappings) {
-        List<MappingJoin> mappingJoins = new ArrayList<>();
-        boolean disableMultiJoins = false;
-
-        if (mappings != null) {
-            for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
-                try {
-                    MappingsSequenceType.Join join = (MappingsSequenceType.Join) mapping;
-
-                    if (join.getJoin_Path() != null && !join.getJoin_Path().isEmpty()) {
-                        String table = join.getJoin_Path().split("/")[0];
-                        if (table.contains("[")) {
-                            System.out.println("JOIN PREDICATE " + join.getJoin_Path());
-                            table = table.substring(0, table.indexOf("["));
-                        }
-                        if (hasTable(table) && (!getTable(table).hasTarget() || getTable(table).getTarget().startsWith(join.getTarget()))) {
-                            MappingJoin mappingJoin = new MappingJoinImpl(join);
-                            if (!disableMultiJoins || mappingJoin.getJoinConditions().size() == 1) {
-                                getTable(table).addJoinPath(mappingJoin);
-                                mappingJoins.add(mappingJoin);
-                            }
-                        }
-                    }
-                } catch (ClassCastException e) {
-                    // ignore
-                }
-            }
-        }
-
-        return mappingJoins;
-    }
-
-    private List<AssociationTarget> extractAssociationTargets(MappingsSequenceType mappings) {
-        List<AssociationTarget> associationTargets = new ArrayList<>();
-
-        if (mappings != null) {
-            for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
-                try {
-                    MappingsSequenceType.AssociationTarget associationTarget = (MappingsSequenceType.AssociationTarget) mapping;
-
-                    if (associationTarget.getObject_Ref() != null && !associationTarget.getObject_Ref().isEmpty() && associationTarget.getTarget() != null && !associationTarget.getTarget().isEmpty()) {
-                        AssociationTarget associationTarget1 = new AssociationTargetImpl();
-                        associationTarget1.setObjectRef(associationTarget.getObject_Ref());
-                        associationTarget1.setTarget(associationTarget.getTarget());
-                        associationTargets.add(associationTarget1);
-                    }
-                } catch (ClassCastException e) {
-                    //ignore
-                }
-            }
-        }
-
-        return associationTargets;
     }
 
     private List<MappingTable> extractJoinedTables(FeatureTypeMapping mergedMapping) {

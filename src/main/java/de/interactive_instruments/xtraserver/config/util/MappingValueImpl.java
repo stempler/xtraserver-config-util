@@ -28,28 +28,6 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
         this.namespaces = namespaces;
     }
 
-    MappingValueImpl(MappingsSequenceType.Table table, Namespaces namespaces) {
-        this.table = table.getTable_Name();
-        this.target = table.getTarget();
-        this.value = table.getValue4();
-        this.valueType = table.getValue_Type();
-        this.mappingMode = table.getMapping_Mode();
-        this.dbCodes = table.getDb_Codes();
-        this.dbValues = table.getSchema_Codes();
-        this.namespaces = namespaces;
-
-        if (valueType == null) {
-            if (value != null && (value.contains("$T$") || value.contains("||"))) {
-                this.valueType = "expression";
-            } else {
-                this.valueType = "value";
-            }
-        }
-        if (value == null) {
-            this.value = "";
-        }
-    }
-
     @Override
     public String getTable() {
         return table;

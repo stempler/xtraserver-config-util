@@ -56,7 +56,7 @@ public class XtraServerMappingTest {
 
         XtraServerMapping expected = XtraServerMapping.create(applicationSchema);
         for (String featureType: xtraServerMapping.getFeatureTypeList(false)) {
-            expected.addFeatureTypeMapping(xtraServerMapping.getFeatureTypeMapping(featureType, true));
+            expected.addFeatureTypeMapping(xtraServerMapping.getFeatureTypeMapping(featureType, true).get());
         }
 
         //assertThat(test, is(equalTo(control)));
@@ -69,7 +69,7 @@ public class XtraServerMappingTest {
         XtraServerMapping xtraServerMapping = buildCitiesMapping();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        xtraServerMapping.writeToStream(outputStream);
+        xtraServerMapping.writeToStream(outputStream, false);
 
         System.out.println(outputStream.toString());
 
@@ -85,7 +85,7 @@ public class XtraServerMappingTest {
         XtraServerMapping xtraServerMapping = buildCitiesMappingFlat();
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        xtraServerMapping.writeToStream(outputStream);
+        xtraServerMapping.writeToStream(outputStream, false);
 
         System.out.println(outputStream.toString());
 
@@ -241,16 +241,9 @@ public class XtraServerMappingTest {
         alternativeName.setOidCol("id");
         alternativeName.setTarget("ci:alternativeName");
 
-        MappingJoin.Condition city2alternativeName = MappingJoin.Condition.create();
-        city2alternativeName.setSourceTable(city);
-        city2alternativeName.setSourceField("id");
-        city2alternativeName.setTargetTable(alternativeName);
-        city2alternativeName.setTargetField("cid");
-
         MappingJoin city2alternativeNameJoin = MappingJoin.create();
-        city2alternativeNameJoin.setTarget("ci:alternativeName");
-        city2alternativeNameJoin.getJoinConditions().add(city2alternativeName);
-        alternativeName.addJoinPath(city2alternativeNameJoin);
+        MappingJoin.Condition city2alternativeName = MappingJoin.Condition.create(city, "id", alternativeName, "cid");
+        city2alternativeNameJoin.addCondition(city2alternativeName);
 
         MappingValue alternativeNameName = MappingValue.create(namespaces);
         alternativeNameName.setTable(alternativeName);
@@ -270,25 +263,13 @@ public class XtraServerMappingTest {
         MappingTable cityRiver = MappingTable.create();
         cityRiver.setName("city_river");
         cityRiver.setOidCol("id");
-        cityRiver.setTarget("ci:passingRiver");
-
-        MappingJoin.Condition city2cityRiver = MappingJoin.Condition.create();
-        city2cityRiver.setSourceTable(city);
-        city2cityRiver.setSourceField("id");
-        city2cityRiver.setTargetTable(cityRiver);
-        city2cityRiver.setTargetField("cid");
-
-        MappingJoin.Condition cityRiver2River = MappingJoin.Condition.create();
-        cityRiver2River.setSourceTable(cityRiver);
-        cityRiver2River.setSourceField("rid");
-        cityRiver2River.setTargetTable(river);
-        cityRiver2River.setTargetField("id");
+        //cityRiver.setTarget("ci:passingRiver");
 
         MappingJoin city2RiverJoin = MappingJoin.create();
-        city2RiverJoin.setTarget("ci:passingRiver");
-        city2RiverJoin.getJoinConditions().add(city2cityRiver);
-        city2RiverJoin.getJoinConditions().add(cityRiver2River);
-        river.addJoinPath(city2RiverJoin);
+        MappingJoin.Condition city2cityRiver = MappingJoin.Condition.create(city, "id", cityRiver, "cid");
+        MappingJoin.Condition cityRiver2River = MappingJoin.Condition.create(cityRiver, "rid", river, "id");
+        city2RiverJoin.addCondition(city2cityRiver);
+        city2RiverJoin.addCondition(cityRiver2River);
 
         MappingValue riverHref = MappingValue.create(namespaces);
         riverHref.setTable(river);
@@ -307,12 +288,13 @@ public class XtraServerMappingTest {
         featureTypeMapping.addValue(cityFunctionNil);
         featureTypeMapping.addValue(cityArea);
         featureTypeMapping.addValue(cityBeginLifespan);
-        featureTypeMapping.addJoin(city2alternativeNameJoin);
         featureTypeMapping.addTable(alternativeName);
+        featureTypeMapping.addJoin(city2alternativeNameJoin);
         featureTypeMapping.addValue(alternativeNameName);
         featureTypeMapping.addValue(alternativeNameLanguage);
-        featureTypeMapping.addJoin(city2RiverJoin);
         featureTypeMapping.addTable(river);
+        featureTypeMapping.addTable(cityRiver);
+        featureTypeMapping.addJoin(city2RiverJoin);
         featureTypeMapping.addValue(riverHref);
         featureTypeMapping.addAssociationTarget(riverType);
 

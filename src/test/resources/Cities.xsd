@@ -6,9 +6,13 @@
 		xmlns:ogc="http://www.opengis.net/ogc"
 		xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 		xmlns:gml="http://www.opengis.net/gml/3.2"
+		xmlns:base="http://inspire.ec.europa.eu/schemas/base/3.3"
+		xmlns:gn="http://inspire.ec.europa.eu/schemas/gn/4.0"
 		elementFormDefault="qualified" version="2.0">
 
 	<import namespace="http://www.opengis.net/gml/3.2" schemaLocation="http://schemas.opengis.net/gml/3.2.1/gml.xsd"/>
+	<import namespace="http://inspire.ec.europa.eu/schemas/base/3.3" schemaLocation="http://inspire.ec.europa.eu/schemas/base/3.3/BaseTypes.xsd"/>
+	<import namespace="http://inspire.ec.europa.eu/schemas/gn/4.0" schemaLocation="http://inspire.ec.europa.eu/schemas/gn/4.0/GeographicalNames.xsd"/>
 
 	<!-- (c) 2012-2014 by interactive instruments GmbH -->
 
@@ -142,9 +146,30 @@
 							<documentation>The location of the river given as multi-curve geometry</documentation>
 						</annotation>
 					</element>
-					<element name="length" type="integer">
+					<element name="length">
 						<annotation>
 							<documentation>The length of this river in km</documentation>
+						</annotation>
+						<complexType>
+							<simpleContent>
+								<extension base="integer">
+									<attribute name="uom" type="string"/>
+								</extension>
+							</simpleContent>
+						</complexType>
+					</element>
+					<element name="inspireId" type="base:IdentifierPropertyType">
+						<annotation>
+							<documentation>
+							-- Name -- inspire id -- Definition -- External object identifier of the spatial object. -- Description -- NOTE An external object identifier is a unique object identifier published by the responsible body, which may be used by external applications to reference the spatial object. The identifier is an identifier of the spatial object, not an identifier of the real-world phenomenon.
+							</documentation>
+						</annotation>
+					</element>
+					<element name="inspireName" type="gn:GeographicalNamePropertyType">
+						<annotation>
+							<documentation>
+							-- Name -- name -- Definition -- Official national geographical name of the administrative unit, given in several languages where required.
+							</documentation>
 						</annotation>
 					</element>
 				</sequence>

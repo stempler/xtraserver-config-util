@@ -1,5 +1,6 @@
 package de.interactive_instruments.xtraserver.config.util;
 
+import com.google.common.collect.ImmutableList;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
 import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
@@ -13,55 +14,15 @@ import java.util.Objects;
  */
 public class MappingJoinImpl implements MappingJoin {
     private String target;
-    private final String axis;
+    private String axis;
     private final String path;
     private final List<Condition> joinConditions;
-    private boolean suppressJoin;
+    boolean suppressJoin;
 
     public MappingJoinImpl() {
         this.axis = "parent";
         this.path = null;
         this.joinConditions = new ArrayList<>();
-    }
-
-    MappingJoinImpl(MappingsSequenceType.Join join) {
-        this.target = join.getTarget();
-        this.axis = join.getAxis();
-        this.path = join.getJoin_Path();
-        this.joinConditions = parseJoinPath(path);
-    }
-
-    private List<Condition> parseJoinPath(String path) {
-        List<Condition> pathTables = new ArrayList<>();
-        String pathElems[] = path.split("::|/");
-
-        int i = pathElems.length-1;
-        while (i > 0) {
-            String props[] = pathElems[i-1].split(":");
-
-            String sourceTable = pathElems[i];
-            if (sourceTable.contains("[")) {
-                if (sourceTable.substring(sourceTable.indexOf("[")).equals("[1=2]")) {
-                    this.suppressJoin = true;
-                }
-                sourceTable = sourceTable.substring(0, sourceTable.indexOf("["));
-            }
-            String sourceField = props[1].substring(0, props[1].length()-1);
-            String targetTable = pathElems[i-2];
-            if (targetTable.contains("[")) {
-                if (targetTable.substring(targetTable.indexOf("[")).equals("[1=2]")) {
-                    this.suppressJoin = true;
-                }
-                targetTable = targetTable.substring(0, targetTable.indexOf("["));
-            }
-            String targetField = props[0].substring(4);
-
-            pathTables.add(new ConditionImpl(sourceTable, sourceField, targetTable, targetField));
-
-            i = i - 2;
-        }
-
-        return pathTables;
     }
 
     private String buildJoinPath(List<Condition> conditions) {
@@ -126,7 +87,28 @@ public class MappingJoinImpl implements MappingJoin {
 
     @Override
     public List<Condition> getJoinConditions() {
-        return joinConditions;
+        return ImmutableList.copyOf(joinConditions);
+    }
+
+    @Override
+    public void addCondition(Condition condition) {
+        if (condition.getSourceTable() == null || condition.getSourceTable().isEmpty()) {
+            throw new IllegalArgumentException("Join condition is incomplete: source table is missing");
+        }
+        if (condition.getSourceField() == null || condition.getSourceTable().isEmpty()) {
+            throw new IllegalArgumentException("Join condition is incomplete: source field is missing");
+        }
+        if (condition.getTargetTable() == null || condition.getSourceTable().isEmpty()) {
+            throw new IllegalArgumentException("Join condition is incomplete: target table is missing");
+        }
+        if (condition.getTargetField() == null || condition.getSourceTable().isEmpty()) {
+            throw new IllegalArgumentException("Join condition is incomplete: target field is missing");
+        }
+        if (joinConditions.size() > 0 && !condition.getSourceTable().equals(joinConditions.get(joinConditions.size()-1).getTargetTable())) {
+            throw new IllegalArgumentException("Join condition does not match previously added conditions");
+        }
+
+        joinConditions.add(condition);
     }
 
     @Override
@@ -164,16 +146,12 @@ public class MappingJoinImpl implements MappingJoin {
     }
 
     public static class ConditionImpl implements Condition {
-        private String sourceTable;
-        private String sourceField;
-        private String targetTable;
-        private String targetField;
+        private final MappingTable sourceTable;
+        private final String sourceField;
+        private final MappingTable targetTable;
+        private final String targetField;
 
-        public ConditionImpl() {
-
-        }
-
-        ConditionImpl(String sourceTable, String sourceField, String targetTable, String targetField) {
+        public ConditionImpl(MappingTable sourceTable, String sourceField, MappingTable targetTable, String targetField) {
             this.sourceTable = sourceTable;
             this.sourceField = sourceField;
             this.targetTable = targetTable;
@@ -182,7 +160,7 @@ public class MappingJoinImpl implements MappingJoin {
 
         @Override
         public String getSourceTable() {
-            return sourceTable;
+            return sourceTable.getName();
         }
 
         @Override
@@ -192,7 +170,7 @@ public class MappingJoinImpl implements MappingJoin {
 
         @Override
         public String getTargetTable() {
-            return targetTable;
+            return targetTable.getName();
         }
 
         @Override
@@ -201,28 +179,8 @@ public class MappingJoinImpl implements MappingJoin {
         }
 
         @Override
-        public void setSourceTable(MappingTable sourceTable) {
-            this.sourceTable = sourceTable.getName();
-        }
-
-        @Override
-        public void setSourceField(String sourceField) {
-            this.sourceField = sourceField;
-        }
-
-        @Override
-        public void setTargetTable(MappingTable targetTable) {
-            this.targetTable = targetTable.getName();
-        }
-
-        @Override
-        public void setTargetField(String targetField) {
-            this.targetField = targetField;
-        }
-
-        @Override
         public String toString() {
-            return sourceTable + "[" + sourceField + "]=" + targetTable + "[" + targetField + "]";
+            return sourceTable.getName() + "[" + sourceField + "]=" + targetTable.getName() + "[" + targetField + "]";
         }
 
         @Override

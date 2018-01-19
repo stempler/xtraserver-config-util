@@ -31,6 +31,8 @@ public interface MappingJoin {
 
     List<Condition> getJoinConditions();
 
+    void addCondition(Condition condition);
+
     String getSourceTable();
 
     String getTargetTable();
@@ -44,8 +46,8 @@ public interface MappingJoin {
          *
          * @return
          */
-        static Condition create() {
-            return new MappingJoinImpl.ConditionImpl();
+        static Condition create(MappingTable sourceTable, String sourceField, MappingTable targetTable, String targetField) {
+            return new MappingJoinImpl.ConditionImpl(sourceTable, sourceField, targetTable, targetField);
         }
 
         String getSourceTable();
@@ -55,13 +57,5 @@ public interface MappingJoin {
         String getTargetTable();
 
         String getTargetField();
-
-        void setSourceTable(MappingTable sourceTable);
-
-        void setSourceField(String sourceField);
-
-        void setTargetTable(MappingTable targetTable);
-
-        void setTargetField(String targetField);
     }
 }
