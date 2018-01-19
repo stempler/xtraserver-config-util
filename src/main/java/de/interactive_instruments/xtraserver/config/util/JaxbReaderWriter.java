@@ -1,5 +1,6 @@
 package de.interactive_instruments.xtraserver.config.util;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import de.interactive_instruments.xtraserver.config.schema.*;
@@ -282,6 +283,7 @@ public class JaxbReaderWriter {
                     SQLFeatureTypeImplType sqlFeatureTypeImplType = objectFactory.createSQLFeatureTypeImplType();
 
                     createMappings(sqlFeatureTypeImplType, featureTypeMapping, objectFactory);
+                    createXtraServerParameters(sqlFeatureTypeImplType, featureTypeMapping);
 
                     FeatureType featureType = objectFactory.createFeatureType();
                     featureType.setName(featureTypeMapping.getName());
@@ -366,6 +368,14 @@ public class JaxbReaderWriter {
                                 return table;
                             }).collect(Collectors.toList())
                     );*/
+    }
+
+    private static void createXtraServerParameters(SQLFeatureTypeImplType sqlFeatureTypeImplType, FeatureTypeMapping featureTypeMapping) {
+        sqlFeatureTypeImplType.setLogging("false");
+        sqlFeatureTypeImplType.setUseTempTable(false);
+        if (!featureTypeMapping.getName().endsWith(":AbstractFeature")) {
+            sqlFeatureTypeImplType.setTempTableName("_xsv_tmp_" + Joiner.on('_').join(featureTypeMapping.getPrimaryTableNames()));
+        }
     }
 
     private static FeatureTypes unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {

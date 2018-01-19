@@ -11,7 +11,7 @@
 
 	<FeatureType>
 		<Name>gml:AbstractFeature</Name>
-		<PGISFeatureTypeImpl>
+		<PGISFeatureTypeImpl logging="false" useTempTable="false">
 			<!--City-->
 			<Table oid_col="id" table_name="city" target=""/>
 			<Table table_name="city" target="@gml:id" value="id"/>
@@ -24,7 +24,7 @@
 
 	<FeatureType>
 		<Name>ci:City</Name>
-		<PGISFeatureTypeImpl>
+		<PGISFeatureTypeImpl logging="false" useTempTable="false" tempTableName="_xsv_tmp_city">
 			<!-- Main table of feature type City -->
 			<Table table_name="city" oid_col="id" target=""/>
 
@@ -61,7 +61,7 @@
 
 	<FeatureType>
 		<Name>ci:River</Name>
-		<PGISFeatureTypeImpl>
+		<PGISFeatureTypeImpl logging="false" useTempTable="false" tempTableName="_xsv_tmp_river">
 			<!-- Main table of feature type River -->
 			<Table table_name="river" oid_col="id" target=""/>
 			<!-- location -->

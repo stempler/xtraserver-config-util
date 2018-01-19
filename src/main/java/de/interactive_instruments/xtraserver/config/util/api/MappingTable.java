@@ -34,7 +34,6 @@ public interface MappingTable {
 
     void setTarget(String target);
 
-    // TODO: check if table is join target
     boolean isPrimary();
 
     void addJoinPath(MappingJoin joinPath);

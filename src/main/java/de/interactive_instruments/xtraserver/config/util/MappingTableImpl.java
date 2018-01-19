@@ -84,10 +84,9 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     @Override
     public boolean hasTarget() {return target != null && !target.isEmpty();}
 
-    // TODO: check if table is join target
     @Override
     public boolean isPrimary() {
-        return !hasTarget();
+        return !hasTarget() && !hasJoinPath() && !values.isEmpty();
     }
 
     @Override
