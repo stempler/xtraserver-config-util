@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- 
+	List of stored queries with their parameters to be cached. 
+	
+	!!! This is a default (sample) configuration !!!
+	For custom stored queries or changes to this configuration please use another file (cas.customStoredQueriesToCache.filename).
+-->
+
+<StoredQueryResponseCachingList xmlns="http://www.interactive-instruments.de/namespaces/XtraServer">
+
+<!--
+	Hinweise:
+	Caching der Stored-Query erfolgt nur, wenn im GetFeature-Request folgende Parameter mit einem der angegebenen Werte verwendet werden. 
+	
+	Um anzugeben, dass im Request ein Parameter fehlen oder dessen Wert leer sein soll (damit die SQ beim Caching berücksichtigt wird), 
+	wird für diesen Parameter ein leeres Value-Element definiert ("<Value/>").
+	
+	Parameter, die in der folgenden Auflistung gar nicht vorkommen (z.B. resolveDepth), werden bei der Entscheidung, ob der Cache benutzt wird, 
+	komplett ignoriert. D.h. es spielt keine Rolle, ob sie im Request angegeben werden oder nicht. Dies bedeutet umgekehrt, dass alle Parameter, 
+	die sich auf das Ergebnis auswirken können, unbedingt hier berücksichtigt werden müssen, andernfalls kann es dazu kommen, 
+	dass ein Response nicht den erwarteten Inhalt aufweist. 
+	
+	Beispiel: Wenn der Parameter "count" unter <Parameters> nicht definiert wird, wird er ganz ignoriert; eine Anfrage mit count=1 würde 
+	dieselbe Datei aus dem Cache identifizieren wie für eine Anfrage ohne oder mit einer anderen count-Beschränkung. 
+		
+	Verhalten bei Parametern mit Standardwerten (Default-Werten): 
+	Auch Parameter mit Default-Werten (z.B. outputFormat) sollten in <Parameters> mit ihren Default-Werten genannt werden,
+	damit XtraServer bei initialer Abfrage (also Erzeugung des Responses im Cache) diesen Parameterwert verwendet. 
+	(Dies analog zu allen anderen Parametern nur, wenn der Response von diesem Parameterwert abhängt.)
+	Für den Request bedeutet es, dass ein Parameter den hier festgelegten Wert haben muss oder ganz fehlen darf, 
+	da ja dann automatisch der Default-Wert verwendet wird.
+	
+	Mehrere Schreibweisen für Parameterwerte:
+	Für manche Parameterwerte gibt es mehrere mögliche Schreibweisen (Synonyme), die aber letztlich dieselbe Bedeutung haben.
+	Beispiel: CRS kann einmal mit einem Präfix (urn, uri) oder ohne Präfix "EPSG:..." notiert werden.  
+	Da XtraServer die Werte erst in einem späteren Verarbeitungsschritt semantisch auswertet, werden bei Behandlung des Caches unterschiedliche 
+	Schreibweisen von Parameterwerten als völlig unterschiedliche Werte interpretiert. Somit würde pro Schreibweise ein weitere Response-Datei 
+	im Cache entstehen. Um das zu vermeiden kann das Attribut "cacheAs" in <Value> verwendet werden. Es legt fest, wie ein Parameterwert im 
+	Dateinamen der Response-Datei im Cache kodiert wird. Es können mehrere Werte dieselbe Abkürzung erhalten. 
+	Auf dieser Weise wird außerdem verhindert, dass die Dateinamen zu lang werden. 
+	Die Id der Stored-Query kann für die Speicherung des Responses im Cache mit "cacheStoredQueryIdAs" abgekürzt werden.
+	
+-->
+
+	<StoredQuery 
+		wfsId="wfs"
+		storedQueryId="{if {$inspire.dls.GetSpatialDataSet}}{$inspire.dls.GetSpatialDataSet}{else}http://inspire.ec.europa.eu/operation/download/GetSpatialDataSet{fi}" 
+		cacheStoredQueryIdAs="GetDataSetByCRS" 
+		{if {$cas.expires.GetDataSetByCRS}} expires="{$cas.expires.GetDataSetByCRS}" {fi}
+		>
+		
+		<Parameters>
+
+			<!-- ======================================== -->
+			<!-- Parameter der Stored-Query -->
+			<!-- ======================================== -->
+			<Parameter name="CRS">
+				<Value cacheAs="{$nativeEpsgCode}">EPSG:{$nativeEpsgCode}</Value>
+				<Value cacheAs="{$nativeEpsgCode}">urn:ogc:def:crs:EPSG::{$nativeEpsgCode}</Value>
+				<Value cacheAs="4258">EPSG:4258</Value>
+				<Value cacheAs="4258">urn:ogc:def:crs:EPSG::4258</Value>
+			</Parameter>
+		
+			<!-- ======================================== -->
+			<!-- Nichtoptionale Parameter -->
+			<!-- ======================================== -->
+			<Parameter name="version">
+				<Value>2.0</Value>
+				<Value cacheAs="2.0">2.0.0</Value>
+			</Parameter>
+			
+			<!-- ======================================== -->
+			<!-- Optionale Parameter *ohne* Default-Werte -->
+			<!-- ======================================== -->
+			<Parameter name="count">
+				<!-- Requests ohne count-Begrenzung sollen gecacht werden: -->
+				<Value/>
+				
+				<!-- Zum Testen: Request mit count=100000 sollen gecacht werden: -->
+				<!--Value>100000</Value-->
+			</Parameter>
+			
+			<!-- ======================================== -->
+			<!-- Optionale Parameter *mit* Default-Werten -->
+			<!-- ======================================== -->
+			<!-- Für folgende Parameter soll die SQ nur bei Default-Werten gecacht werden.
+				D.h. dass ein Parameter im Request den hier definierten Wert haben muss 
+				oder der Parameter ganz fehlen darf, da ja dann automatisch der Default-Wert 
+				verwendet wird.
+			-->
+			<Parameter name="resultType">
+				<Value cacheAs="r">results</Value>
+			</Parameter>
+			
+			<Parameter name="outputFormat">
+				<Value cacheAs="gml32">application/gml+xml; version=3.2</Value>
+				<Value cacheAs="gml32">text/xml; subtype=gml/3.2.1</Value>
+			</Parameter>
+						
+			<Parameter name="resolve">
+				<Value cacheAs="n">none</Value>
+			</Parameter>
+			
+			
+			<!-- Restliche, hier nicht angegebene Request-Parameter, werden bei der Entscheidung,
+				ob ein SQ gecacht werden soll (oder aus dem Cache entnommen wird), nicht berücksichtigt. 
+			-->
+			
+		</Parameters>							
+	</StoredQuery>
+	
+	<!-- Ggf. weitere Stored Queries ... -->
+	<!-- Siehe auch Custom ... -->
+	
+</StoredQueryResponseCachingList>

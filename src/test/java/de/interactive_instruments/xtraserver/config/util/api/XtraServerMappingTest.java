@@ -17,7 +17,12 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.nio.ByteBuffer;
 import java.util.function.Consumer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
 import static org.hamcrest.core.Is.is;
@@ -94,6 +99,51 @@ public class XtraServerMappingTest {
         Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
 
         com.shazam.shazamcrest.MatcherAssert.assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+    }
+
+    @Test
+    public void testExportZip() throws JAXBException, IOException, SAXException {
+
+        XtraServerMapping xtraServerMapping = buildCitiesMapping();
+
+        PipedInputStream inputStream = new PipedInputStream();
+        PipedOutputStream outputStream = new PipedOutputStream(inputStream);
+        ByteArrayOutputStream byteArrayBuffer = new ByteArrayOutputStream();
+
+        new Thread(() -> {
+            try {
+                xtraServerMapping.writeToStream(outputStream, true);
+            } catch (IOException | JAXBException | SAXException e) {
+                //ignore
+            }
+        }).start();
+
+        try(ZipInputStream stream = new ZipInputStream(inputStream)) {
+            ZipEntry entry;
+            while((entry = stream.getNextEntry())!=null)
+            {
+                if (entry.getName().equals("XtraSrvConfig_Mapping.inc.xml")) {
+                    byte[] buffer = new byte[2048];
+
+                    int len;
+                    while ((len = stream.read(buffer)) > 0)
+                    {
+                        byteArrayBuffer.write(buffer, 0, len);
+                    }
+                } else {
+                    stream.closeEntry();
+                }
+            }
+        }
+
+        System.out.println(byteArrayBuffer.toString());
+
+        Source expected = Input.fromURL(Resources.getResource("cities-mapping.xml")).build();
+        Source actual = Input.fromByteArray(byteArrayBuffer.toByteArray()).build();
+
+        com.shazam.shazamcrest.MatcherAssert.assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+
+        // TODO: extract and compare additional files
     }
 
     private XtraServerMapping buildCitiesMapping() throws IOException {

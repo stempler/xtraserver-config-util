@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- 
+	This file is a part of XtraServer * AAA Suite configuration
+	
+	* Default Stored-Queries *
+	
+	!!! This is a default configuration !!!
+	For changes to this configuration please use another file (see property predefinedCustomStoredQueriesFile).
+--><InitialStoredQueries xmlns="http://www.interactive-instruments.de/namespaces/XtraServer" xmlns:adv="http://www.adv-online.de/namespaces/adv/gid/6.0" xmlns:fes="http://www.opengis.net/fes/2.0" xmlns:fg="http://www.interactive-instruments.de/ns/aaa/flurgema" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:wfs="http://www.opengis.net/wfs/2.0" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" wfsVersion="2.0">
+
+	<StoredQueryDefinition id="{if {$inspire.dls.GetSpatialDataSet}}{$inspire.dls.GetSpatialDataSet}{else}http://inspire.ec.europa.eu/operation/download/GetSpatialDataSet{fi}">
+		<wfs:Title xml:lang="de">Erfragen des Datensatzes {$dataset}</wfs:Title>
+		<wfs:Parameter name="CRS" type="xs:string">
+			<wfs:Title xml:lang="de">Koordinatenreferenzsystem des Datensatzes</wfs:Title>
+			<wfs:Abstract xml:lang="de">Zugelassene Werte gemäß Capabilities-Dokument</wfs:Abstract>
+		</wfs:Parameter>
+		<wfs:Parameter name="DataSetIdCode" type="xs:string">
+			<wfs:Title xml:lang="de">Identifikator des Datensatzes</wfs:Title>
+			<wfs:Abstract xml:lang="de">Immer '{$inspire.dls.spatialDataSetIdentifier}', wird im Request ignoriert</wfs:Abstract>
+		</wfs:Parameter>
+		<wfs:Parameter name="DataSetIdNamespace" type="xs:string">
+			<wfs:Title xml:lang="de">Namespace des Identifikators des Datensatzes</wfs:Title>
+			<wfs:Abstract xml:lang="de">Immer '{$inspire.dls.spatialDataSetIdentifier.nameSpace}', wird im Request ignoriert</wfs:Abstract>
+		</wfs:Parameter>
+		<wfs:Parameter name="Language" type="xs:string">
+			<wfs:Title xml:lang="de">Sprache des Datensatzes</wfs:Title>
+			<wfs:Abstract xml:lang="de">Immer 'ger', wird im Request ignoriert</wfs:Abstract>
+		</wfs:Parameter>
+
+		<wfs:QueryExpressionText isPrivate="true" language="urn-x:wfs:StoredQueryLanguage:WFS_QueryExpression" returnFeatureTypes="gml:AbstractFeature">
+		<!-- Hinweis zu returnFeatureTypes: laut WFS 2.0 Spec muss es ein FeatureType aus Capabilities sein. Bei Angabe mehrerer Typen bedeutet es, 
+			dass sie geJOINed sind. Das Attribut kann daher sinnvoll nicht belegt werden. -->    

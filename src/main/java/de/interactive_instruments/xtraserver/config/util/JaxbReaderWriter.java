@@ -2,7 +2,9 @@ package de.interactive_instruments.xtraserver.config.util;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.io.Resources;
 import de.interactive_instruments.xtraserver.config.schema.*;
 import de.interactive_instruments.xtraserver.config.util.api.*;
 import org.xml.sax.SAXException;
@@ -18,6 +20,8 @@ import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -274,7 +278,7 @@ public class JaxbReaderWriter {
         return associationTargets;
     }
 
-    public static void writeToStream(OutputStream outputStream, XtraServerMappingImpl xtraServerMapping) throws IOException, JAXBException, SAXException {
+    public static void writeToStream(OutputStream outputStream, XtraServerMappingImpl xtraServerMapping, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException {
         ObjectFactory objectFactory = new ObjectFactory();
         FeatureTypes featureTypes = objectFactory.createFeatureTypes();
 
@@ -307,7 +311,131 @@ public class JaxbReaderWriter {
                 }).collect(Collectors.toList())
         );
 
-        marshal(outputStream, featureTypes);
+        if (createArchiveWithAdditionalFiles) {
+
+            ZipOutputStream zipStream = new ZipOutputStream(outputStream);
+
+            zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_Mapping.inc.xml"));
+            marshal(zipStream, featureTypes);
+
+            createAdditionalFiles(zipStream, xtraServerMapping);
+
+            zipStream.close();
+
+        } else {
+            marshal(outputStream, featureTypes);
+        }
+    }
+
+    private static void createAdditionalFiles(ZipOutputStream zipStream, XtraServerMapping xtraServerMapping) throws IOException {
+
+        zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_FeatureTypes.inc.xml"));
+        createFeatureTypesFile(zipStream, xtraServerMapping);
+
+        zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_Geoindexes.inc.xml"));
+        createGeoIndexesFile(zipStream, xtraServerMapping);
+
+        zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_GetSpatialDataSetSQ.inc.xml"));
+        Resources.asByteSource(Resources.getResource(JaxbReaderWriter.class, "/XtraSrvConfig_GetSpatialDataSetSQ.inc.xml.start")).copyTo(zipStream);
+        createGetSpatialDataSetSQFileEnd(zipStream, xtraServerMapping);
+
+        zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_StoredQueriesToCache.inc.xml"));
+        Resources.asByteSource(Resources.getResource(JaxbReaderWriter.class, "/XtraSrvConfig_StoredQueriesToCache.inc.xml")).copyTo(zipStream);
+
+    }
+
+    private static void createFeatureTypesFile(OutputStream outputStream, XtraServerMapping xtraServerMapping) throws IOException {
+        final OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+
+        writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<FeatureTypes xmlns=\"http://www.interactive-instruments.de/namespaces/XtraServer\">\n");
+
+        xtraServerMapping.getFeatureTypeList(false).forEach(featureTypeName -> {
+            String featureTypeNameWithoutPrefix = Splitter.on(':').splitToList(featureTypeName).get(1);
+
+            try {
+                writer.append("\t<FeatureType defaultSRS=\"{if {$defaultSRS}}{$defaultSRS}{else}EPSG:{$nativeEpsgCode}{fi}\" supportedSRSs=\"srslistWFS\">\n\t\t");
+                writer.append("<Name>");
+                writer.append(featureTypeName);
+                writer.append("</Name>\n\t\t");
+                writer.append("{if {$featureTypes.metadataUrl.enabled} == true}{if {$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".metadataUrl}}{if {$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".WFS11.metadataFormat}}{if {$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".WFS11.metadataType}}<MetadataURL format=\"{$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".WFS11.metadataFormat}\" type=\"{$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".WFS11.metadataType}\">{$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".metadataUrl}</MetadataURL>{fi}{else}<MetadataURL>{$featureTypes.");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append(".metadataUrl}</MetadataURL>{fi}{fi}{fi}\n\t");
+                writer.append("</FeatureType>\n");
+            } catch (IOException e) {
+
+            }
+        });
+
+        writer.append("</FeatureTypes>\n");
+        writer.flush();
+    }
+
+    private static void createGeoIndexesFile(OutputStream outputStream, XtraServerMapping xtraServerMapping) throws IOException {
+        final OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+
+        writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<GeoIndexes xmlns=\"http://www.interactive-instruments.de/namespaces/XtraServer\">\n");
+
+        xtraServerMapping.getFeatureTypeList(false).forEach(featureTypeName -> {
+            String featureTypeNameWithoutPrefix = Splitter.on(':').splitToList(featureTypeName).get(1);
+            // TODO: get from schema
+            String propertyName = "adv:position";
+            String propertyNameWithoutPrefix = Splitter.on(':').splitToList(propertyName).get(1);
+
+            try {
+                writer.append("\t<GeoIndex id=\"gidx_");
+                writer.append(featureTypeNameWithoutPrefix);
+                writer.append("_");
+                writer.append(propertyNameWithoutPrefix);
+                writer.append("\">\n\t\t");
+                writer.append("<PGISGeoIndexImpl>\n\t\t\t");
+                writer.append("<PGISGeoIndexFeatures>\n\t\t\t\t");
+                writer.append("<PGISFeatureType>");
+                writer.append(featureTypeName);
+                writer.append("</PGISFeatureType>\n\t\t\t\t");
+                writer.append("<PGISGeoPropertyName>");
+                writer.append(propertyName);
+                writer.append("</PGISGeoPropertyName>\n\t\t\t");
+                writer.append("</PGISGeoIndexFeatures>\n\t\t");
+                writer.append("</PGISGeoIndexImpl>\n\t");
+                writer.append("</GeoIndex>\n");
+            } catch (IOException e) {
+
+            }
+        });
+
+        writer.append("</GeoIndexes>\n");
+        writer.flush();
+    }
+
+    private static void createGetSpatialDataSetSQFileEnd(OutputStream outputStream, XtraServerMapping xtraServerMapping) throws IOException {
+        final OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+
+        xtraServerMapping.getFeatureTypeList(false).forEach(featureTypeName -> {
+            try {
+                writer.append("\t\t\t<wfs:Query srsName=\"${CRS}\" typeNames=\"");
+                writer.append(featureTypeName);
+                writer.append("\"/>\n");
+            } catch (IOException e) {
+
+            }
+        });
+
+        writer.append("\t\t</wfs:QueryExpressionText>\n");
+        writer.append("\t</StoredQueryDefinition>\n");
+        writer.append("</InitialStoredQueries>\n");
+        writer.flush();
     }
 
     private static void createMappings(MappingsSequenceType mappingsSequenceType, FeatureTypeMapping featureTypeMapping, ObjectFactory objectFactory) {

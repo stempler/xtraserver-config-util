@@ -201,7 +201,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     @Override
     public void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException {
-        JaxbReaderWriter.writeToStream(outputStream, this);
+        JaxbReaderWriter.writeToStream(outputStream, this, createArchiveWithAdditionalFiles);
     }
 
     void print() {
