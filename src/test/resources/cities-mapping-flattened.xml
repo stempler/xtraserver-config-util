@@ -31,17 +31,16 @@
 			<!-- beginLifespan -->
 			<Table table_name="city" value="regexp_replace(begin_lifespan, '([0-9]{4})([0-9]{2})([0-9]{2})', '\\1-\\2-\\3 00:00:00', 'g')" target="ci:beginLifespan" value_type="expression"/>
 
-			<!-- alternativeName : DataType of multiple occurrence -->
-			<Join target="ci:alternativeName" axis="parent" join_path="alternativename/ref(cid:id)::city"/>
-			<Table table_name="alternativename" oid_col="id" target="ci:alternativeName"/>
-			<Table table_name="alternativename" value="name" target="ci:alternativeName/ci:AlternativeName/ci:name"/>
-			<Table table_name="alternativename" value="language" target="ci:alternativeName/ci:AlternativeName/ci:language"/>
+
 
 			<!-- river : FeatureType, multiple occurrence linked by reference -->
 			<Join target="ci:passingRiver" axis="parent" join_path="river/ref(id:rid)::city_river/ref(cid:id)::city"/>
 			<Table table_name="river" oid_col="id" target="ci:passingRiver"/>
 			<Table table_name="river" target="ci:passingRiver/@xlink:href"/>
 			<AssociationTarget object_ref="ci:River" target="ci:passingRiver"/>
+
+			<Join target="ci:alternativeName" axis="parent" join_path="alternativename/ref(cid:id)::city"/>
+			<Table table_name="alternativename" oid_col="id" target="ci:alternativeName"/>
 
 			<!-- district : FeatureType, multiple occurrence linked by reference (optimized join) -->
 			<Join target="ci:district" axis="parent" join_path="city_district/ref(cid:id)::city"/>
@@ -51,6 +50,8 @@
 			<Join axis="parent" join_path="district/ref(id:did)::city_district" target="ci:district/ci:District"/>
 
 			<!-- merged from superclasses -->
+			<Table table_name="alternativename" value="name" target="ci:alternativeName/ci:AlternativeName/ci:name"/>
+			<Table table_name="alternativename" value="language" target="ci:alternativeName/ci:AlternativeName/ci:language"/>
 			<Table table_name="city" value="name" target="ci:name"/>
 			<Table table_name="city" target="@gml:id" value="id"/>
 

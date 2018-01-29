@@ -22,7 +22,7 @@
 			<documentation>Abstract object carrying common attributes</documentation>
 		</annotation>
 	</element>
-	<complexType name="NamedGeoObjectType">
+	<complexType name="NamedGeoObjectType" abstract="true">
 		<complexContent>
 			<extension base="gml:AbstractFeatureType">
 				<sequence>
@@ -42,7 +42,7 @@
 			<documentation>Abstract object carrying common attributes</documentation>
 		</annotation>
 	</element>
-	<complexType name="NamedPlaceType">
+	<complexType name="NamedPlaceType" abstract="true">
 		<complexContent>
 			<extension base="ci:NamedGeoObjectType">
 				<sequence>
