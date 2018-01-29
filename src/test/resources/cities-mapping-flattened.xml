@@ -43,6 +43,13 @@
 			<Table table_name="river" target="ci:passingRiver/@xlink:href"/>
 			<AssociationTarget object_ref="ci:River" target="ci:passingRiver"/>
 
+			<!-- district : FeatureType, multiple occurrence linked by reference (optimized join) -->
+			<Join target="ci:district" axis="parent" join_path="city_district/ref(cid:id)::city"/>
+			<Table table_name="city_district" oid_col="id" target="ci:district"/>
+			<Table table_name="city_district" target="ci:district/@xlink:href" value="'urn:adv:oid:' || $T$.did" value_type="expression"/>
+			<AssociationTarget object_ref="ci:District" target="ci:district"/>
+			<Join axis="parent" join_path="district/ref(id:did)::city_district" target="ci:district/ci:District"/>
+
 			<!-- merged from superclasses -->
 			<Table table_name="city" value="name" target="ci:name"/>
 			<Table table_name="city" target="@gml:id" value="id"/>
@@ -64,6 +71,19 @@
 			<Table table_name="river" value="name" target="ci:name"/>
 			<Table table_name="river" target="@gml:id" value="id"/>
 			<Table table_name="river" target="gml:identifier" value="id"/>
+		</PGISFeatureTypeImpl>
+	</FeatureType>
+
+	<FeatureType>
+		<Name>ci:District</Name>
+		<PGISFeatureTypeImpl logging="false" useTempTable="false" tempTableName="_xsv_tmp_district">
+			<!-- Main table of feature type District -->
+			<Table table_name="district" oid_col="id" target=""/>
+			<!-- location -->
+			<Table table_name="district" value="location" target="ci:location"/>
+
+			<!-- merged from superclasses -->
+			<Table table_name="district" target="@gml:id" value="id"/>
 		</PGISFeatureTypeImpl>
 	</FeatureType>
 

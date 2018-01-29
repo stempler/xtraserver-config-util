@@ -47,7 +47,7 @@ public interface MappingJoin {
          * @return
          */
         static Condition create(MappingTable sourceTable, String sourceField, MappingTable targetTable, String targetField) {
-            return new MappingJoinImpl.ConditionImpl(sourceTable, sourceField, targetTable, targetField);
+            return new MappingJoinImpl.ConditionImpl(sourceTable.getName(), sourceField, targetTable.getName(), targetField);
         }
 
         String getSourceTable();

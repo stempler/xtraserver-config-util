@@ -1,10 +1,5 @@
 package de.interactive_instruments.xtraserver.config.util;
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
-import de.interactive_instruments.xtraserver.config.schema.AdditionalMappings;
-import de.interactive_instruments.xtraserver.config.schema.FeatureType;
-import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
 import de.interactive_instruments.xtraserver.config.util.api.*;
 
 import javax.xml.namespace.QName;
@@ -36,11 +31,16 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     FeatureTypeMappingImpl(FeatureTypeMapping mainMapping, List<FeatureTypeMapping> mergedMappings, Namespaces namespaces) {
         this.name = mainMapping.getName();
         this.qualifiedTypeName = mainMapping.getQName();
-        this.tables = mainMapping.getTables();
-        this.joins = mainMapping.getJoins();
-        this.values = mainMapping.getValues();
-        this.associationTargets = mainMapping.getAssociationTargets();
+        this.tables = new ArrayList<>();
+        this.joins = new ArrayList<>();
+        this.values = new ArrayList<>();
+        this.associationTargets = new ArrayList<>();
         this.namespaces = namespaces;
+
+        mainMapping.getTables().forEach(mappingTable -> this.tables.add(new MappingTableImpl((MappingTableImpl) mappingTable)));
+        mainMapping.getJoins().forEach(mappingJoin -> this.joins.add(new MappingJoinImpl((MappingJoinImpl) mappingJoin)));
+        mainMapping.getValues().forEach(mappingValue -> this.values.add(new MappingValueImpl((MappingValueImpl) mappingValue)));
+        mainMapping.getAssociationTargets().forEach(associationTarget -> this.associationTargets.add(new AssociationTargetImpl((AssociationTargetImpl) associationTarget)));
 
         //TODO: merge AssociationTargets???
         for (FeatureTypeMapping mergedMapping : mergedMappings) {
@@ -49,17 +49,19 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
 
             for (MappingTable mappingTable : referencedTables) {
                 if (!hasTable(mappingTable.getName())) {
-                    this.tables.add(this.tables.size(), mappingTable);
+                    this.tables.add(new MappingTableImpl((MappingTableImpl)mappingTable));
                 }
             }
 
             for (MappingValue mappingValue : mergedMapping.getValues()) {
                 //System.out.println(mappingValue.getTarget());
                 if (!values.contains(mappingValue)) {
-                    if ((hasTable(mappingValue.getTable()) && hasValueMappingForTable(mappingValue.getTable(), getTable(mappingValue.getTable()).getTarget())) ||
-                            (hasTable(mappingValue.getTable()) && mappingValue.getTarget().startsWith(getTable(mappingValue.getTable()).getTarget()))) {
-                        this.values.add(this.values.size(), mappingValue);
-                        getTable(mappingValue.getTable()).getValues().add(mappingValue);
+                    Optional<MappingTable> mappingTable = getTable(mappingValue.getTable());
+                    if ((mappingTable.isPresent() && hasValueMappingForTable(mappingValue.getTable(), mappingTable.get().getTarget())) ||
+                            (mappingTable.isPresent() && mappingValue.getTarget().startsWith(mappingTable.get().getTarget()))) {
+                        MappingValue mappingValue1 = new MappingValueImpl((MappingValueImpl)mappingValue);
+                        this.values.add(mappingValue1);
+                        mappingTable.get().getValues().add(mappingValue1);
                     }
                 }
             }
@@ -79,6 +81,14 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         return tables.stream()
                 .filter(
                         table -> tableName.equals(table.getName())
+                )
+                .findFirst();
+    }
+
+    private Optional<MappingTable> getTableOptional(String tableName, String target) {
+        return tables.stream()
+                .filter(
+                        table -> tableName.equals(table.getName()) && target.equals(table.getTarget())
                 )
                 .findFirst();
     }
@@ -147,8 +157,18 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
     }
 
     @Override
-    public MappingTable getTable(String name) {
-        return getTableOptional(name).orElse(null);
+    public boolean hasTable(String name, String target) {
+        return getTableOptional(name, target).isPresent();
+    }
+
+    @Override
+    public Optional<MappingTable> getTable(String name) {
+        return getTableOptional(name);
+    }
+
+    @Override
+    public Optional<MappingTable> getTable(String name, String target) {
+        return getTableOptional(name, target);
     }
 
     @Override
@@ -171,15 +191,17 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         if (mappingTable.getName() == null || mappingTable.getName().isEmpty()) {
             throw new IllegalArgumentException("Table has no name");
         }
-        if (mappingTable.getOidCol() == null || mappingTable.getOidCol().isEmpty()) {
+        if (!mappingTable.hasTarget() && (mappingTable.getOidCol() == null || mappingTable.getOidCol().isEmpty())) {
             throw new IllegalArgumentException("Table has no oidCol");
         }
 
-        if (tables.contains(mappingTable)) {
+        /*if (tables.contains(mappingTable)) {
             tables.remove(mappingTable);
-        }
+        }*/
 
-        tables.add(mappingTable);
+        if (!hasTable(mappingTable.getName())) {
+            tables.add(mappingTable);
+        }
     }
 
     @Override
@@ -189,17 +211,27 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         }
 
         final String targetTableName = mappingJoin.getTargetTable();
-        final MappingTable targetTable = getTable(targetTableName);
+        final Optional<MappingTable> targetTable = getTable(targetTableName);
+        final String sourceTableName = mappingJoin.getSourceTable();
+        final Optional<MappingTable> sourceTable = getTable(sourceTableName);
 
-        if (targetTable == null) {
+        if (!targetTable.isPresent()) {
             throw new IllegalArgumentException("Join target table '" + targetTableName + "' does not exist");
         }
-        if (getTable(mappingJoin.getSourceTable()) == null) {
-            throw new IllegalArgumentException("Join source table '" + targetTableName + "' does not exist");
+        if (!sourceTable.isPresent()) {
+            throw new IllegalArgumentException("Join source table '" + sourceTableName + "' does not exist");
         }
 
-        mappingJoin.setTarget(targetTable.getTarget());
-        targetTable.addJoinPath(mappingJoin);
+        // if join has target, overwrite table target (for table definitions parsed from value mappings)
+        if (mappingJoin.getTarget() != null && !mappingJoin.getTarget().isEmpty()) {
+            targetTable.get().setTarget(mappingJoin.getTarget());
+        }
+        // if join has no target, overwrite with table target (for exports from hale)
+        else {
+            mappingJoin.setTarget(targetTable.get().getTarget());
+        }
+
+        targetTable.get().addJoinPath(mappingJoin);
         joins.add(mappingJoin);
     }
 
@@ -218,7 +250,7 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
         values.add(mappingValue);
     }
 
-    @Override
+    /*@Override
     public void addAssociationTarget(AssociationTarget associationTarget) {
         if (associationTarget.getObjectRef() == null || associationTarget.getObjectRef().isEmpty()) {
             throw new IllegalArgumentException("Association target has no object reference");
@@ -237,7 +269,61 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
             throw new IllegalArgumentException("No value mapping found for given association target");
         }
 
-        mappingValue.get().setValue("");
+        if (mappingValue.get().getValue().equals("href")) {
+            mappingValue.get().setValue("");
+        }
+
+        Optional<MappingTable> mappingTable = tables.stream()
+                .filter(
+                        table -> table.getValues().contains(mappingValue.get())
+                )
+                .findFirst();
+
+        if (!mappingTable.isPresent()) {
+            throw new IllegalArgumentException("No table mapping found for given association target");
+        }
+
+        ((MappingTableImpl)mappingTable.get()).addAssociationTarget(associationTarget);
+
+        associationTargets.add(associationTarget);
+    }*/
+
+    @Override
+    public void addAssociationTarget(AssociationTarget associationTarget) {
+        if (associationTarget.getObjectRef() == null || associationTarget.getObjectRef().isEmpty()) {
+            throw new IllegalArgumentException("Association target has no object reference");
+        }
+        if (associationTarget.getTarget() == null || associationTarget.getTarget().isEmpty()) {
+            throw new IllegalArgumentException("Association target has no target");
+        }
+
+        List<MappingValue> mappingValues = values.stream()
+                .filter(
+                        value -> value.getTarget().equals(associationTarget.getTarget() + "/@xlink:href")
+                )
+                .collect(Collectors.toList());
+
+        if (mappingValues.isEmpty()) {
+            throw new IllegalArgumentException("No value mapping found for given association target");
+        }
+
+        mappingValues.forEach(mappingValue -> {
+            if (mappingValue.getValue().equals("href")) {
+                mappingValue.setValue("");
+            }
+        });
+
+        List<MappingTable> mappingTables = tables.stream()
+                .filter(
+                        table -> table.getValues().stream().anyMatch(mappingValues::contains)//contains(mappingValue.get())
+                )
+                .collect(Collectors.toList());
+
+        if (mappingTables.isEmpty()) {
+            throw new IllegalArgumentException("No table mapping found for given association target");
+        }
+
+        mappingTables.forEach(mappingTable -> ((MappingTableImpl)mappingTable).addAssociationTarget(associationTarget));
 
         associationTargets.add(associationTarget);
     }
@@ -257,23 +343,23 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                         String sourceTableName = join.getSourceTable();
                         String targetTableName = join.getTargetTable();
 
-                        if (mappingTable.getName().equals("o51009")) {
+                        /*if (mappingTable.getName().equals("o51009")) {
                             System.out.println("FOO " + join.toString() + " " + join.getTarget());
                             System.out.println("BAR " + sourceTableName + (hasTable(sourceTableName) ? join.getTarget().startsWith(getTable(sourceTableName).getTarget()) : "NOPE"));
-                        }
+                        }*/
 
                         // merged join can be connected to existing table and target
-                        if (!join.getJoinConditions().isEmpty() && hasTable(sourceTableName) && join.getTarget().startsWith(getTable(sourceTableName).getTarget())) {
+                        if (!join.getJoinConditions().isEmpty() && hasTable(sourceTableName) && join.getTarget().startsWith(getTable(sourceTableName).get().getTarget())) {
 
-                            if (targetTableName.equals("o51009")) {
+                            /*if (targetTableName.equals("o51009")) {
                                 System.out.println("BLA " + targetTableName + " " + mergedMapping.hasTable(targetTableName) + " " + hasTable(targetTableName));
-                            }
+                            }*/
 
                             if (mergedMapping.hasTable(targetTableName)) {
                                 //merged join is needed for a value mapping
                                 if (mergedMapping.hasValueMappingForTable(targetTableName, join.getTarget())) {
                                     if (!hasTable(targetTableName)) {
-                                        this.tables.add(new MappingTableImpl(mergedMapping.getTable(targetTableName), join.getTarget()));
+                                        this.tables.add(new MappingTableImpl(mergedMapping.getTable(targetTableName).get(), join.getTarget()));
                                         joinedTablesString.add(targetTableName + "[" + join.getTarget() + "]");
 
                                         added = true;
@@ -287,14 +373,14 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
                                         referencedTables.add(new MappingTableImpl(mappingTable, join));
                                     } else {
                                         // if it does exist, we have self join, which is added to the target table
-                                        if (!getTable(targetTableName).getJoinPaths().contains(join)) {
-                                            System.out.println("SELF JOIN " + targetTableName);
-                                            getTable(targetTableName).addJoinPath(join);
+                                        if (!getTable(targetTableName).get().getJoinPaths().contains(join) && getTable(targetTableName).get().getTarget().startsWith(join.getTarget())) {
+                                            //System.out.println("SELF JOIN " + targetTableName);
+                                            getTable(targetTableName).get().addJoinPath(new MappingJoinImpl((MappingJoinImpl) join));
                                         }
                                     }
                                 }
                             } else {
-                                System.out.println("IGNORED " + targetTableName);
+                                //System.out.println("IGNORED " + targetTableName);
                             }
                             //}
                         }
@@ -303,8 +389,8 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
             } while (added);
         }
 
-        System.out.println(mergedMapping.getName() + " JOINED " + Joiner.on(" | ").join(joinedTablesString));
-        System.out.println(mergedMapping.getName() + " REFERENCED " + Joiner.on(" | ").join(referencedTablesString));
+        //System.out.println(mergedMapping.getName() + " JOINED " + Joiner.on(" | ").join(joinedTablesString));
+        //System.out.println(mergedMapping.getName() + " REFERENCED " + Joiner.on(" | ").join(referencedTablesString));
 
         return referencedTables;
     }

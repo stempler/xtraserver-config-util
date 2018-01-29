@@ -6,6 +6,7 @@ import de.interactive_instruments.xtraserver.config.util.Namespaces;
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A collection of mappings related to a specific FeatureType
@@ -79,12 +80,16 @@ public interface FeatureTypeMapping {
      */
     boolean hasTable(String name);
 
+    boolean hasTable(String name, String target);
+
     /**
      * Get the table mapping for the given table
      * @param name
      * @return
      */
-    MappingTable getTable(String name);
+    Optional<MappingTable> getTable(String name);
+
+    Optional<MappingTable> getTable(String name, String target);
 
     /**
      * Does a value mapping exist for the given table?

@@ -1,10 +1,13 @@
 package de.interactive_instruments.xtraserver.config.util;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import javax.xml.namespace.QName;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author zahnen
@@ -15,7 +18,7 @@ public class Namespaces {
     private Namespaces() {
         this.namespaces = HashBiMap.create();
 
-        namespaces.put("gmlx", "http://www.opengis.net/gml");
+        /*namespaces.put("gmlx", "http://www.opengis.net/gml");
         namespaces.put("gco", "http://www.isotc211.org/2005/gco");
         namespaces.put("gmd", "http://www.isotc211.org/2005/gmd");
         namespaces.put("ogc", "http://www.opengis.net/ogc");
@@ -33,7 +36,7 @@ public class Namespaces {
         namespaces.put("adv", "http://www.adv-online.de/namespaces/adv/gid/6.0");
         namespaces.put("fg", "http://www.interactive-instruments.de/ns/aaa/flurgema");
         namespaces.put("dnm", "http://www.interactive-instruments.de/namespaces/XtraServer/addons/dnm");
-        namespaces.put("xpalias", "http://www.interactive-instruments.de/namespaces/XtraServer/addons/XPathAlias");
+        namespaces.put("xpalias", "http://www.interactive-instruments.de/namespaces/XtraServer/addons/XPathAlias");*/
     }
 
     /**
@@ -46,7 +49,7 @@ public class Namespaces {
         this();
         namespaceUriToPrefixMapping.forEach((key, value) -> {
             // containsValue() check required as bimap does not handle putIfAbsent for values
-            if(key!=null && !key.isEmpty() && !this.namespaces.containsValue(key)) {
+            if (key != null && !key.isEmpty() && !this.namespaces.containsValue(key)) {
                 // Change NS URI -> prefix to internal representation prefix -> NS URI
                 this.namespaces.putIfAbsent(value, key);
             }
@@ -58,8 +61,7 @@ public class Namespaces {
 
         if (name.length == 2 && namespaces.get(name[0]) != null) {
             return new QName(namespaces.get(name[0]), name[1], name[0]);
-        }
-        else if (name.length == 1) {
+        } else if (name.length == 1) {
             return new QName(name[0]);
         }
 
@@ -70,13 +72,22 @@ public class Namespaces {
         if (namespaces.inverse().get(qualifiedName.getNamespaceURI()) != null) {
             return namespaces.inverse().get(qualifiedName.getNamespaceURI()) + ":" + qualifiedName.getLocalPart();
         }
-        if("".equals(qualifiedName.getNamespaceURI())) {
-            if(!"".equals(qualifiedName.getPrefix())) {
-                return qualifiedName.getPrefix()+ ":" +qualifiedName.getLocalPart();
+        if ("".equals(qualifiedName.getNamespaceURI())) {
+            if (!"".equals(qualifiedName.getPrefix())) {
+                return qualifiedName.getPrefix() + ":" + qualifiedName.getLocalPart();
             }
             return qualifiedName.getLocalPart();
-        }else{
+        } else {
             return qualifiedName.getNamespaceURI() + ":" + qualifiedName.getLocalPart();
         }
+    }
+
+    public List<QName> getQualifiedPathElements(String prefixedPath) {
+        return Splitter
+                .on('/')
+                .splitToList(prefixedPath)
+                .stream()
+                .map(this::getQualifiedName)
+                .collect(Collectors.toList());
     }
 }

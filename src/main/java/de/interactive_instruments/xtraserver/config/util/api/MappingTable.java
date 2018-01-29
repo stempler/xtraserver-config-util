@@ -36,6 +36,8 @@ public interface MappingTable {
 
     boolean isPrimary();
 
+    void setJoined(boolean joined);
+
     void addJoinPath(MappingJoin joinPath);
 
     List<MappingJoin> getJoinPaths();

@@ -28,6 +28,17 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
         this.namespaces = namespaces;
     }
 
+    MappingValueImpl(MappingValueImpl mappingValue) {
+        this.table = mappingValue.table;
+        this.target = mappingValue.target;
+        this.value = mappingValue.value;
+        this.valueType = mappingValue.valueType;
+        this.mappingMode = mappingValue.mappingMode;
+        this.dbCodes = mappingValue.dbCodes;
+        this.dbValues = mappingValue.dbValues;
+        this.namespaces = mappingValue.namespaces;
+    }
+
     @Override
     public String getTable() {
         return table;

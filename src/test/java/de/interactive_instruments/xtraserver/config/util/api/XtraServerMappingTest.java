@@ -1,34 +1,29 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
+import de.interactive_instruments.xtraserver.config.util.MappingTableImpl;
 import de.interactive_instruments.xtraserver.config.util.Namespaces;
-import de.interactive_instruments.xtraserver.config.util.XtraServerMappingImpl;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.w3c.dom.Attr;
 import org.xml.sax.SAXException;
 import org.xmlunit.builder.Input;
-import org.xmlunit.diff.DefaultNodeMatcher;
-import org.xmlunit.diff.ElementSelectors;
+import org.xmlunit.diff.*;
+import org.xmlunit.util.Predicate;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.transform.Source;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.nio.ByteBuffer;
-import java.util.function.Consumer;
+import javax.xml.transform.stream.StreamSource;
+import java.io.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static com.shazam.shazamcrest.MatcherAssert.assertThat;
 import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.junit.Assert.assertThat;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 public class XtraServerMappingTest {
@@ -50,7 +45,7 @@ public class XtraServerMappingTest {
         XtraServerMapping expected = buildCitiesMapping();
 
         //assertThat(test, is(equalTo(control)));
-        com.shazam.shazamcrest.MatcherAssert.assertThat(actual, sameBeanAs(expected).ignoring(startsWith("applicationSchema")).ignoring(startsWith("namespaces")).ignoring(startsWith("prefix")).ignoring(startsWith("path")).ignoring(startsWith("mappingMode")));
+        assertThat(actual, sameBeanAs(expected).ignoring(startsWith("applicationSchema")).ignoring(startsWith("namespaces")).ignoring(startsWith("prefix")).ignoring(startsWith("path")).ignoring(startsWith("mappingMode")));
     }
 
     @Test
@@ -61,12 +56,12 @@ public class XtraServerMappingTest {
         XtraServerMapping xtraServerMapping = buildCitiesMapping();
 
         XtraServerMapping expected = XtraServerMapping.create(applicationSchema);
-        for (String featureType: xtraServerMapping.getFeatureTypeList(false)) {
+        for (String featureType : xtraServerMapping.getFeatureTypeList(false)) {
             expected.addFeatureTypeMapping(xtraServerMapping.getFeatureTypeMapping(featureType, true).get());
         }
 
         //assertThat(test, is(equalTo(control)));
-        com.shazam.shazamcrest.MatcherAssert.assertThat(actual, sameBeanAs(expected).ignoring(startsWith("applicationSchema")).ignoring(startsWith("namespaces")).ignoring(startsWith("prefix")).ignoring(startsWith("path")).ignoring(startsWith("mappingMode")));
+        assertThat(actual, sameBeanAs(expected).ignoring(startsWith("applicationSchema")).ignoring(startsWith("namespaces")).ignoring(startsWith("prefix")).ignoring(startsWith("path")).ignoring(startsWith("mappingMode")));
     }
 
     @Test
@@ -82,7 +77,7 @@ public class XtraServerMappingTest {
         Source expected = Input.fromURL(Resources.getResource("cities-mapping.xml")).build();
         Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
 
-        com.shazam.shazamcrest.MatcherAssert.assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+        assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
     }
 
     @Test
@@ -98,7 +93,7 @@ public class XtraServerMappingTest {
         Source expected = Input.fromURL(Resources.getResource("cities-mapping.xml")).build();
         Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
 
-        com.shazam.shazamcrest.MatcherAssert.assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+        assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
     }
 
     @Test
@@ -118,16 +113,14 @@ public class XtraServerMappingTest {
             }
         }).start();
 
-        try(ZipInputStream stream = new ZipInputStream(inputStream)) {
+        try (ZipInputStream stream = new ZipInputStream(inputStream)) {
             ZipEntry entry;
-            while((entry = stream.getNextEntry())!=null)
-            {
+            while ((entry = stream.getNextEntry()) != null) {
                 if (entry.getName().equals("XtraSrvConfig_Mapping.inc.xml")) {
                     byte[] buffer = new byte[2048];
 
                     int len;
-                    while ((len = stream.read(buffer)) > 0)
-                    {
+                    while ((len = stream.read(buffer)) > 0) {
                         byteArrayBuffer.write(buffer, 0, len);
                     }
                 } else {
@@ -141,9 +134,96 @@ public class XtraServerMappingTest {
         Source expected = Input.fromURL(Resources.getResource("cities-mapping.xml")).build();
         Source actual = Input.fromByteArray(byteArrayBuffer.toByteArray()).build();
 
-        com.shazam.shazamcrest.MatcherAssert.assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+        assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
 
         // TODO: extract and compare additional files
+    }
+
+    @Test
+    public void testImportExport() throws JAXBException, IOException, SAXException {
+
+        XtraServerMapping xtraServerMappingImport = XtraServerMapping.createFromStream(Resources.asByteSource(Resources.getResource("cities-mapping.xml")).openBufferedStream(), applicationSchema);
+
+        XtraServerMapping xtraServerMappingFlattenFanout = XtraServerMapping.create(applicationSchema);
+        for (String featureType : xtraServerMappingImport.getFeatureTypeList(false)) {
+            xtraServerMappingFlattenFanout.addFeatureTypeMapping(xtraServerMappingImport.getFeatureTypeMapping(featureType, true).get(), true);
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        xtraServerMappingFlattenFanout.writeToStream(outputStream, false);
+
+        System.out.println(outputStream.toString());
+
+        Source expected = Input.fromURL(Resources.getResource("cities-mapping.xml")).build();
+        Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
+
+        assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndAllAttributes)));
+    }
+
+    //@Test
+    public void testLocalImportExport() throws JAXBException, IOException, SAXException {
+        StreamSource schemaSource = new StreamSource(new FileInputStream("/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema/AAA-Fachschema_XtraServer.xsd"), "/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema");
+        ApplicationSchema localApplicationSchema = new ApplicationSchema(schemaSource);
+        String mappingFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/1/includes/XtraSrvConfig_Mapping.inc.xml";
+        XtraServerMapping xtraServerMappingImport = XtraServerMapping.createFromStream(new FileInputStream(mappingFile), localApplicationSchema);
+
+        XtraServerMapping xtraServerMappingFlattenFanout = XtraServerMapping.create(localApplicationSchema);
+        for (String featureType : xtraServerMappingImport.getFeatureTypeList(false)) {
+            xtraServerMappingFlattenFanout.addFeatureTypeMapping(xtraServerMappingImport.getFeatureTypeMapping(featureType, true).get(), true);
+        }
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        xtraServerMappingFlattenFanout.writeToStream(outputStream, false);
+
+        System.out.println(outputStream.toString());
+
+        Source expected = Input.fromStream(new FileInputStream(mappingFile)).build();
+        //Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
+        Source actual = Input.fromStream(new FileInputStream("/home/zahnen/Downloads/alkis-mapping.xml")).build();
+
+        ElementSelector elementSelector = ElementSelectors.conditionalBuilder()
+                .whenElementIsNamed("FeatureType").thenUse(ElementSelectors.byXPath("./*[1]", ElementSelectors.byNameAndText))
+                .whenElementIsNamed("AdditionalMappings").thenUse(ElementSelectors.byXPath("./*[1]", ElementSelectors.byNameAndText))
+                .whenElementIsNamed("PGISFeatureTypeImpl").thenUse(ElementSelectors.byName)
+                .whenElementIsNamed("Table").thenUse(ElementSelectors.byNameAndAttributes("table_name", "target", "value"))
+                .elseUse(ElementSelectors.byNameAndAllAttributes)
+                .build();
+
+        assertThat(actual, isSimilarTo(expected)
+                .throwComparisonFailure()
+                .ignoreComments()
+                .ignoreWhitespace()
+                .withAttributeFilter(attr -> !ImmutableList.of("FTCode", "logging", "tempTableName", "useTempTable", "derivation_pattern", "assign", "no_output", "value_type", "oid_col", "gmlVersion", "generator", "filter_mapping", "significant_for_emptiness").contains(attr.getLocalName()))
+                .withNodeFilter(node -> {
+                    if (node.getLocalName() != null) {
+                        if (node.getLocalName().equals("Table") && node.getAttributes() != null && node.getAttributes().getLength() == 3
+                                && node.getAttributes().getNamedItem("oid_col") != null && node.getAttributes().getNamedItem("oid_col").getNodeValue().equals("id")
+                                && node.getAttributes().getNamedItem("target") != null && !node.getAttributes().getNamedItem("target").getNodeValue().isEmpty()
+                                && node.getAttributes().getNamedItem("table_name") != null) {
+                            return false;
+                        } else if (node.getLocalName().equals("PathAliases") || node.getLocalName().equals("Content")) {
+                            return false;
+                        } else if (node.getLocalName().equals("Table") && node.getAttributes() != null && node.getAttributes().getNamedItem("filter_mapping") != null && node.getAttributes().getNamedItem("filter_mapping").getNodeValue().equals("true")) {
+                            return false;
+                        } else if (node.getLocalName().equals("Table") && node.getAttributes() != null && node.getAttributes().getNamedItem("mapped_geometry") != null && node.getAttributes().getNamedItem("mapped_geometry").getNodeValue().equals("true")) {
+                            return false;
+                        } else if ((node.getLocalName().equals("Table") || node.getLocalName().equals("Join") || node.getLocalName().equals("AssociationTarget"))
+                                && (node.getAttributes() != null && node.getAttributes().getNamedItem("target") != null
+                                && (node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:beziehtSichAufFlurstueck") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_an")
+                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:gehoertZu") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:haengtZusammenMit")
+                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:istTeilVon") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_dientZurDarstellungVon_AP_PTO")
+                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_dientZurDarstellungVon_AP_PPO") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:istAbgeleitetAus")
+                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:hatDirektUnten") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_hatDirektUnten")))) {
+                            return false;
+                        } else if (node.getLocalName().equals("FeatureType") && node.getFirstChild() != null && node.getFirstChild().getTextContent() != null && node.getFirstChild().getTextContent().startsWith("gmlx:_Feature")) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .withNodeMatcher(new DefaultNodeMatcher(elementSelector))
+                .withDifferenceEvaluator(DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.CHILD_NODELIST_LENGTH, ComparisonType.CHILD_NODELIST_SEQUENCE, ComparisonType.ELEMENT_NUM_ATTRIBUTES))
+        );
     }
 
     private XtraServerMapping buildCitiesMapping() throws IOException {
@@ -152,6 +232,7 @@ public class XtraServerMappingTest {
         xtraServerMapping.addFeatureTypeMapping(buildNamedGeoObject());
         xtraServerMapping.addFeatureTypeMapping(buildCity());
         xtraServerMapping.addFeatureTypeMapping(buildRiver());
+        xtraServerMapping.addFeatureTypeMapping(buildDistrict());
 
         return xtraServerMapping;
     }
@@ -161,6 +242,7 @@ public class XtraServerMappingTest {
         XtraServerMapping xtraServerMapping = XtraServerMapping.create(this.applicationSchema);
         xtraServerMapping.addFeatureTypeMapping(buildCityFlat(), true);
         xtraServerMapping.addFeatureTypeMapping(buildRiverFlat(), true);
+        xtraServerMapping.addFeatureTypeMapping(buildDistrictFlat(), true);
 
         return xtraServerMapping;
     }
@@ -174,6 +256,10 @@ public class XtraServerMappingTest {
         MappingTable river = MappingTable.create();
         river.setName("river");
         river.setOidCol("id");
+
+        MappingTable district = MappingTable.create();
+        district.setName("district");
+        district.setOidCol("id");
 
         MappingValue cityId = MappingValue.create(namespaces);
         cityId.setTable(city);
@@ -190,12 +276,19 @@ public class XtraServerMappingTest {
         riverIdentifier.setTarget("gml:identifier");
         riverIdentifier.setValue("id");
 
+        MappingValue districtId = MappingValue.create(namespaces);
+        districtId.setTable(district);
+        districtId.setTarget("@gml:id");
+        districtId.setValue("id");
+
         FeatureTypeMapping featureTypeMapping = FeatureTypeMapping.create("gml:AbstractFeature", new QName("http://www.opengis.net/gml/3.2", "AbstractFeatureType", "gml"), namespaces);
         featureTypeMapping.addTable(city);
+        featureTypeMapping.addTable(district);
         featureTypeMapping.addTable(river);
         featureTypeMapping.addValue(cityId);
         featureTypeMapping.addValue(riverId);
         featureTypeMapping.addValue(riverIdentifier);
+        featureTypeMapping.addValue(districtId);
 
         return featureTypeMapping;
     }
@@ -232,7 +325,7 @@ public class XtraServerMappingTest {
     private FeatureTypeMapping buildCityFlat() {
         FeatureTypeMapping cityMapping = buildCity();
 
-        MappingTable city = cityMapping.getTable("city");
+        MappingTable city = cityMapping.getTable("city").get();
 
         MappingValue cityName = MappingValue.create(namespaces);
         cityName.setTable(city);
@@ -320,7 +413,7 @@ public class XtraServerMappingTest {
         MappingTable cityRiver = MappingTable.create();
         cityRiver.setName("city_river");
         cityRiver.setOidCol("id");
-        //cityRiver.setTarget("ci:passingRiver");
+        ((MappingTableImpl) cityRiver).isJoined = true;
 
         MappingJoin city2RiverJoin = MappingJoin.create();
         MappingJoin.Condition city2cityRiver = MappingJoin.Condition.create(city, "id", cityRiver, "cid");
@@ -337,6 +430,25 @@ public class XtraServerMappingTest {
         riverType.setObjectRef("ci:River");
         riverType.setTarget("ci:passingRiver");
 
+        MappingTable cityDistrict = MappingTable.create();
+        cityDistrict.setName("city_district");
+        cityDistrict.setOidCol("id");
+        cityDistrict.setTarget("ci:district");
+
+        MappingJoin city2CityDistrictJoin = MappingJoin.create();
+        MappingJoin.Condition city2cityDistrict = MappingJoin.Condition.create(city, "id", cityDistrict, "cid");
+        city2CityDistrictJoin.addCondition(city2cityDistrict);
+
+        MappingValue districtHref = MappingValue.create(namespaces);
+        districtHref.setTable(cityDistrict);
+        districtHref.setTarget("ci:district/@xlink:href");
+        districtHref.setValue("'urn:adv:oid:' || $T$.did");
+        districtHref.setValueType("expression");
+
+        AssociationTarget districtType = AssociationTarget.create();
+        districtType.setObjectRef("ci:District");
+        districtType.setTarget("ci:district");
+
         FeatureTypeMapping featureTypeMapping = FeatureTypeMapping.create("ci:City", new QName("http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities", "CityType", "ci"), namespaces);
         featureTypeMapping.addTable(city);
         featureTypeMapping.addValue(cityLocation);
@@ -350,10 +462,14 @@ public class XtraServerMappingTest {
         featureTypeMapping.addValue(alternativeNameName);
         featureTypeMapping.addValue(alternativeNameLanguage);
         featureTypeMapping.addTable(river);
+        featureTypeMapping.addTable(cityDistrict);
         featureTypeMapping.addTable(cityRiver);
         featureTypeMapping.addJoin(city2RiverJoin);
         featureTypeMapping.addValue(riverHref);
         featureTypeMapping.addAssociationTarget(riverType);
+        featureTypeMapping.addJoin(city2CityDistrictJoin);
+        featureTypeMapping.addValue(districtHref);
+        featureTypeMapping.addAssociationTarget(districtType);
 
         return featureTypeMapping;
     }
@@ -361,7 +477,7 @@ public class XtraServerMappingTest {
     private FeatureTypeMapping buildRiverFlat() {
         FeatureTypeMapping riverMapping = buildRiver();
 
-        MappingTable river = riverMapping.getTable("river");
+        MappingTable river = riverMapping.getTable("river").get();
 
         MappingValue riverName = MappingValue.create(namespaces);
         riverName.setTable(river);
@@ -405,6 +521,39 @@ public class XtraServerMappingTest {
         featureTypeMapping.addTable(river);
         featureTypeMapping.addValue(riverLocation);
         featureTypeMapping.addValue(riverLength);
+
+        return featureTypeMapping;
+    }
+
+    private FeatureTypeMapping buildDistrictFlat() {
+        FeatureTypeMapping districtMapping = buildDistrict();
+
+        MappingTable district = districtMapping.getTable("district").get();
+
+        MappingValue districtId = MappingValue.create(namespaces);
+        districtId.setTable(district);
+        districtId.setTarget("@gml:id");
+        districtId.setValue("id");
+
+        districtMapping.addValue(districtId);
+
+        return districtMapping;
+    }
+
+    private FeatureTypeMapping buildDistrict() {
+
+        MappingTable district = MappingTable.create();
+        district.setName("district");
+        district.setOidCol("id");
+
+        MappingValue districtLocation = MappingValue.create(namespaces);
+        districtLocation.setTable(district);
+        districtLocation.setTarget("ci:location");
+        districtLocation.setValue("location");
+
+        FeatureTypeMapping featureTypeMapping = FeatureTypeMapping.create("ci:District", new QName("http://www.interactive-instruments.de/namespaces/demo/cities/4.0/cities", "DistrictType", "ci"), namespaces);
+        featureTypeMapping.addTable(district);
+        featureTypeMapping.addValue(districtLocation);
 
         return featureTypeMapping;
     }

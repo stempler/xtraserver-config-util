@@ -36,24 +36,39 @@
 		</complexContent>
 	</complexType>
 
+	<!-- NamedPlace (abstract) -->
+	<element name="NamedPlace" substitutionGroup="ci:NamedGeoObject" type="ci:NamedPlaceType" abstract="true">
+		<annotation>
+			<documentation>Abstract object carrying common attributes</documentation>
+		</annotation>
+	</element>
+	<complexType name="NamedPlaceType">
+		<complexContent>
+			<extension base="ci:NamedGeoObjectType">
+				<sequence>
+					<element name="alternativeName" type="ci:AlternativeNamePropertyType" minOccurs="0" maxOccurs="unbounded">
+						<annotation>
+							<documentation>Zero or more alternative names of the city</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
 	<!-- Cities -->
-	<element name="City" substitutionGroup="ci:NamedGeoObject" type="ci:CityType">
+	<element name="City" substitutionGroup="ci:NamedPlace" type="ci:CityType">
 		<annotation>
 			<documentation>Representation of Cities</documentation>
 		</annotation>
 	</element>
 	<complexType name="CityType">
 		<complexContent>
-			<extension base="ci:NamedGeoObjectType">
+			<extension base="ci:NamedPlaceType">
 				<sequence>
 					<element name="location" type="gml:PointPropertyType">
 						<annotation>
 							<documentation>The location of the city given as point geometry</documentation>
-						</annotation>
-					</element>
-					<element name="alternativeName" type="ci:AlternativeNamePropertyType" minOccurs="0" maxOccurs="unbounded">
-						<annotation>
-							<documentation>Zero or more alternative names of the city</documentation>
 						</annotation>
 					</element>
 					<element name="country" type="string">
@@ -78,9 +93,12 @@
 							</simpleContent>
 						</complexType>
 					</element>
-					<element name="district" type="ci:DistrictPropertyType" minOccurs="0" maxOccurs="unbounded">
+					<element name="district" type="gml:ReferenceType" minOccurs="0" maxOccurs="unbounded">
 						<annotation>
 							<documentation>District objects being part of the city object</documentation>
+							<appinfo>
+								<targetElement xmlns="http://www.opengis.net/gml/3.2">ci:District</targetElement>
+							</appinfo>
 						</annotation>
 					</element>
 					<element name="passingRiver" type="gml:ReferenceType" minOccurs="0" maxOccurs="unbounded">
@@ -107,14 +125,14 @@
 	</complexType>
 
 	<!-- Districts -->
-	<element name="District" substitutionGroup="ci:NamedGeoObject" type="ci:DistrictType">
+	<element name="District" substitutionGroup="gml:AbstractFeature" type="ci:DistrictType">
 		<annotation>
 			<documentation>Representation of city districts</documentation>
 		</annotation>
 	</element>
 	<complexType name="DistrictType">
 		<complexContent>
-			<extension base="ci:NamedGeoObjectType">
+			<extension base="gml:AbstractFeatureType">
 				<sequence>
 					<element name="location" type="gml:PointPropertyType">
 						<annotation>

@@ -19,6 +19,7 @@ import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -46,8 +47,11 @@ public class JaxbReaderWriter {
 
                 extractMappings(mappings, ftm, applicationSchema.getNamespaces());
 
-                xtraServerMapping.addFeatureTypeMapping(ftm);
-
+                try {
+                    xtraServerMapping.addFeatureTypeMapping(ftm);
+                } catch (IllegalArgumentException e) {
+                    //ignore
+                }
             } catch (ClassCastException e) {
                 try {
                     AdditionalMappings am = (AdditionalMappings) a;
@@ -72,7 +76,14 @@ public class JaxbReaderWriter {
         extractTables(mappings).forEach(featureTypeMapping::addTable);
         extractValues(mappings, featureTypeMapping, namespaces).forEach(featureTypeMapping::addValue);
         extractJoins(mappings, featureTypeMapping).forEach(featureTypeMapping::addJoin);
-        extractAssociationTargets(mappings).forEach(featureTypeMapping::addAssociationTarget);
+        extractAssociationTargets(mappings).forEach(associationTarget -> {
+            // ignore AssociationTargets that do not match a href mapping
+            try {
+                featureTypeMapping.addAssociationTarget(associationTarget);
+            } catch (IllegalArgumentException e) {
+                // ignore
+            }
+        });
     }
 
     private static Collection<MappingTable> extractTables(MappingsSequenceType mappings) {
@@ -84,28 +95,43 @@ public class JaxbReaderWriter {
                     MappingsSequenceType.Table table = (MappingsSequenceType.Table) mapping;
 
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty()) {
-                        if (table.getOid_Col() != null && !table.getOid_Col().isEmpty()) {
+                        if ((table.getOid_Col() != null && !table.getOid_Col().isEmpty())
+                                || (table.getTarget() != null && !table.getTarget().isEmpty() && table.getValue4() == null)) {
                             //if (table.getValue4() == null || table.getValue4().isEmpty()) {
-                            if (!mappingTables.containsKey(table.getTable_Name())) {
+                            //if (!mappingTables.containsKey(table.getTable_Name())
+                            //        || (mappingTables.get(table.getTable_Name()).hasTarget() && (table.getTarget() == null || table.getTarget().isEmpty()))) {
                                 MappingTable mappingTable = MappingTable.create();
+                                //System.out.println(table.getDerivation_Pattern() + table.getTarget() + table.getOid_Col() + table.getTable_Name());
 
                                 mappingTable.setName(table.getTable_Name());
                                 if (mappingTable.getName().contains("[")) {
-                                    System.out.println("PREDICATE " + mappingTable.getName());
+                                    //System.out.println("PREDICATE " + mappingTable.getName());
                                     mappingTable.setName(mappingTable.getName().substring(0, mappingTable.getName().indexOf("[")));
                                 }
                                 mappingTable.setOidCol(table.getOid_Col());
-                                if (mappingTable.getOidCol().contains(":=SEQUENCE")) {
+                                if (mappingTable.getOidCol() != null && mappingTable.getOidCol().contains(":=SEQUENCE")) {
                                     mappingTable.setOidCol(mappingTable.getOidCol().substring(0, mappingTable.getOidCol().indexOf(":=SEQUENCE")));
                                 }
-                                mappingTable.setTarget(table.getTarget());
 
-                                mappingTables.put(table.getTable_Name(), mappingTable);
-                            } else {
+                                mappingTable.setTarget(table.getTarget());
+                                // table definition from value mapping, shorten target to first path element
+                                if (table.getValue4() != null && !table.getValue4().isEmpty()) {
+                                    if (mappingTable.getTarget() != null && mappingTable.getTarget().contains("/")) {
+                                        mappingTable.setTarget(mappingTable.getTarget().substring(0, mappingTable.getTarget().indexOf("/")));
+                                    }
+                                }
+
+                                // TODO: add all tables, filter in hale import plugin
+                                if (!mappingTables.containsKey(mappingTable.getName())
+                                        || (mappingTables.get(mappingTable.getName()).hasTarget() && !mappingTable.hasTarget())) {
+                                    mappingTables.put(mappingTable.getName(), mappingTable);
+                                }
+                            //}
+                            /*else {
                                 MappingTable mappingTable = mappingTables.get(table.getTable_Name());
                                 String newTarget = Strings.commonPrefix(table.getTarget(), mappingTable.getTarget());
                                 mappingTable.setTarget(newTarget);
-                            }
+                            }*/
                         }
                     }
                 } catch (ClassCastException e) {
@@ -126,16 +152,18 @@ public class JaxbReaderWriter {
                     MappingsSequenceType.Table table = (MappingsSequenceType.Table) mapping;
 
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty() && ftm.hasTable(table.getTable_Name())) {
-                        if (table.getTarget() != null && !table.getTarget().isEmpty() && table.getTarget().startsWith(ftm.getTable(table.getTable_Name()).getTarget())) {
+                        if (table.getTarget() != null && !table.getTarget().isEmpty() && table.getTarget().startsWith(ftm.getTable(table.getTable_Name()).get().getTarget())) {
                             if ((table.getValue4() != null && !table.getValue4().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) || table.getTarget().endsWith("/@xlink:href")) {
                                 if (ftm.hasTable(table.getTable_Name())) {
                                     MappingValue mappingValue = MappingValue.create(namespaces);
 
-                                    mappingValue.setTable(ftm.getTable(table.getTable_Name()));//.getValues().add(mappingValue);
+                                    mappingValue.setTable(ftm.getTable(table.getTable_Name()).get());//.getValues().add(mappingValue);
                                     mappingValue.setTarget(table.getTarget());
                                     mappingValue.setValue(table.getValue4());
                                     mappingValue.setValueType(table.getValue_Type());
-                                    mappingValue.setMappingMode(table.getMapping_Mode());
+                                    if (!table.getMapping_Mode().equals("value")) {
+                                        mappingValue.setMappingMode(table.getMapping_Mode());
+                                    }
                                     mappingValue.setDbCodes(table.getDb_Codes());
                                     mappingValue.setDbValues(table.getSchema_Codes());
 
@@ -178,10 +206,10 @@ public class JaxbReaderWriter {
                     if (join.getJoin_Path() != null && !join.getJoin_Path().isEmpty()) {
                         String table = join.getJoin_Path().split("/")[0];
                         if (table.contains("[")) {
-                            System.out.println("JOIN PREDICATE " + join.getJoin_Path());
+                            //System.out.println("JOIN PREDICATE " + join.getJoin_Path());
                             table = table.substring(0, table.indexOf("["));
                         }
-                        if (ftm.hasTable(table) && (!ftm.getTable(table).hasTarget() || ftm.getTable(table).getTarget().startsWith(join.getTarget()))) {
+                        if (ftm.hasTable(table) && (ftm.getTable(table).get().hasTarget() && join.getTarget().startsWith(ftm.getTable(table).get().getTarget()))) {
                             MappingJoin mappingJoin = MappingJoin.create();
 
                             mappingJoin.setTarget(join.getTarget());
@@ -230,22 +258,13 @@ public class JaxbReaderWriter {
                 targetTableName = targetTableName.substring(0, targetTableName.indexOf("["));
             }
             String targetField = props[0].substring(4);
-            System.out.println("JOIN PREDICATE " + sourceTableName + " " + targetTableName);
+            //System.out.println("JOIN PREDICATE " + sourceTableName + " " + targetTableName);
 
-            MappingTable sourceTable = ftm.getTable(sourceTableName);
-            if (sourceTable == null) {
-                sourceTable = MappingTable.create();
-                sourceTable.setName(sourceTableName);
-                sourceTable.setOidCol("id");
-                ftm.addTable(sourceTable);
-            }
-            MappingTable targetTable = ftm.getTable(targetTableName);
-            if (targetTable == null) {
-                targetTable = MappingTable.create();
-                targetTable.setName(targetTableName);
-                targetTable.setOidCol("id");
-                ftm.addTable(targetTable);
-            }
+            MappingTable sourceTable = ftm.getTable(sourceTableName)
+                    .orElse(createVirtualTable(sourceTableName, ftm));
+
+            MappingTable targetTable = ftm.getTable(targetTableName)
+                    .orElse(createVirtualTable(targetTableName, ftm));
 
             mappingJoin.addCondition(MappingJoin.Condition.create(sourceTable, sourceField, targetTable, targetField));
 
@@ -253,6 +272,18 @@ public class JaxbReaderWriter {
         }
 
         return pathTables;
+    }
+
+    private static MappingTable createVirtualTable(String name, FeatureTypeMapping featureTypeMapping) {
+        MappingTable mappingTable = MappingTable.create();
+        mappingTable.setName(name);
+        mappingTable.setOidCol("id");
+        // TODO
+        ((MappingTableImpl) mappingTable).isJoined = true;
+
+        featureTypeMapping.addTable(mappingTable);
+
+        return mappingTable;
     }
 
     private static List<AssociationTarget> extractAssociationTargets(MappingsSequenceType mappings) {
@@ -286,7 +317,7 @@ public class JaxbReaderWriter {
                 xtraServerMapping.getFeatureTypeMappings().stream().map(featureTypeMapping -> {
                     SQLFeatureTypeImplType sqlFeatureTypeImplType = objectFactory.createSQLFeatureTypeImplType();
 
-                    createMappings(sqlFeatureTypeImplType, featureTypeMapping, objectFactory);
+                    createMappings(sqlFeatureTypeImplType, featureTypeMapping, objectFactory, xtraServerMapping);
                     createXtraServerParameters(sqlFeatureTypeImplType, featureTypeMapping);
 
                     FeatureType featureType = objectFactory.createFeatureType();
@@ -301,7 +332,7 @@ public class JaxbReaderWriter {
                 xtraServerMapping.getAdditionalMappings().stream().map(additionalMapping -> {
                     MappingsSequenceType mappingsSequenceType = objectFactory.createMappingsSequenceType();
 
-                    createMappings(mappingsSequenceType, additionalMapping, objectFactory);
+                    createMappings(mappingsSequenceType, additionalMapping, objectFactory, xtraServerMapping);
 
                     AdditionalMappings jaxbAdditionalMappings = objectFactory.createAdditionalMappings();
                     jaxbAdditionalMappings.setRootElementName(additionalMapping.getName());
@@ -390,6 +421,7 @@ public class JaxbReaderWriter {
         xtraServerMapping.getFeatureTypeList(false).forEach(featureTypeName -> {
             String featureTypeNameWithoutPrefix = Splitter.on(':').splitToList(featureTypeName).get(1);
             // TODO: get from schema
+            //((XtraServerMappingImpl)xtraServerMapping).
             String propertyName = "adv:position";
             String propertyNameWithoutPrefix = Splitter.on(':').splitToList(propertyName).get(1);
 
@@ -438,10 +470,11 @@ public class JaxbReaderWriter {
         writer.flush();
     }
 
-    private static void createMappings(MappingsSequenceType mappingsSequenceType, FeatureTypeMapping featureTypeMapping, ObjectFactory objectFactory) {
+    private static void createMappings(MappingsSequenceType mappingsSequenceType, FeatureTypeMapping featureTypeMapping, ObjectFactory objectFactory, XtraServerMapping xtraServerMapping) {
         featureTypeMapping.getTables().forEach(mappingTable -> {
             // TODO
-            if (!(mappingTable.getValues().isEmpty() && mappingTable.getJoinPaths().isEmpty())) {
+            //if (!(mappingTable.getValues().isEmpty() && mappingTable.getJoinPaths().isEmpty())) {
+            if (!(((MappingTableImpl) mappingTable).isJoined && mappingTable.getValues().isEmpty() && mappingTable.getJoinPaths().isEmpty())) {
 
                 mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
                         mappingTable.getJoinPaths().stream().map(mappingJoin -> {
@@ -475,17 +508,89 @@ public class JaxbReaderWriter {
                             return value;
                         }).collect(Collectors.toList())
                 );
+
+                mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
+                        ((MappingTableImpl) mappingTable).getAssociationTargets().stream().map(associationTarget -> {
+                            MappingsSequenceType.AssociationTarget associationTarget1 = objectFactory.createMappingsSequenceTypeAssociationTarget();
+                            associationTarget1.setObject_Ref(associationTarget.getObjectRef());
+                            associationTarget1.setTarget(associationTarget.getTarget());
+                            return associationTarget1;
+                        }).collect(Collectors.toList())
+                );
+
+                ((MappingTableImpl) mappingTable).getAssociationTargets()
+                        .forEach(associationTarget -> {
+
+                            Optional<MappingJoin> refJoin = mappingTable.getJoinPaths().stream()
+                                    .filter(mappingJoin -> mappingJoin.getTarget().equals(associationTarget.getTarget()))
+                                    .findFirst();
+
+                            Optional<MappingValue> refValue = mappingTable.getValues().stream()
+                                    .filter(value -> value.getTarget().equals(associationTarget.getTarget() + "/@xlink:href"))
+                                    .findFirst();
+
+                            Optional<FeatureTypeMapping> refMapping = ((XtraServerMappingImpl)xtraServerMapping).getTypeMapping(associationTarget.getObjectRef(), true);
+
+                            if (refValue.isPresent() && refMapping.isPresent()) {
+                                // join is not connected to FeatureType
+                                if ((refJoin.isPresent() && !refMapping.get().getPrimaryTableNames().contains(refJoin.get().getTargetTable()))
+                                        || !refMapping.get().getPrimaryTableNames().contains(refValue.get().getTable())) {
+                                    //System.out.println("Adding navigation join for AssociationTarget " + associationTarget.toString());
+                                    String sourceTable = refValue.get().getTable();
+                                    String sourceField = refValue.get().getValue().replaceAll(".*\\$T\\$\\.", "");
+                                    //System.out.println(sourceTable);
+                                    //System.out.println(sourceField);
+
+                                    // special case reference without join, add not-null predicate for optimization
+                                    if (!refJoin.isPresent()) {
+                                        MappingsSequenceType.Table predicate = objectFactory.createMappingsSequenceTypeTable();
+                                        predicate.setTable_Name(refValue.get().getTable() + "[" + refValue.get().getValue().substring(refValue.get().getValue().indexOf("$T$.")) + " IS NOT NULL]");
+                                        predicate.setTarget(associationTarget.getTarget());
+                                        mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(predicate);
+                                    }
+
+                                    List<MappingValue> refMappingIds = refMapping.get().getValues().stream()
+                                            .filter(value -> value.getTarget().equals("@gml:id"))
+                                            .collect(Collectors.toList());
+
+                                    refMappingIds.forEach(refMappingId -> {
+                                        String targetTable = refMappingId.getTable();
+                                        String targetField = refMappingId.getValue().replaceAll(".*\\$T\\$\\.", "");
+                                        //System.out.println(targetTable);
+                                        //System.out.println(targetField);
+
+                                        MappingJoin mappingJoin = MappingJoin.create();
+                                        mappingJoin.setTarget(associationTarget.getTarget() + "/" + associationTarget.getObjectRef());
+                                        mappingJoin.addCondition(MappingJoin.Condition.create(mappingTable, sourceField, refMapping.get().getTable(refMappingId.getTable()).get(), targetField));
+
+                                        MappingsSequenceType.Join join = objectFactory.createMappingsSequenceTypeJoin();
+                                        join.setAxis(mappingJoin.getAxis());
+                                        join.setTarget(mappingJoin.getTarget());
+                                        join.setJoin_Path(mappingJoin.getPath());
+                                        mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(join);
+                                    });
+
+
+                                } else {
+                                    // warn
+                                    //System.out.println("AssociationTarget is navigable " + associationTarget.toString());
+                                }
+                            } else {
+                                // warn
+                                //System.out.println("Mapping for AssociationTarget not found " + associationTarget.toString());
+                            }
+                        });
             }
         });
 
-        mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
+        /*mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
                 featureTypeMapping.getAssociationTargets().stream().map(associationTarget -> {
                     MappingsSequenceType.AssociationTarget associationTarget1 = objectFactory.createMappingsSequenceTypeAssociationTarget();
                     associationTarget1.setObject_Ref(associationTarget.getObjectRef());
                     associationTarget1.setTarget(associationTarget.getTarget());
                     return associationTarget1;
                 }).collect(Collectors.toList())
-        );
+        );*/
 
                     /*sqlFeatureTypeImplType.getTableOrJoinOrAssociationTarget().addAll(
                             featureTypeMapping.getTables().stream().map(mappingTable -> {

@@ -25,6 +25,15 @@ public class MappingJoinImpl implements MappingJoin {
         this.joinConditions = new ArrayList<>();
     }
 
+    MappingJoinImpl(MappingJoinImpl mappingJoin) {
+        this.target = mappingJoin.target;
+        this.axis = mappingJoin.axis;
+        this.suppressJoin = mappingJoin.suppressJoin;
+        this.path = mappingJoin.path;
+        this.joinConditions = new ArrayList<>();
+        this.joinConditions.addAll(mappingJoin.joinConditions);
+    }
+
     private String buildJoinPath(List<Condition> conditions) {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -146,12 +155,12 @@ public class MappingJoinImpl implements MappingJoin {
     }
 
     public static class ConditionImpl implements Condition {
-        private final MappingTable sourceTable;
+        private final String sourceTable;
         private final String sourceField;
-        private final MappingTable targetTable;
+        private final String targetTable;
         private final String targetField;
 
-        public ConditionImpl(MappingTable sourceTable, String sourceField, MappingTable targetTable, String targetField) {
+        public ConditionImpl(String sourceTable, String sourceField, String targetTable, String targetField) {
             this.sourceTable = sourceTable;
             this.sourceField = sourceField;
             this.targetTable = targetTable;
@@ -160,7 +169,7 @@ public class MappingJoinImpl implements MappingJoin {
 
         @Override
         public String getSourceTable() {
-            return sourceTable.getName();
+            return sourceTable;
         }
 
         @Override
@@ -170,7 +179,7 @@ public class MappingJoinImpl implements MappingJoin {
 
         @Override
         public String getTargetTable() {
-            return targetTable.getName();
+            return targetTable;
         }
 
         @Override
@@ -180,7 +189,7 @@ public class MappingJoinImpl implements MappingJoin {
 
         @Override
         public String toString() {
-            return sourceTable.getName() + "[" + sourceField + "]=" + targetTable.getName() + "[" + targetField + "]";
+            return sourceTable + "[" + sourceField + "]=" + targetTable + "[" + targetField + "]";
         }
 
         @Override

@@ -12,6 +12,15 @@ public class AssociationTargetImpl implements AssociationTarget {
     private String objectRef;
     private String target;
 
+    public AssociationTargetImpl() {
+
+    }
+
+    AssociationTargetImpl(AssociationTargetImpl associationTarget) {
+        this.objectRef = associationTarget.objectRef;
+        this.target = associationTarget.target;
+    }
+
     @Override
     public String getObjectRef() {
         return objectRef;

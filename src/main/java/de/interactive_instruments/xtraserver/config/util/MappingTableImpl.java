@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
+import de.interactive_instruments.xtraserver.config.util.api.AssociationTarget;
 import de.interactive_instruments.xtraserver.config.util.api.MappingJoin;
 import de.interactive_instruments.xtraserver.config.util.api.MappingTable;
 import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
@@ -20,35 +21,62 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     private String name;
     private String oidCol;
     private String target;
+    public boolean isJoined;
 
     private final List<MappingJoin> joinPaths;
     private final List<MappingValue> values;
+    private final List<AssociationTarget> associationTargets;
 
     public MappingTableImpl() {
         this.joinPaths = new ArrayList<>();
         this.values = new ArrayList<>();
+        this.associationTargets = new ArrayList<>();
         this.target = "";
+    }
+
+    MappingTableImpl(MappingTableImpl mappingTable) {
+        this.name = mappingTable.name;
+        this.oidCol = mappingTable.oidCol;
+        this.target = mappingTable.target;
+        this.joinPaths = new ArrayList<>();
+        this.values = new ArrayList<>();
+        this.associationTargets = new ArrayList<>();
+        this.isJoined = ((MappingTableImpl)mappingTable).isJoined;
+
+        mappingTable.joinPaths.forEach(mappingJoin -> this.joinPaths.add(new MappingJoinImpl((MappingJoinImpl) mappingJoin)));
+        mappingTable.values.forEach(mappingValue -> this.values.add(new MappingValueImpl((MappingValueImpl) mappingValue)));
+        mappingTable.associationTargets.forEach(associationTarget -> this.associationTargets.add(new AssociationTargetImpl((AssociationTargetImpl) associationTarget)));
     }
 
     MappingTableImpl(MappingTable mappingTable, String target) {
         this.name = mappingTable.getName();
         this.oidCol = mappingTable.getOidCol();
         this.target = target;
-        this.joinPaths = Lists.newArrayList(Collections2.filter(mappingTable.getJoinPaths(), new Predicate<MappingJoin>() {
-            @Override
-            public boolean apply(MappingJoin join) {
-                return join.getTarget().equals(target);
-            }
-        }));
+        this.joinPaths = new ArrayList<>();//Lists.newArrayList(Collections2.filter(mappingTable.getJoinPaths(), join -> join.getTarget().equals(target)));
         this.values = new ArrayList<>();
+        this.associationTargets = new ArrayList<>();
+        this.isJoined = ((MappingTableImpl)mappingTable).isJoined;
+
+        mappingTable.getJoinPaths().stream()
+                .filter(mappingJoin -> mappingJoin.getTarget().equals(target))
+                .forEach(mappingJoin -> this.joinPaths.add(new MappingJoinImpl((MappingJoinImpl) mappingJoin)));
+        ((MappingTableImpl) mappingTable).getAssociationTargets().stream()
+                .filter(associationTarget -> associationTarget.getTarget().equals(target))
+                .forEach(associationTarget -> this.associationTargets.add(new AssociationTargetImpl((AssociationTargetImpl) associationTarget)));
     }
 
     MappingTableImpl(MappingTable mappingTable, MappingJoin join) {
         this.name = mappingTable.getName();
         this.oidCol = mappingTable.getOidCol();
         this.target = join.getTarget();
-        this.joinPaths = Lists.newArrayList(join);
+        this.joinPaths = Lists.newArrayList(new MappingJoinImpl((MappingJoinImpl) join));
         this.values = new ArrayList<>();
+        this.associationTargets = new ArrayList<>();
+        this.isJoined = ((MappingTableImpl)mappingTable).isJoined;
+
+        ((MappingTableImpl) mappingTable).getAssociationTargets().stream()
+                .filter(associationTarget -> associationTarget.getTarget().equals(target))
+                .forEach(associationTarget -> this.associationTargets.add(new AssociationTargetImpl((AssociationTargetImpl) associationTarget)));
     }
 
     @Override
@@ -79,6 +107,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     @Override
     public void setTarget(String target) {
         this.target = target;
+        joinPaths.forEach(mappingJoin -> mappingJoin.setTarget(target));
     }
 
     @Override
@@ -86,7 +115,12 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
 
     @Override
     public boolean isPrimary() {
-        return !hasTarget() && !hasJoinPath() && !values.isEmpty();
+        return !hasTarget() && !hasJoinPath() /*&& !values.isEmpty()*/ && !isJoined;
+    }
+
+    @Override
+    public void setJoined(boolean joined) {
+        isJoined = joined;
     }
 
     @Override
@@ -101,7 +135,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
 
     @Override
     public boolean hasJoinPath() {
-        return !this.joinPaths.isEmpty();
+        return this.joinPaths.stream().anyMatch(mappingJoin -> !mappingJoin.isSuppressJoin());
     }
 
     void addValue(MappingValue value) {
@@ -140,5 +174,15 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
                 "\n, joinPaths=" + joinPaths +
                 "\n, values=" + values +
                 "\n}";
+    }
+
+    List<AssociationTarget> getAssociationTargets() {
+        return associationTargets;
+    }
+
+    void addAssociationTarget(AssociationTarget associationTarget) {
+        if (!associationTargets.contains(associationTarget)) {
+            associationTargets.add(associationTarget);
+        }
     }
 }

@@ -166,17 +166,21 @@ public class ApplicationSchema {
     }
 
     public List<XmlSchemaComplexType> getAllTypes(QName featureType) {
+         return getAllParentTypes(xmlSchema.getTypeByName(featureType));
+    }
+
+    public List<XmlSchemaComplexType> getAllParentTypes(XmlSchemaType type) {
         List<XmlSchemaComplexType> types = new ArrayList<>();
 
         try {
-            XmlSchemaComplexType type = (XmlSchemaComplexType) xmlSchema.getTypeByName(featureType);
+            XmlSchemaComplexType complexType = (XmlSchemaComplexType) type;
             QName lastBaseType = null;
 
             // recursively find the extension base type and add it to the list
-            while (type != null) {
-                types.add(type);
+            while (complexType != null) {
+                types.add(complexType);
 
-                XmlSchemaContentModel model = type.getContentModel();
+                XmlSchemaContentModel model = complexType.getContentModel();
                 if (model != null) {
                     XmlSchemaContent content = model.getContent();
                     if (content != null && content instanceof XmlSchemaComplexContentExtension) {
@@ -184,8 +188,8 @@ public class ApplicationSchema {
                         QName baseType = ext.getBaseTypeName();
 
                         if (baseType != null) {
-                            type = (XmlSchemaComplexType) xmlSchema.getTypeByName(baseType);
-                            boolean next = type != null && !baseType.equals(lastBaseType);
+                            complexType = (XmlSchemaComplexType) xmlSchema.getTypeByName(baseType);
+                            boolean next = complexType != null && !baseType.equals(lastBaseType);
                             lastBaseType = baseType;
                             if (next) continue;
                         }
@@ -201,6 +205,16 @@ public class ApplicationSchema {
         return Lists.reverse(types);
     }
 
+    // TODO
+    public boolean isGeometry(XmlSchemaComplexType type, QName propertyName) {
+        XmlSchemaElement element = getProperty(type, propertyName);
+        if (element != null) {
+            //System.out.println(getAllParentTypes(element.getSchemaType()));
+        }
+
+        return false;
+    }
+
     public List<XmlSchemaElement> getAllElements(QName featureType) {
         List<XmlSchemaComplexType> types = getAllTypes(featureType);
 
@@ -209,7 +223,7 @@ public class ApplicationSchema {
             Iterator i = xmlSchema.getElements().getValues();
             while (i.hasNext()) {
                 XmlSchemaElement element = (XmlSchemaElement) i.next();
-                System.out.println("FeatureTypes:" + type.getName() + " - " + element.getName());
+                //System.out.println("FeatureTypes:" + type.getName() + " - " + element.getName());
                 if (type.getQName().equals(element.getSchemaTypeName())) {
                     return element;
                 }
@@ -261,5 +275,33 @@ public class ApplicationSchema {
         }
 
         return false;
+    }
+
+
+
+    public XmlSchemaElement getProperty(XmlSchemaComplexType type, QName propertyName) {
+        try {
+            // check if property is contained in the element sequence of the type
+            XmlSchemaContentModel model = type.getContentModel();
+            if (model != null) {
+                XmlSchemaContent content = model.getContent();
+                if (content != null && content instanceof XmlSchemaComplexContentExtension) {
+                    XmlSchemaComplexContentExtension ext = (XmlSchemaComplexContentExtension) content;
+                    XmlSchemaSequence sequence = (XmlSchemaSequence) ext.getParticle();
+                    Iterator i = sequence.getItems().getIterator();
+                    while(i.hasNext()) {
+                        XmlSchemaElement element = (XmlSchemaElement) i.next();
+                        if (element.getQName() != null && element.getQName().equals(propertyName)) {
+                            return element;
+                        }
+                    }
+                }
+            }
+
+        } catch (ClassCastException e) {
+            // ignore
+        }
+
+        return null;
     }
 }

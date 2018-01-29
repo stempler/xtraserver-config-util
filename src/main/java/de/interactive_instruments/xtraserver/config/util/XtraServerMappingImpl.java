@@ -59,7 +59,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
         if (featureTypeMappingOptional.isPresent() && flattenInheritance) {
             List<String> parents = applicationSchema.getAllParents(featureTypeMappingOptional.get().getName());
             List<FeatureTypeMapping> parentMappings = parents.stream().filter(this::hasType).map(this::getTypeMapping).map(Optional::get).collect(Collectors.toList());
-            featureTypeMappingOptional = Optional.of(new FeatureTypeMappingImpl(featureTypeMappingOptional.get(), parentMappings, applicationSchema.getNamespaces()));
+            return Optional.of(new FeatureTypeMappingImpl(featureTypeMappingOptional.get(), parentMappings, applicationSchema.getNamespaces()));
         }
 
         return featureTypeMappingOptional;
@@ -88,7 +88,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
         return getTypeMapping(type, false);
     }
 
-    private Optional<FeatureTypeMapping> getTypeMapping(String type, boolean flattenInheritance) {
+    public Optional<FeatureTypeMapping> getTypeMapping(String type, boolean flattenInheritance) {
         Optional<FeatureTypeMapping> optionalFeatureTypeMapping = getTypeMappingOptional(featureTypeMappings, type, flattenInheritance);
 
         if (!optionalFeatureTypeMapping.isPresent()) {
@@ -131,7 +131,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
         if (fanOutInheritance) {
             //List<XmlSchemaComplexType> types = applicationSchema.getAllTypes(featureTypeMapping.getQName());
             List<XmlSchemaElement> types = applicationSchema.getAllElements(featureTypeMapping.getQName());
-            System.out.println("FeatureTypes:" + types);
+            //System.out.println("FeatureTypes:" + types);
 
             //for (XmlSchemaComplexType type : types) {
             for (XmlSchemaElement element : types) {
@@ -143,60 +143,104 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                 //typeName = typeName.replace("AbstractGMLType", "AbstractFeatureType");
                 String typeName = applicationSchema.getNamespaces().getPrefixedName(element.getQName());
                 typeName = typeName.replace("AbstractGML", "AbstractFeature");
-                FeatureTypeMapping featureTypeMapping1 = getTypeMappingOptional(element.isAbstract() ? additionalMappings : featureTypeMappings, typeName).orElse(new FeatureTypeMappingImpl(typeName, type.getQName(), applicationSchema.getNamespaces()));
+                FeatureTypeMapping parentFeatureTypeMapping = getTypeMapping(typeName).orElse(new FeatureTypeMappingImpl(typeName, type.getQName(), applicationSchema.getNamespaces()));
 
                 for (MappingTable mappingTable : featureTypeMapping.getTables()) {
-                    if (mappingTable.getTarget() != null && !mappingTable.getTarget().isEmpty()) {
-                        QName property = applicationSchema.getNamespaces().getQualifiedName(mappingTable.getTarget().split("/")[0]);
-                        if (property != null && applicationSchema.hasProperty(type, property)) {
-                            System.out.println("Property:" + mappingTable.getTarget() + " || " + type.getName());
-                            featureTypeMapping1.addTable(mappingTable);
-                            mappingTable.getValues().forEach(featureTypeMapping1::addValue);
-                        }
-                    } else {
-                        MappingTable mappingTable1 = new MappingTableImpl();
-                        mappingTable1.setOidCol(mappingTable.getOidCol());
-                        mappingTable1.setName(mappingTable.getName());
-                        featureTypeMapping1.addTable(mappingTable1);
+                    if (mappingTable.isPrimary()) {
+                        // TODO: PrimaryTable
+
+                        MappingTable parentMappingTable = parentFeatureTypeMapping.getTable(mappingTable.getName())
+                                .orElse(copyTableShallow(parentFeatureTypeMapping, mappingTable));
 
                         for (MappingValue mappingValue : mappingTable.getValues()) {
-                            if (mappingValue.getTarget() != null && !mappingValue.getTarget().isEmpty()) {
-                                QName property = applicationSchema.getNamespaces().getQualifiedName(mappingValue.getTarget().split("/")[0]);
-                                if (property != null && applicationSchema.hasProperty(type, property)) {
-                                    System.out.println("Property2:" + mappingValue.getTarget() + " || " + type.getName());
-                                    mappingTable1.getValues().add(mappingValue);
-                                    featureTypeMapping1.addValue(mappingValue);
+                            List<QName> pathElements = applicationSchema.getNamespaces().getQualifiedPathElements(mappingValue.getTarget());
+
+                            if (!pathElements.isEmpty() && applicationSchema.hasProperty(type, pathElements.get(0))) {
+                                //System.out.println("Property2:" + mappingValue.getTarget() + " || " + type.getName());
+
+                                if (applicationSchema.isGeometry(type, pathElements.get(0))) {
+                                    // TODO: set isGeometry on value
+                                }
+
+                                if (!parentMappingTable.getValues().contains(mappingValue)) {
+                                    parentMappingTable.getValues().add(mappingValue);
+                                    parentFeatureTypeMapping.addValue(mappingValue);
                                 }
                             }
                         }
-                    }
-                }
-                for (AssociationTarget associationTarget : featureTypeMapping.getAssociationTargets()) {
-                    if (associationTarget.getTarget() != null && !associationTarget.getTarget().isEmpty()) {
-                        QName property = applicationSchema.getNamespaces().getQualifiedName(associationTarget.getTarget().split("/")[0]);
-                        if (property != null && applicationSchema.hasProperty(type, property)) {
-                            System.out.println("AssociationTarget:" + associationTarget.getTarget() + " || " + type.getName());
-                            featureTypeMapping1.addAssociationTarget(associationTarget);
+
+                        for (AssociationTarget associationTarget : ((MappingTableImpl) mappingTable).getAssociationTargets()) {
+                            List<QName> pathElements = applicationSchema.getNamespaces().getQualifiedPathElements(associationTarget.getTarget());
+
+                            if (!pathElements.isEmpty() && applicationSchema.hasProperty(type, pathElements.get(0))) {
+                                parentFeatureTypeMapping.addAssociationTarget(associationTarget);
+                            }
+                        }
+                    } else {
+                        // TODO: JoinedTable
+                        List<QName> pathElements = applicationSchema.getNamespaces().getQualifiedPathElements(mappingTable.getTarget());
+
+                        if (!pathElements.isEmpty() && applicationSchema.hasProperty(type, pathElements.get(0))) {
+                            //System.out.println("Property:" + mappingTable.getTarget() + " || " + type.getName());
+
+                            // TODO: mergeTable
+                            MappingTable parentMappingTable = parentFeatureTypeMapping.getTable(mappingTable.getName(), mappingTable.getTarget())
+                                    .orElse(copyTableShallow(parentFeatureTypeMapping, mappingTable));
+
+                            mappingTable.getValues().forEach(parentFeatureTypeMapping::addValue);
+                            mappingTable.getValues().forEach(parentMappingTable.getValues()::add);
+                            //mappingTable.getJoinPaths().forEach(parentFeatureTypeMapping::addJoin);
+                            //((MappingTableImpl) mappingTable).getAssociationTargets().forEach(parentFeatureTypeMapping::addAssociationTarget);
                         }
                     }
                 }
-                if (element.isAbstract() && !typeName.endsWith("AbstractFeature")) {
-                    if (!hasAbstractType(typeName)) {
-                        additionalMappings.add(featureTypeMapping1);
+
+                for (MappingTable mappingTable : featureTypeMapping.getTables()) {
+                    if (!mappingTable.isPrimary()) {
+                        List<QName> pathElements = applicationSchema.getNamespaces().getQualifiedPathElements(mappingTable.getTarget());
+
+                        if (!pathElements.isEmpty() && applicationSchema.hasProperty(type, pathElements.get(0))) {
+                            //System.out.println("Property:" + mappingTable.getTarget() + " || " + type.getName());
+
+                            // TODO: mergeTable
+                            MappingTable parentMappingTable = parentFeatureTypeMapping.getTable(mappingTable.getName(), mappingTable.getTarget())
+                                    .orElse(copyTableShallow(parentFeatureTypeMapping, mappingTable));
+
+                            //mappingTable.getValues().forEach(parentFeatureTypeMapping::addValue);
+                            //mappingTable.getValues().forEach(parentMappingTable.getValues()::add);
+                            mappingTable.getJoinPaths().forEach(parentFeatureTypeMapping::addJoin);
+                            ((MappingTableImpl) mappingTable).getAssociationTargets().forEach(parentFeatureTypeMapping::addAssociationTarget);
+                        }
                     }
                 }
-                else if (!hasFeatureType(typeName)) {
-                    featureTypeMappings.add(featureTypeMapping1);
+
+                if (type.isAbstract() && !typeName.endsWith("AbstractFeature")) {
+                    if (!hasAbstractType(typeName)) {
+                        additionalMappings.add(parentFeatureTypeMapping);
+                    }
+                } else if (!hasFeatureType(typeName)) {
+                    featureTypeMappings.add(parentFeatureTypeMapping);
                 }
             }
         } else {
-            if(applicationSchema.isAbstract(featureTypeMapping.getName()) && !featureTypeMapping.getName().endsWith("AbstractFeature")) {
+            if (applicationSchema.isAbstract(featureTypeMapping.getName()) && !featureTypeMapping.getName().endsWith("AbstractFeature")) {
                 additionalMappings.add(featureTypeMapping);
             } else {
                 featureTypeMappings.add(featureTypeMapping);
             }
         }
 
+    }
+
+    private MappingTable copyTableShallow(FeatureTypeMapping featureTypeMapping, MappingTable mappingTable) {
+           MappingTable parentMappingTable = MappingTable.create();
+           parentMappingTable.setOidCol(mappingTable.getOidCol());
+           parentMappingTable.setName(mappingTable.getName());
+           parentMappingTable.setTarget(mappingTable.getTarget());
+           //TODO
+           ((MappingTableImpl)parentMappingTable).isJoined = ((MappingTableImpl)mappingTable).isJoined;
+           featureTypeMapping.addTable(parentMappingTable);
+           return parentMappingTable;
     }
 
     @Override
@@ -237,7 +281,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                 );
 
                 System.out.println("  Root Tables: \n" + Joiner.on("\n").join(rootTables) + "\n");
-                System.out.println("  Self Joins: \n" + Joiner.on("\n").join(ftm.getTable((String) ftm.getPrimaryTableNames().toArray()[0]).getJoinPaths()) + "\n");
+                System.out.println("  Self Joins: \n" + Joiner.on("\n").join(ftm.getTable((String) ftm.getPrimaryTableNames().toArray()[0]).get().getJoinPaths()) + "\n");
                 System.out.println("  Multi Joins: \n" + Joiner.on("\n").join(multiJoins) + "\n");
                 System.out.println("  Joined Value Tables: \n" + Joiner.on("\n").join(joinedTables) + "\n");
                 System.out.println("  Joined Reference Tables: \n" + Joiner.on("\n").join(referenceTables) + "\n");
@@ -258,7 +302,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
     private Collection<String> getDecoratedTableNames(Collection<String> tableNames, FeatureTypeMapping ftm) {
         return Collections2.transform(tableNames, tableName -> {
-            MappingTable table = ftm.getTable(tableName);
+            MappingTable table = ftm.getTable(tableName).get();
             String name = table.getName() + "[" + table.getOidCol() + "]";
             if (!table.isPrimary())
                 name += "[" + table.getJoinPaths().get(0).toString() + "]";
