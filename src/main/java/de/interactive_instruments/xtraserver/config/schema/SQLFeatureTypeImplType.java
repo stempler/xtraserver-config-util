@@ -1,10 +1,3 @@
-//
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2017.07.26 um 01:38:15 PM CEST 
-//
-
 
 package de.interactive_instruments.xtraserver.config.schema;
 
@@ -20,21 +13,21 @@ import javax.xml.bind.annotation.XmlType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType name="SQLFeatureTypeImplType">
- *   &lt;complexContent>
- *     &lt;extension base="{http://www.interactive-instruments.de/namespaces/XtraServer}MappingsSequenceType">
- *       &lt;attribute name="logging" default="false">
- *         &lt;simpleType>
- *           &lt;union memberTypes=" {http://www.w3.org/2001/XMLSchema}boolean {http://www.interactive-instruments.de/namespaces/XtraServer}loggingExtensionType">
- *           &lt;/union>
- *         &lt;/simpleType>
- *       &lt;/attribute>
- *       &lt;attribute name="useTempTable" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
- *       &lt;attribute name="tempTableName" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="FTCode" type="{http://www.w3.org/2001/XMLSchema}string" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="SQLFeatureTypeImplType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{http://www.interactive-instruments.de/namespaces/XtraServer}MappingsSequenceType"&gt;
+ *       &lt;attribute name="logging" default="false"&gt;
+ *         &lt;simpleType&gt;
+ *           &lt;union memberTypes=" {http://www.w3.org/2001/XMLSchema}boolean {http://www.interactive-instruments.de/namespaces/XtraServer}loggingExtensionType"&gt;
+ *           &lt;/union&gt;
+ *         &lt;/simpleType&gt;
+ *       &lt;/attribute&gt;
+ *       &lt;attribute name="useTempTable" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" /&gt;
+ *       &lt;attribute name="tempTableName" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="FTCode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

@@ -6,6 +6,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
+        classpath 'org.unbroken-dome.gradle-plugins:gradle-xjc-plugin:1.1.3'
     }
 }
 
@@ -13,6 +14,7 @@ apply plugin: 'java'
 apply plugin: 'osgi'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'org.unbroken-dome.xjc'
 
 version = '0.9.0.' + new Date().format("yyyyMMddHHmmss")
 group = 'de.interactive_instruments'
@@ -42,6 +44,17 @@ test {
     testLogging {
         events "PASSED", "STARTED", "FAILED", "SKIPPED", "standard_out", "standard_error"
     }
+}
+
+xjc {
+    includeInMainCompilation = false
+}
+
+xjcGenerate {
+    source = fileTree('src/main/resources/XtraServer_Mapping.xsd')
+    bindingFiles = fileTree('src/main/resources/bindings.xjb')
+    outputDirectory = file('src/main/java')
+    targetPackage = 'de.interactive_instruments.xtraserver.config.schema'
 }
 
 javadoc {

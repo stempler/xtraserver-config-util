@@ -16,21 +16,24 @@
 					<xsd:complexType>
 						<xsd:simpleContent>
 							<xsd:extension base="xsd:string">
+								<xsd:attribute name="apply_mapping_to_path" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="applyMappingToPath" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="assign" use="optional" type="xsd:string"/>
+								<xsd:attribute name="assign1" use="optional" type="xsd:string"/>
+								<xsd:attribute name="db_codes" use="optional" type="xsd:string"/>
+								<xsd:attribute name="derivation_pattern" use="optional" type="xsd:string"/>
+								<xsd:attribute name="disambiguate" use="optional" type="xsd:string"/>
+								<xsd:attribute name="filter_mapping" type="xsd:boolean" use="optional" default="false"/>
+								<xsd:attribute name="for_each_select_id" use="optional" type="xsd:string"/>
+								<xsd:attribute name="ft_col" use="optional" type="xsd:string"/>
+								<xsd:attribute name="generator" use="optional" type="xsd:string"/>
 								<xsd:attribute name="gmlVersion" type="xsd:string" use="optional"/>
-								<xsd:attribute name="id" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="target" use="optional" type="xsd:string" default="">
-								</xsd:attribute>
-								<xsd:attribute name="match" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="disambiguate" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="map_targetpath" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="apply_mapping_to_path" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="applyMappingToPath" use="optional" type="xsd:boolean" >
-								</xsd:attribute>
+								<xsd:attribute name="id" use="optional" type="xsd:string"/>
+								<xsd:attribute name="is_reference" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="isMappedGeometry" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="isReference" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="map_targetpath" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="mapped_geometry" use="optional" type="xsd:boolean"/>
 								<xsd:attribute name="mapping_mode" use="optional" default="value">
 									<xsd:simpleType>
 										<xsd:restriction base="xsd:string">
@@ -41,67 +44,27 @@
 										</xsd:restriction>
 									</xsd:simpleType>
 								</xsd:attribute>
-								<xsd:attribute name="filter_mapping" type="xsd:boolean" use="optional" default="false">
-								</xsd:attribute>
-								<xsd:attribute name="no_output" type="xsd:boolean" use="optional" >
-								</xsd:attribute>
-								<xsd:attribute name="noOutput" type="xsd:boolean" use="optional">
-								</xsd:attribute>
-								<xsd:attribute name="table_name" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="oid_col" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="ft_col" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="generator" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="value" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="value_type" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="valueType" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="srs" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="srid" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="mapped_geometry" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="isMappedGeometry" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="use_geotypes" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="useGeotypes" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="assign" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="assign1" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="significant_for_emptiness" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="significantForEmptiness" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="suppress_xml_entities_encoding" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="suppressXMLEntitiesEncoding" use="optional" type="xsd:boolean">
-								</xsd:attribute>
-								<xsd:attribute name="is_reference" use="optional" type="xsd:boolean" >
-								</xsd:attribute>
-								<xsd:attribute name="isReference" use="optional" type="xsd:boolean" >
-								</xsd:attribute>
-								<xsd:attribute name="derivation_pattern" use="optional" type="xsd:string"/>
-								<xsd:attribute name="db_codes" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="schema_codes" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="nil_value" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="nil_reason" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="for_each_select_id" use="optional" type="xsd:string">
-								</xsd:attribute>
-								<xsd:attribute name="select_id" use="optional" type="xsd:string">
-								</xsd:attribute>
+								<xsd:attribute name="match" use="optional" type="xsd:string"/>
+								<xsd:attribute name="nil_reason" use="optional" type="xsd:string"/>
+								<xsd:attribute name="nil_value" use="optional" type="xsd:string"/>
+								<xsd:attribute name="no_output" type="xsd:boolean" use="optional"/>
+								<xsd:attribute name="noOutput" type="xsd:boolean" use="optional"/>
+								<xsd:attribute name="oid_col" use="optional" type="xsd:string"/>
+								<xsd:attribute name="schema_codes" use="optional" type="xsd:string"/>
+								<xsd:attribute name="select_id" use="optional" type="xsd:string"/>
+								<xsd:attribute name="significant_for_emptiness" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="significantForEmptiness" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="srid" use="optional" type="xsd:string"/>
+								<xsd:attribute name="srs" use="optional" type="xsd:string"/>
+								<xsd:attribute name="suppress_xml_entities_encoding" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="suppressXMLEntitiesEncoding" use="optional" type="xsd:boolean"/>
+								<xsd:attribute name="table_name" use="optional" type="xsd:string"/>
+								<xsd:attribute name="target" use="optional" type="xsd:string" default=""/>
+								<xsd:attribute name="use_geotypes" use="optional" type="xsd:string"/>
+								<xsd:attribute name="useGeotypes" use="optional" type="xsd:string"/>
+								<xsd:attribute name="value" use="optional" type="xsd:string"/>
+								<xsd:attribute name="value_type" use="optional" type="xsd:string"/>
+								<xsd:attribute name="valueType" use="optional" type="xsd:string"/>
 							</xsd:extension>
 						</xsd:simpleContent>
 					</xsd:complexType>

@@ -1,10 +1,3 @@
-//
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2017.07.26 um 01:38:15 PM CEST 
-//
-
 
 package de.interactive_instruments.xtraserver.config.schema;
 
@@ -17,7 +10,7 @@ import javax.xml.namespace.QName;
 /**
  * This object contains factory methods for each 
  * Java content interface and Java element interface 
- * generated in the de.interactive_instruments.xtraserver.schema package. 
+ * generated in the de.interactive_instruments.xtraserver.config.schema package. 
  * <p>An ObjectFactory allows you to programatically 
  * construct new instances of the Java representation 
  * for XML content. The Java representation of XML 
@@ -31,15 +24,15 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Title_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "Title");
+    private final static QName _Mappings_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "Mappings");
     private final static QName _Name_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "Name");
+    private final static QName _Title_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "Title");
     private final static QName _OraSFeatureTypeImpl_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "OraSFeatureTypeImpl");
     private final static QName _PGISFeatureTypeImpl_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "PGISFeatureTypeImpl");
     private final static QName _GDBSQLFeatureTypeImpl_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "GDBSQLFeatureTypeImpl");
-    private final static QName _Mappings_QNAME = new QName("http://www.interactive-instruments.de/namespaces/XtraServer", "Mappings");
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: de.interactive_instruments.xtraserver.schema
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: de.interactive_instruments.xtraserver.config.schema
      * 
      */
     public ObjectFactory() {
@@ -86,19 +79,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link FeatureTypes }
-     * 
-     */
-    public FeatureTypes createFeatureTypes() {
-        return new FeatureTypes();
-    }
-
-    /**
      * Create an instance of {@link AdditionalMappings }
      * 
      */
     public AdditionalMappings createAdditionalMappings() {
         return new AdditionalMappings();
+    }
+
+    /**
+     * Create an instance of {@link FeatureTypes }
+     * 
+     */
+    public FeatureTypes createFeatureTypes() {
+        return new FeatureTypes();
     }
 
     /**
@@ -150,12 +143,12 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
+     * Create an instance of {@link JAXBElement }{@code <}{@link MappingsSequenceType }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://www.interactive-instruments.de/namespaces/XtraServer", name = "Title")
-    public JAXBElement<String> createTitle(String value) {
-        return new JAXBElement<String>(_Title_QNAME, String.class, null, value);
+    @XmlElementDecl(namespace = "http://www.interactive-instruments.de/namespaces/XtraServer", name = "Mappings")
+    public JAXBElement<MappingsSequenceType> createMappings(MappingsSequenceType value) {
+        return new JAXBElement<MappingsSequenceType>(_Mappings_QNAME, MappingsSequenceType.class, null, value);
     }
 
     /**
@@ -165,6 +158,15 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.interactive-instruments.de/namespaces/XtraServer", name = "Name")
     public JAXBElement<String> createName(String value) {
         return new JAXBElement<String>(_Name_QNAME, String.class, null, value);
+    }
+
+    /**
+     * Create an instance of {@link JAXBElement }{@code <}{@link String }{@code >}}
+     * 
+     */
+    @XmlElementDecl(namespace = "http://www.interactive-instruments.de/namespaces/XtraServer", name = "Title")
+    public JAXBElement<String> createTitle(String value) {
+        return new JAXBElement<String>(_Title_QNAME, String.class, null, value);
     }
 
     /**
@@ -192,15 +194,6 @@ public class ObjectFactory {
     @XmlElementDecl(namespace = "http://www.interactive-instruments.de/namespaces/XtraServer", name = "GDBSQLFeatureTypeImpl")
     public JAXBElement<SQLFeatureTypeImplType> createGDBSQLFeatureTypeImpl(SQLFeatureTypeImplType value) {
         return new JAXBElement<SQLFeatureTypeImplType>(_GDBSQLFeatureTypeImpl_QNAME, SQLFeatureTypeImplType.class, null, value);
-    }
-
-    /**
-     * Create an instance of {@link JAXBElement }{@code <}{@link MappingsSequenceType }{@code >}}
-     * 
-     */
-    @XmlElementDecl(namespace = "http://www.interactive-instruments.de/namespaces/XtraServer", name = "Mappings")
-    public JAXBElement<MappingsSequenceType> createMappings(MappingsSequenceType value) {
-        return new JAXBElement<MappingsSequenceType>(_Mappings_QNAME, MappingsSequenceType.class, null, value);
     }
 
 }

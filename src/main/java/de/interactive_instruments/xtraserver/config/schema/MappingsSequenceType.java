@@ -1,10 +1,3 @@
-//
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2017.07.26 um 01:38:15 PM CEST 
-//
-
 
 package de.interactive_instruments.xtraserver.config.schema;
 
@@ -26,124 +19,124 @@ import javax.xml.bind.annotation.XmlValue;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType name="MappingsSequenceType">
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;choice maxOccurs="unbounded" minOccurs="0">
- *           &lt;element name="Table">
- *             &lt;complexType>
- *               &lt;simpleContent>
- *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
- *                   &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="map_targetpath" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="apply_mapping_to_path" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="applyMappingToPath" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="mapping_mode" default="value">
- *                     &lt;simpleType>
- *                       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *                         &lt;enumeration value="value"/>
- *                         &lt;enumeration value="nil"/>
- *                         &lt;enumeration value="nil_attr"/>
- *                         &lt;enumeration value="nilAttr"/>
- *                       &lt;/restriction>
- *                     &lt;/simpleType>
- *                   &lt;/attribute>
- *                   &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
- *                   &lt;attribute name="no_output" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="noOutput" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="table_name" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="oid_col" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="ft_col" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="generator" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="value_type" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="valueType" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="srs" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="srid" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="mapped_geometry" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="isMappedGeometry" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="use_geotypes" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="useGeotypes" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="assign" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="assign1" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="significant_for_emptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="significantForEmptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="suppress_xml_entities_encoding" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="suppressXMLEntitiesEncoding" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="is_reference" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="isReference" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *                   &lt;attribute name="derivation_pattern" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="db_codes" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="schema_codes" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="nil_value" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="nil_reason" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="for_each_select_id" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="select_id" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;/extension>
- *               &lt;/simpleContent>
- *             &lt;/complexType>
- *           &lt;/element>
- *           &lt;element name="Join">
- *             &lt;complexType>
- *               &lt;simpleContent>
- *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
- *                   &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
- *                   &lt;attribute name="join_path" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="axis" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="idref" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;/extension>
- *               &lt;/simpleContent>
- *             &lt;/complexType>
- *           &lt;/element>
- *           &lt;element name="AssociationTarget">
- *             &lt;complexType>
- *               &lt;simpleContent>
- *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
- *                   &lt;attribute name="object_ref" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;/extension>
- *               &lt;/simpleContent>
- *             &lt;/complexType>
- *           &lt;/element>
- *           &lt;element name="Content">
- *             &lt;complexType>
- *               &lt;simpleContent>
- *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
- *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
- *                   &lt;attribute name="representation" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="mode" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;/extension>
- *               &lt;/simpleContent>
- *             &lt;/complexType>
- *           &lt;/element>
- *           &lt;element name="Substitution">
- *             &lt;complexType>
- *               &lt;complexContent>
- *                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
- *                   &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" />
- *                 &lt;/restriction>
- *               &lt;/complexContent>
- *             &lt;/complexType>
- *           &lt;/element>
- *         &lt;/choice>
- *       &lt;/sequence>
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="MappingsSequenceType"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *           &lt;element name="Table"&gt;
+ *             &lt;complexType&gt;
+ *               &lt;simpleContent&gt;
+ *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+ *                   &lt;attribute name="apply_mapping_to_path" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="applyMappingToPath" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="assign" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="assign1" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="db_codes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="derivation_pattern" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" /&gt;
+ *                   &lt;attribute name="for_each_select_id" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="ft_col" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="generator" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="is_reference" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="isMappedGeometry" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="isReference" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="map_targetpath" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="mapped_geometry" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="mapping_mode" default="value"&gt;
+ *                     &lt;simpleType&gt;
+ *                       &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *                         &lt;enumeration value="value"/&gt;
+ *                         &lt;enumeration value="nil"/&gt;
+ *                         &lt;enumeration value="nil_attr"/&gt;
+ *                         &lt;enumeration value="nilAttr"/&gt;
+ *                       &lt;/restriction&gt;
+ *                     &lt;/simpleType&gt;
+ *                   &lt;/attribute&gt;
+ *                   &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="nil_reason" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="nil_value" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="no_output" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="noOutput" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="oid_col" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="schema_codes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="select_id" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="significant_for_emptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="significantForEmptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="srid" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="srs" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="suppress_xml_entities_encoding" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="suppressXMLEntitiesEncoding" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *                   &lt;attribute name="table_name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+ *                   &lt;attribute name="use_geotypes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="useGeotypes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="value_type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="valueType" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;/extension&gt;
+ *               &lt;/simpleContent&gt;
+ *             &lt;/complexType&gt;
+ *           &lt;/element&gt;
+ *           &lt;element name="Join"&gt;
+ *             &lt;complexType&gt;
+ *               &lt;simpleContent&gt;
+ *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+ *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+ *                   &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" /&gt;
+ *                   &lt;attribute name="join_path" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="axis" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="idref" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;/extension&gt;
+ *               &lt;/simpleContent&gt;
+ *             &lt;/complexType&gt;
+ *           &lt;/element&gt;
+ *           &lt;element name="AssociationTarget"&gt;
+ *             &lt;complexType&gt;
+ *               &lt;simpleContent&gt;
+ *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+ *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+ *                   &lt;attribute name="object_ref" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;/extension&gt;
+ *               &lt;/simpleContent&gt;
+ *             &lt;/complexType&gt;
+ *           &lt;/element&gt;
+ *           &lt;element name="Content"&gt;
+ *             &lt;complexType&gt;
+ *               &lt;simpleContent&gt;
+ *                 &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+ *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+ *                   &lt;attribute name="representation" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="mode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;/extension&gt;
+ *               &lt;/simpleContent&gt;
+ *             &lt;/complexType&gt;
+ *           &lt;/element&gt;
+ *           &lt;element name="Substitution"&gt;
+ *             &lt;complexType&gt;
+ *               &lt;complexContent&gt;
+ *                 &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *                   &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                   &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+ *                   &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *                 &lt;/restriction&gt;
+ *               &lt;/complexContent&gt;
+ *             &lt;/complexType&gt;
+ *           &lt;/element&gt;
+ *         &lt;/choice&gt;
+ *       &lt;/sequence&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
@@ -206,15 +199,15 @@ public class MappingsSequenceType {
      * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
      * 
      * <pre>
-     * &lt;complexType>
-     *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
-     *       &lt;attribute name="object_ref" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/extension>
-     *   &lt;/simpleContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;simpleContent&gt;
+     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+     *       &lt;attribute name="object_ref" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *     &lt;/extension&gt;
+     *   &lt;/simpleContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      * 
      * 
@@ -343,17 +336,17 @@ public class MappingsSequenceType {
      * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
      * 
      * <pre>
-     * &lt;complexType>
-     *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
-     *       &lt;attribute name="representation" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="mode" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/extension>
-     *   &lt;/simpleContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;simpleContent&gt;
+     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+     *       &lt;attribute name="representation" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="mode" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *     &lt;/extension&gt;
+     *   &lt;/simpleContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      * 
      * 
@@ -534,20 +527,20 @@ public class MappingsSequenceType {
      * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
      * 
      * <pre>
-     * &lt;complexType>
-     *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
-     *       &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
-     *       &lt;attribute name="join_path" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="axis" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="idref" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/extension>
-     *   &lt;/simpleContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;simpleContent&gt;
+     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+     *       &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" /&gt;
+     *       &lt;attribute name="join_path" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="axis" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="idref" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *     &lt;/extension&gt;
+     *   &lt;/simpleContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      * 
      * 
@@ -810,15 +803,15 @@ public class MappingsSequenceType {
      * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
      * 
      * <pre>
-     * &lt;complexType>
-     *   &lt;complexContent>
-     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
-     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
-     *       &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/restriction>
-     *   &lt;/complexContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;complexContent&gt;
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+     *       &lt;attribute name="implementation" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *     &lt;/restriction&gt;
+     *   &lt;/complexContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      * 
      * 
@@ -919,61 +912,61 @@ public class MappingsSequenceType {
      * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
      * 
      * <pre>
-     * &lt;complexType>
-     *   &lt;simpleContent>
-     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema>string">
-     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" />
-     *       &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="map_targetpath" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="apply_mapping_to_path" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="applyMappingToPath" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="mapping_mode" default="value">
-     *         &lt;simpleType>
-     *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
-     *             &lt;enumeration value="value"/>
-     *             &lt;enumeration value="nil"/>
-     *             &lt;enumeration value="nil_attr"/>
-     *             &lt;enumeration value="nilAttr"/>
-     *           &lt;/restriction>
-     *         &lt;/simpleType>
-     *       &lt;/attribute>
-     *       &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" />
-     *       &lt;attribute name="no_output" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="noOutput" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="table_name" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="oid_col" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="ft_col" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="generator" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="value_type" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="valueType" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="srs" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="srid" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="mapped_geometry" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="isMappedGeometry" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="use_geotypes" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="useGeotypes" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="assign" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="assign1" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="significant_for_emptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="significantForEmptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="suppress_xml_entities_encoding" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="suppressXMLEntitiesEncoding" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="is_reference" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="isReference" type="{http://www.w3.org/2001/XMLSchema}boolean" />
-     *       &lt;attribute name="derivation_pattern" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="db_codes" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="schema_codes" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="nil_value" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="nil_reason" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="for_each_select_id" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *       &lt;attribute name="select_id" type="{http://www.w3.org/2001/XMLSchema}string" />
-     *     &lt;/extension>
-     *   &lt;/simpleContent>
-     * &lt;/complexType>
+     * &lt;complexType&gt;
+     *   &lt;simpleContent&gt;
+     *     &lt;extension base="&lt;http://www.w3.org/2001/XMLSchema&gt;string"&gt;
+     *       &lt;attribute name="apply_mapping_to_path" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="applyMappingToPath" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="assign" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="assign1" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="db_codes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="derivation_pattern" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="disambiguate" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="filter_mapping" type="{http://www.w3.org/2001/XMLSchema}boolean" default="false" /&gt;
+     *       &lt;attribute name="for_each_select_id" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="ft_col" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="generator" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="gmlVersion" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="id" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="is_reference" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="isMappedGeometry" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="isReference" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="map_targetpath" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="mapped_geometry" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="mapping_mode" default="value"&gt;
+     *         &lt;simpleType&gt;
+     *           &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+     *             &lt;enumeration value="value"/&gt;
+     *             &lt;enumeration value="nil"/&gt;
+     *             &lt;enumeration value="nil_attr"/&gt;
+     *             &lt;enumeration value="nilAttr"/&gt;
+     *           &lt;/restriction&gt;
+     *         &lt;/simpleType&gt;
+     *       &lt;/attribute&gt;
+     *       &lt;attribute name="match" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="nil_reason" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="nil_value" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="no_output" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="noOutput" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="oid_col" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="schema_codes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="select_id" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="significant_for_emptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="significantForEmptiness" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="srid" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="srs" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="suppress_xml_entities_encoding" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="suppressXMLEntitiesEncoding" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+     *       &lt;attribute name="table_name" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="target" type="{http://www.w3.org/2001/XMLSchema}string" default="" /&gt;
+     *       &lt;attribute name="use_geotypes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="useGeotypes" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="value" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="value_type" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *       &lt;attribute name="valueType" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+     *     &lt;/extension&gt;
+     *   &lt;/simpleContent&gt;
+     * &lt;/complexType&gt;
      * </pre>
      * 
      * 
@@ -986,86 +979,86 @@ public class MappingsSequenceType {
 
         @XmlValue
         protected String value;
-        @XmlAttribute(name = "gmlVersion")
-        protected String gmlVersion;
-        @XmlAttribute(name = "id")
-        protected String id;
-        @XmlAttribute(name = "target")
-        protected String target;
-        @XmlAttribute(name = "match")
-        protected String match;
-        @XmlAttribute(name = "disambiguate")
-        protected String disambiguate;
-        @XmlAttribute(name = "map_targetpath")
-        protected Boolean map_Targetpath;
         @XmlAttribute(name = "apply_mapping_to_path")
         protected Boolean apply_Mapping_To_Path;
         @XmlAttribute(name = "applyMappingToPath")
         protected Boolean applyMappingToPath;
-        @XmlAttribute(name = "mapping_mode")
-        protected String mapping_Mode;
+        @XmlAttribute(name = "assign")
+        protected String assign;
+        @XmlAttribute(name = "assign1")
+        protected String assign1;
+        @XmlAttribute(name = "db_codes")
+        protected String db_Codes;
+        @XmlAttribute(name = "derivation_pattern")
+        protected String derivation_Pattern;
+        @XmlAttribute(name = "disambiguate")
+        protected String disambiguate;
         @XmlAttribute(name = "filter_mapping")
         protected Boolean filter_Mapping;
-        @XmlAttribute(name = "no_output")
-        protected Boolean no_Output;
-        @XmlAttribute(name = "noOutput")
-        protected Boolean noOutput;
-        @XmlAttribute(name = "table_name")
-        protected String table_Name;
-        @XmlAttribute(name = "oid_col")
-        protected String oid_Col;
+        @XmlAttribute(name = "for_each_select_id")
+        protected String for_Each_Select_Id;
         @XmlAttribute(name = "ft_col")
         protected String ft_Col;
         @XmlAttribute(name = "generator")
         protected String generator;
+        @XmlAttribute(name = "gmlVersion")
+        protected String gmlVersion;
+        @XmlAttribute(name = "id")
+        protected String id;
+        @XmlAttribute(name = "is_reference")
+        protected Boolean is_Reference;
+        @XmlAttribute(name = "isMappedGeometry")
+        protected Boolean isMappedGeometry;
+        @XmlAttribute(name = "isReference")
+        protected Boolean isReference;
+        @XmlAttribute(name = "map_targetpath")
+        protected Boolean map_Targetpath;
+        @XmlAttribute(name = "mapped_geometry")
+        protected Boolean mapped_Geometry;
+        @XmlAttribute(name = "mapping_mode")
+        protected String mapping_Mode;
+        @XmlAttribute(name = "match")
+        protected String match;
+        @XmlAttribute(name = "nil_reason")
+        protected String nil_Reason;
+        @XmlAttribute(name = "nil_value")
+        protected String nil_Value;
+        @XmlAttribute(name = "no_output")
+        protected Boolean no_Output;
+        @XmlAttribute(name = "noOutput")
+        protected Boolean noOutput;
+        @XmlAttribute(name = "oid_col")
+        protected String oid_Col;
+        @XmlAttribute(name = "schema_codes")
+        protected String schema_Codes;
+        @XmlAttribute(name = "select_id")
+        protected String select_Id;
+        @XmlAttribute(name = "significant_for_emptiness")
+        protected Boolean significant_For_Emptiness;
+        @XmlAttribute(name = "significantForEmptiness")
+        protected Boolean significantForEmptiness;
+        @XmlAttribute(name = "srid")
+        protected String srid;
+        @XmlAttribute(name = "srs")
+        protected String srs;
+        @XmlAttribute(name = "suppress_xml_entities_encoding")
+        protected Boolean suppress_Xml_Entities_Encoding;
+        @XmlAttribute(name = "suppressXMLEntitiesEncoding")
+        protected Boolean suppressXMLEntitiesEncoding;
+        @XmlAttribute(name = "table_name")
+        protected String table_Name;
+        @XmlAttribute(name = "target")
+        protected String target;
+        @XmlAttribute(name = "use_geotypes")
+        protected String use_Geotypes;
+        @XmlAttribute(name = "useGeotypes")
+        protected String useGeotypes;
         @XmlAttribute(name = "value")
         protected String value4;
         @XmlAttribute(name = "value_type")
         protected String value_Type;
         @XmlAttribute(name = "valueType")
         protected String valueType;
-        @XmlAttribute(name = "srs")
-        protected String srs;
-        @XmlAttribute(name = "srid")
-        protected String srid;
-        @XmlAttribute(name = "mapped_geometry")
-        protected Boolean mapped_Geometry;
-        @XmlAttribute(name = "isMappedGeometry")
-        protected Boolean isMappedGeometry;
-        @XmlAttribute(name = "use_geotypes")
-        protected String use_Geotypes;
-        @XmlAttribute(name = "useGeotypes")
-        protected String useGeotypes;
-        @XmlAttribute(name = "assign")
-        protected String assign;
-        @XmlAttribute(name = "assign1")
-        protected String assign1;
-        @XmlAttribute(name = "significant_for_emptiness")
-        protected Boolean significant_For_Emptiness;
-        @XmlAttribute(name = "significantForEmptiness")
-        protected Boolean significantForEmptiness;
-        @XmlAttribute(name = "suppress_xml_entities_encoding")
-        protected Boolean suppress_Xml_Entities_Encoding;
-        @XmlAttribute(name = "suppressXMLEntitiesEncoding")
-        protected Boolean suppressXMLEntitiesEncoding;
-        @XmlAttribute(name = "is_reference")
-        protected Boolean is_Reference;
-        @XmlAttribute(name = "isReference")
-        protected Boolean isReference;
-        @XmlAttribute(name = "derivation_pattern")
-        protected String derivation_Pattern;
-        @XmlAttribute(name = "db_codes")
-        protected String db_Codes;
-        @XmlAttribute(name = "schema_codes")
-        protected String schema_Codes;
-        @XmlAttribute(name = "nil_value")
-        protected String nil_Value;
-        @XmlAttribute(name = "nil_reason")
-        protected String nil_Reason;
-        @XmlAttribute(name = "for_each_select_id")
-        protected String for_Each_Select_Id;
-        @XmlAttribute(name = "select_id")
-        protected String select_Id;
 
         /**
          * Ruft den Wert der value-Eigenschaft ab.
@@ -1089,154 +1082,6 @@ public class MappingsSequenceType {
          */
         public void setValue(String value) {
             this.value = value;
-        }
-
-        /**
-         * Ruft den Wert der gmlVersion-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getGmlVersion() {
-            return gmlVersion;
-        }
-
-        /**
-         * Legt den Wert der gmlVersion-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setGmlVersion(String value) {
-            this.gmlVersion = value;
-        }
-
-        /**
-         * Ruft den Wert der id-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getId() {
-            return id;
-        }
-
-        /**
-         * Legt den Wert der id-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setId(String value) {
-            this.id = value;
-        }
-
-        /**
-         * Ruft den Wert der target-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getTarget() {
-            if (target == null) {
-                return "";
-            } else {
-                return target;
-            }
-        }
-
-        /**
-         * Legt den Wert der target-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setTarget(String value) {
-            this.target = value;
-        }
-
-        /**
-         * Ruft den Wert der match-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getMatch() {
-            return match;
-        }
-
-        /**
-         * Legt den Wert der match-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setMatch(String value) {
-            this.match = value;
-        }
-
-        /**
-         * Ruft den Wert der disambiguate-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getDisambiguate() {
-            return disambiguate;
-        }
-
-        /**
-         * Legt den Wert der disambiguate-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setDisambiguate(String value) {
-            this.disambiguate = value;
-        }
-
-        /**
-         * Ruft den Wert der map_Targetpath-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isMap_Targetpath() {
-            return map_Targetpath;
-        }
-
-        /**
-         * Legt den Wert der map_Targetpath-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setMap_Targetpath(Boolean value) {
-            this.map_Targetpath = value;
         }
 
         /**
@@ -1288,31 +1133,123 @@ public class MappingsSequenceType {
         }
 
         /**
-         * Ruft den Wert der mapping_Mode-Eigenschaft ab.
+         * Ruft den Wert der assign-Eigenschaft ab.
          * 
          * @return
          *     possible object is
          *     {@link String }
          *     
          */
-        public String getMapping_Mode() {
-            if (mapping_Mode == null) {
-                return "value";
-            } else {
-                return mapping_Mode;
-            }
+        public String getAssign() {
+            return assign;
         }
 
         /**
-         * Legt den Wert der mapping_Mode-Eigenschaft fest.
+         * Legt den Wert der assign-Eigenschaft fest.
          * 
          * @param value
          *     allowed object is
          *     {@link String }
          *     
          */
-        public void setMapping_Mode(String value) {
-            this.mapping_Mode = value;
+        public void setAssign(String value) {
+            this.assign = value;
+        }
+
+        /**
+         * Ruft den Wert der assign1-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getAssign1() {
+            return assign1;
+        }
+
+        /**
+         * Legt den Wert der assign1-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setAssign1(String value) {
+            this.assign1 = value;
+        }
+
+        /**
+         * Ruft den Wert der db_Codes-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getDb_Codes() {
+            return db_Codes;
+        }
+
+        /**
+         * Legt den Wert der db_Codes-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setDb_Codes(String value) {
+            this.db_Codes = value;
+        }
+
+        /**
+         * Ruft den Wert der derivation_Pattern-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getDerivation_Pattern() {
+            return derivation_Pattern;
+        }
+
+        /**
+         * Legt den Wert der derivation_Pattern-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setDerivation_Pattern(String value) {
+            this.derivation_Pattern = value;
+        }
+
+        /**
+         * Ruft den Wert der disambiguate-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getDisambiguate() {
+            return disambiguate;
+        }
+
+        /**
+         * Legt den Wert der disambiguate-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setDisambiguate(String value) {
+            this.disambiguate = value;
         }
 
         /**
@@ -1341,6 +1278,346 @@ public class MappingsSequenceType {
          */
         public void setFilter_Mapping(Boolean value) {
             this.filter_Mapping = value;
+        }
+
+        /**
+         * Ruft den Wert der for_Each_Select_Id-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getFor_Each_Select_Id() {
+            return for_Each_Select_Id;
+        }
+
+        /**
+         * Legt den Wert der for_Each_Select_Id-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setFor_Each_Select_Id(String value) {
+            this.for_Each_Select_Id = value;
+        }
+
+        /**
+         * Ruft den Wert der ft_Col-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getFt_Col() {
+            return ft_Col;
+        }
+
+        /**
+         * Legt den Wert der ft_Col-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setFt_Col(String value) {
+            this.ft_Col = value;
+        }
+
+        /**
+         * Ruft den Wert der generator-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getGenerator() {
+            return generator;
+        }
+
+        /**
+         * Legt den Wert der generator-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setGenerator(String value) {
+            this.generator = value;
+        }
+
+        /**
+         * Ruft den Wert der gmlVersion-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getGmlVersion() {
+            return gmlVersion;
+        }
+
+        /**
+         * Legt den Wert der gmlVersion-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setGmlVersion(String value) {
+            this.gmlVersion = value;
+        }
+
+        /**
+         * Ruft den Wert der id-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getId() {
+            return id;
+        }
+
+        /**
+         * Legt den Wert der id-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setId(String value) {
+            this.id = value;
+        }
+
+        /**
+         * Ruft den Wert der is_Reference-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isIs_Reference() {
+            return is_Reference;
+        }
+
+        /**
+         * Legt den Wert der is_Reference-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setIs_Reference(Boolean value) {
+            this.is_Reference = value;
+        }
+
+        /**
+         * Ruft den Wert der isMappedGeometry-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isIsMappedGeometry() {
+            return isMappedGeometry;
+        }
+
+        /**
+         * Legt den Wert der isMappedGeometry-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setIsMappedGeometry(Boolean value) {
+            this.isMappedGeometry = value;
+        }
+
+        /**
+         * Ruft den Wert der isReference-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isIsReference() {
+            return isReference;
+        }
+
+        /**
+         * Legt den Wert der isReference-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setIsReference(Boolean value) {
+            this.isReference = value;
+        }
+
+        /**
+         * Ruft den Wert der map_Targetpath-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isMap_Targetpath() {
+            return map_Targetpath;
+        }
+
+        /**
+         * Legt den Wert der map_Targetpath-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setMap_Targetpath(Boolean value) {
+            this.map_Targetpath = value;
+        }
+
+        /**
+         * Ruft den Wert der mapped_Geometry-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isMapped_Geometry() {
+            return mapped_Geometry;
+        }
+
+        /**
+         * Legt den Wert der mapped_Geometry-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setMapped_Geometry(Boolean value) {
+            this.mapped_Geometry = value;
+        }
+
+        /**
+         * Ruft den Wert der mapping_Mode-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getMapping_Mode() {
+            if (mapping_Mode == null) {
+                return "value";
+            } else {
+                return mapping_Mode;
+            }
+        }
+
+        /**
+         * Legt den Wert der mapping_Mode-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setMapping_Mode(String value) {
+            this.mapping_Mode = value;
+        }
+
+        /**
+         * Ruft den Wert der match-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getMatch() {
+            return match;
+        }
+
+        /**
+         * Legt den Wert der match-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setMatch(String value) {
+            this.match = value;
+        }
+
+        /**
+         * Ruft den Wert der nil_Reason-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getNil_Reason() {
+            return nil_Reason;
+        }
+
+        /**
+         * Legt den Wert der nil_Reason-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setNil_Reason(String value) {
+            this.nil_Reason = value;
+        }
+
+        /**
+         * Ruft den Wert der nil_Value-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getNil_Value() {
+            return nil_Value;
+        }
+
+        /**
+         * Legt den Wert der nil_Value-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setNil_Value(String value) {
+            this.nil_Value = value;
         }
 
         /**
@@ -1392,30 +1669,6 @@ public class MappingsSequenceType {
         }
 
         /**
-         * Ruft den Wert der table_Name-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getTable_Name() {
-            return table_Name;
-        }
-
-        /**
-         * Legt den Wert der table_Name-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setTable_Name(String value) {
-            this.table_Name = value;
-        }
-
-        /**
          * Ruft den Wert der oid_Col-Eigenschaft ab.
          * 
          * @return
@@ -1440,51 +1693,295 @@ public class MappingsSequenceType {
         }
 
         /**
-         * Ruft den Wert der ft_Col-Eigenschaft ab.
+         * Ruft den Wert der schema_Codes-Eigenschaft ab.
          * 
          * @return
          *     possible object is
          *     {@link String }
          *     
          */
-        public String getFt_Col() {
-            return ft_Col;
+        public String getSchema_Codes() {
+            return schema_Codes;
         }
 
         /**
-         * Legt den Wert der ft_Col-Eigenschaft fest.
+         * Legt den Wert der schema_Codes-Eigenschaft fest.
          * 
          * @param value
          *     allowed object is
          *     {@link String }
          *     
          */
-        public void setFt_Col(String value) {
-            this.ft_Col = value;
+        public void setSchema_Codes(String value) {
+            this.schema_Codes = value;
         }
 
         /**
-         * Ruft den Wert der generator-Eigenschaft ab.
+         * Ruft den Wert der select_Id-Eigenschaft ab.
          * 
          * @return
          *     possible object is
          *     {@link String }
          *     
          */
-        public String getGenerator() {
-            return generator;
+        public String getSelect_Id() {
+            return select_Id;
         }
 
         /**
-         * Legt den Wert der generator-Eigenschaft fest.
+         * Legt den Wert der select_Id-Eigenschaft fest.
          * 
          * @param value
          *     allowed object is
          *     {@link String }
          *     
          */
-        public void setGenerator(String value) {
-            this.generator = value;
+        public void setSelect_Id(String value) {
+            this.select_Id = value;
+        }
+
+        /**
+         * Ruft den Wert der significant_For_Emptiness-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isSignificant_For_Emptiness() {
+            return significant_For_Emptiness;
+        }
+
+        /**
+         * Legt den Wert der significant_For_Emptiness-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setSignificant_For_Emptiness(Boolean value) {
+            this.significant_For_Emptiness = value;
+        }
+
+        /**
+         * Ruft den Wert der significantForEmptiness-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isSignificantForEmptiness() {
+            return significantForEmptiness;
+        }
+
+        /**
+         * Legt den Wert der significantForEmptiness-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setSignificantForEmptiness(Boolean value) {
+            this.significantForEmptiness = value;
+        }
+
+        /**
+         * Ruft den Wert der srid-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getSrid() {
+            return srid;
+        }
+
+        /**
+         * Legt den Wert der srid-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setSrid(String value) {
+            this.srid = value;
+        }
+
+        /**
+         * Ruft den Wert der srs-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getSrs() {
+            return srs;
+        }
+
+        /**
+         * Legt den Wert der srs-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setSrs(String value) {
+            this.srs = value;
+        }
+
+        /**
+         * Ruft den Wert der suppress_Xml_Entities_Encoding-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isSuppress_Xml_Entities_Encoding() {
+            return suppress_Xml_Entities_Encoding;
+        }
+
+        /**
+         * Legt den Wert der suppress_Xml_Entities_Encoding-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setSuppress_Xml_Entities_Encoding(Boolean value) {
+            this.suppress_Xml_Entities_Encoding = value;
+        }
+
+        /**
+         * Ruft den Wert der suppressXMLEntitiesEncoding-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link Boolean }
+         *     
+         */
+        public Boolean isSuppressXMLEntitiesEncoding() {
+            return suppressXMLEntitiesEncoding;
+        }
+
+        /**
+         * Legt den Wert der suppressXMLEntitiesEncoding-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link Boolean }
+         *     
+         */
+        public void setSuppressXMLEntitiesEncoding(Boolean value) {
+            this.suppressXMLEntitiesEncoding = value;
+        }
+
+        /**
+         * Ruft den Wert der table_Name-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getTable_Name() {
+            return table_Name;
+        }
+
+        /**
+         * Legt den Wert der table_Name-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setTable_Name(String value) {
+            this.table_Name = value;
+        }
+
+        /**
+         * Ruft den Wert der target-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getTarget() {
+            if (target == null) {
+                return "";
+            } else {
+                return target;
+            }
+        }
+
+        /**
+         * Legt den Wert der target-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setTarget(String value) {
+            this.target = value;
+        }
+
+        /**
+         * Ruft den Wert der use_Geotypes-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getUse_Geotypes() {
+            return use_Geotypes;
+        }
+
+        /**
+         * Legt den Wert der use_Geotypes-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setUse_Geotypes(String value) {
+            this.use_Geotypes = value;
+        }
+
+        /**
+         * Ruft den Wert der useGeotypes-Eigenschaft ab.
+         * 
+         * @return
+         *     possible object is
+         *     {@link String }
+         *     
+         */
+        public String getUseGeotypes() {
+            return useGeotypes;
+        }
+
+        /**
+         * Legt den Wert der useGeotypes-Eigenschaft fest.
+         * 
+         * @param value
+         *     allowed object is
+         *     {@link String }
+         *     
+         */
+        public void setUseGeotypes(String value) {
+            this.useGeotypes = value;
         }
 
         /**
@@ -1557,510 +2054,6 @@ public class MappingsSequenceType {
          */
         public void setValueType(String value) {
             this.valueType = value;
-        }
-
-        /**
-         * Ruft den Wert der srs-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSrs() {
-            return srs;
-        }
-
-        /**
-         * Legt den Wert der srs-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSrs(String value) {
-            this.srs = value;
-        }
-
-        /**
-         * Ruft den Wert der srid-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSrid() {
-            return srid;
-        }
-
-        /**
-         * Legt den Wert der srid-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSrid(String value) {
-            this.srid = value;
-        }
-
-        /**
-         * Ruft den Wert der mapped_Geometry-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isMapped_Geometry() {
-            return mapped_Geometry;
-        }
-
-        /**
-         * Legt den Wert der mapped_Geometry-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setMapped_Geometry(Boolean value) {
-            this.mapped_Geometry = value;
-        }
-
-        /**
-         * Ruft den Wert der isMappedGeometry-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isIsMappedGeometry() {
-            return isMappedGeometry;
-        }
-
-        /**
-         * Legt den Wert der isMappedGeometry-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setIsMappedGeometry(Boolean value) {
-            this.isMappedGeometry = value;
-        }
-
-        /**
-         * Ruft den Wert der use_Geotypes-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getUse_Geotypes() {
-            return use_Geotypes;
-        }
-
-        /**
-         * Legt den Wert der use_Geotypes-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setUse_Geotypes(String value) {
-            this.use_Geotypes = value;
-        }
-
-        /**
-         * Ruft den Wert der useGeotypes-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getUseGeotypes() {
-            return useGeotypes;
-        }
-
-        /**
-         * Legt den Wert der useGeotypes-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setUseGeotypes(String value) {
-            this.useGeotypes = value;
-        }
-
-        /**
-         * Ruft den Wert der assign-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getAssign() {
-            return assign;
-        }
-
-        /**
-         * Legt den Wert der assign-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setAssign(String value) {
-            this.assign = value;
-        }
-
-        /**
-         * Ruft den Wert der assign1-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getAssign1() {
-            return assign1;
-        }
-
-        /**
-         * Legt den Wert der assign1-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setAssign1(String value) {
-            this.assign1 = value;
-        }
-
-        /**
-         * Ruft den Wert der significant_For_Emptiness-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isSignificant_For_Emptiness() {
-            return significant_For_Emptiness;
-        }
-
-        /**
-         * Legt den Wert der significant_For_Emptiness-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setSignificant_For_Emptiness(Boolean value) {
-            this.significant_For_Emptiness = value;
-        }
-
-        /**
-         * Ruft den Wert der significantForEmptiness-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isSignificantForEmptiness() {
-            return significantForEmptiness;
-        }
-
-        /**
-         * Legt den Wert der significantForEmptiness-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setSignificantForEmptiness(Boolean value) {
-            this.significantForEmptiness = value;
-        }
-
-        /**
-         * Ruft den Wert der suppress_Xml_Entities_Encoding-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isSuppress_Xml_Entities_Encoding() {
-            return suppress_Xml_Entities_Encoding;
-        }
-
-        /**
-         * Legt den Wert der suppress_Xml_Entities_Encoding-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setSuppress_Xml_Entities_Encoding(Boolean value) {
-            this.suppress_Xml_Entities_Encoding = value;
-        }
-
-        /**
-         * Ruft den Wert der suppressXMLEntitiesEncoding-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isSuppressXMLEntitiesEncoding() {
-            return suppressXMLEntitiesEncoding;
-        }
-
-        /**
-         * Legt den Wert der suppressXMLEntitiesEncoding-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setSuppressXMLEntitiesEncoding(Boolean value) {
-            this.suppressXMLEntitiesEncoding = value;
-        }
-
-        /**
-         * Ruft den Wert der is_Reference-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isIs_Reference() {
-            return is_Reference;
-        }
-
-        /**
-         * Legt den Wert der is_Reference-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setIs_Reference(Boolean value) {
-            this.is_Reference = value;
-        }
-
-        /**
-         * Ruft den Wert der isReference-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link Boolean }
-         *     
-         */
-        public Boolean isIsReference() {
-            return isReference;
-        }
-
-        /**
-         * Legt den Wert der isReference-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link Boolean }
-         *     
-         */
-        public void setIsReference(Boolean value) {
-            this.isReference = value;
-        }
-
-        /**
-         * Ruft den Wert der derivation_Pattern-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getDerivation_Pattern() {
-            return derivation_Pattern;
-        }
-
-        /**
-         * Legt den Wert der derivation_Pattern-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setDerivation_Pattern(String value) {
-            this.derivation_Pattern = value;
-        }
-
-        /**
-         * Ruft den Wert der db_Codes-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getDb_Codes() {
-            return db_Codes;
-        }
-
-        /**
-         * Legt den Wert der db_Codes-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setDb_Codes(String value) {
-            this.db_Codes = value;
-        }
-
-        /**
-         * Ruft den Wert der schema_Codes-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSchema_Codes() {
-            return schema_Codes;
-        }
-
-        /**
-         * Legt den Wert der schema_Codes-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSchema_Codes(String value) {
-            this.schema_Codes = value;
-        }
-
-        /**
-         * Ruft den Wert der nil_Value-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getNil_Value() {
-            return nil_Value;
-        }
-
-        /**
-         * Legt den Wert der nil_Value-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setNil_Value(String value) {
-            this.nil_Value = value;
-        }
-
-        /**
-         * Ruft den Wert der nil_Reason-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getNil_Reason() {
-            return nil_Reason;
-        }
-
-        /**
-         * Legt den Wert der nil_Reason-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setNil_Reason(String value) {
-            this.nil_Reason = value;
-        }
-
-        /**
-         * Ruft den Wert der for_Each_Select_Id-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getFor_Each_Select_Id() {
-            return for_Each_Select_Id;
-        }
-
-        /**
-         * Legt den Wert der for_Each_Select_Id-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setFor_Each_Select_Id(String value) {
-            this.for_Each_Select_Id = value;
-        }
-
-        /**
-         * Ruft den Wert der select_Id-Eigenschaft ab.
-         * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
-         */
-        public String getSelect_Id() {
-            return select_Id;
-        }
-
-        /**
-         * Legt den Wert der select_Id-Eigenschaft fest.
-         * 
-         * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
-         */
-        public void setSelect_Id(String value) {
-            this.select_Id = value;
         }
 
     }

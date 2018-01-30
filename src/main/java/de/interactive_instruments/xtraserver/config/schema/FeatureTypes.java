@@ -1,10 +1,3 @@
-//
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
-// Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2017.07.26 um 01:38:15 PM CEST 
-//
-
 
 package de.interactive_instruments.xtraserver.config.schema;
 
@@ -27,18 +20,18 @@ import javax.xml.bind.annotation.XmlType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;choice maxOccurs="unbounded" minOccurs="0">
- *         &lt;element ref="{http://www.interactive-instruments.de/namespaces/XtraServer}FeatureType"/>
- *         &lt;element ref="{http://www.interactive-instruments.de/namespaces/XtraServer}AdditionalMappings"/>
- *       &lt;/choice>
- *       &lt;attribute name="defaultDbSchema" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="appSchemaGenerator" type="{http://www.w3.org/2001/XMLSchema}IDREF" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;choice maxOccurs="unbounded" minOccurs="0"&gt;
+ *         &lt;element ref="{http://www.interactive-instruments.de/namespaces/XtraServer}FeatureType"/&gt;
+ *         &lt;element ref="{http://www.interactive-instruments.de/namespaces/XtraServer}AdditionalMappings"/&gt;
+ *       &lt;/choice&gt;
+ *       &lt;attribute name="defaultDbSchema" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="appSchemaGenerator" type="{http://www.w3.org/2001/XMLSchema}IDREF" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
