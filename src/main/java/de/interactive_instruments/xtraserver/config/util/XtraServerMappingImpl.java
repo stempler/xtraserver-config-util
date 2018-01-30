@@ -159,7 +159,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                                 //System.out.println("Property2:" + mappingValue.getTarget() + " || " + type.getName());
 
                                 if (applicationSchema.isGeometry(type, pathElements.get(0))) {
-                                    // TODO: set isGeometry on value
+                                    ((MappingValueImpl)mappingValue).setGeometry(true);
                                 }
 
                                 if (!parentMappingTable.getValues().contains(mappingValue)) {

@@ -1,5 +1,6 @@
 package de.interactive_instruments.xtraserver.config.util;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.ws.commons.schema.*;
 import org.apache.ws.commons.schema.utils.NamespacePrefixList;
@@ -208,8 +209,20 @@ public class ApplicationSchema {
     // TODO
     public boolean isGeometry(XmlSchemaComplexType type, QName propertyName) {
         XmlSchemaElement element = getProperty(type, propertyName);
-        if (element != null) {
-            //System.out.println(getAllParentTypes(element.getSchemaType()));
+        if (element != null && element.getSchemaType() != null && element.getSchemaType().getQName() != null) {
+            return ImmutableList.of("GeometryPropertyType",
+                    "GeometricPrimitivePropertyType",
+                    "PointPropertyType",
+                    "MultiPointPropertyType",
+                    "LineStringPropertyType",
+                    "MultiLineStringPropertyType",
+                    "CurvePropertyType",
+                    "MultiCurvePropertyType",
+                    "SurfacePropertyType",
+                    "MultiSurfacePropertyType",
+                    "PolygonPropertyType",
+                    "MultiPolygonPropertyType")
+                    .contains(element.getSchemaType().getQName().getLocalPart());
         }
 
         return false;

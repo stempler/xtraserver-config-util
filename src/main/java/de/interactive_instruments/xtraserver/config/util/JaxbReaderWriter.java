@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import de.interactive_instruments.xtraserver.config.schema.*;
 import de.interactive_instruments.xtraserver.config.util.api.*;
@@ -100,32 +101,32 @@ public class JaxbReaderWriter {
                             //if (table.getValue4() == null || table.getValue4().isEmpty()) {
                             //if (!mappingTables.containsKey(table.getTable_Name())
                             //        || (mappingTables.get(table.getTable_Name()).hasTarget() && (table.getTarget() == null || table.getTarget().isEmpty()))) {
-                                MappingTable mappingTable = MappingTable.create();
-                                //System.out.println(table.getDerivation_Pattern() + table.getTarget() + table.getOid_Col() + table.getTable_Name());
+                            MappingTable mappingTable = MappingTable.create();
+                            //System.out.println(table.getDerivation_Pattern() + table.getTarget() + table.getOid_Col() + table.getTable_Name());
 
-                                mappingTable.setName(table.getTable_Name());
-                                if (mappingTable.getName().contains("[")) {
-                                    //System.out.println("PREDICATE " + mappingTable.getName());
-                                    mappingTable.setName(mappingTable.getName().substring(0, mappingTable.getName().indexOf("[")));
-                                }
-                                mappingTable.setOidCol(table.getOid_Col());
-                                if (mappingTable.getOidCol() != null && mappingTable.getOidCol().contains(":=SEQUENCE")) {
-                                    mappingTable.setOidCol(mappingTable.getOidCol().substring(0, mappingTable.getOidCol().indexOf(":=SEQUENCE")));
-                                }
+                            mappingTable.setName(table.getTable_Name());
+                            if (mappingTable.getName().contains("[")) {
+                                //System.out.println("PREDICATE " + mappingTable.getName());
+                                mappingTable.setName(mappingTable.getName().substring(0, mappingTable.getName().indexOf("[")));
+                            }
+                            mappingTable.setOidCol(table.getOid_Col());
+                            if (mappingTable.getOidCol() != null && mappingTable.getOidCol().contains(":=SEQUENCE")) {
+                                mappingTable.setOidCol(mappingTable.getOidCol().substring(0, mappingTable.getOidCol().indexOf(":=SEQUENCE")));
+                            }
 
-                                mappingTable.setTarget(table.getTarget());
-                                // table definition from value mapping, shorten target to first path element
-                                if (table.getValue4() != null && !table.getValue4().isEmpty()) {
-                                    if (mappingTable.getTarget() != null && mappingTable.getTarget().contains("/")) {
-                                        mappingTable.setTarget(mappingTable.getTarget().substring(0, mappingTable.getTarget().indexOf("/")));
-                                    }
+                            mappingTable.setTarget(table.getTarget());
+                            // table definition from value mapping, shorten target to first path element
+                            if (table.getValue4() != null && !table.getValue4().isEmpty()) {
+                                if (mappingTable.getTarget() != null && mappingTable.getTarget().contains("/")) {
+                                    mappingTable.setTarget(mappingTable.getTarget().substring(0, mappingTable.getTarget().indexOf("/")));
                                 }
+                            }
 
-                                // TODO: add all tables, filter in hale import plugin
-                                if (!mappingTables.containsKey(mappingTable.getName())
-                                        || (mappingTables.get(mappingTable.getName()).hasTarget() && !mappingTable.hasTarget())) {
-                                    mappingTables.put(mappingTable.getName(), mappingTable);
-                                }
+                            // TODO: add all tables, filter in hale import plugin
+                            if (!mappingTables.containsKey(mappingTable.getName())
+                                    || (mappingTables.get(mappingTable.getName()).hasTarget() && !mappingTable.hasTarget())) {
+                                mappingTables.put(mappingTable.getName(), mappingTable);
+                            }
                             //}
                             /*else {
                                 MappingTable mappingTable = mappingTables.get(table.getTable_Name());
@@ -221,12 +222,11 @@ public class JaxbReaderWriter {
                                 //ftm.getTable(table).addJoinPath(mappingJoin);
                                 mappingJoins.add(mappingJoin);
                             }
+                            // self joins have to be added for value filtering in import
                         } else if (ftm.hasTable(table) && !ftm.getTable(table).get().hasTarget()) {
                             List<String> t = Splitter.on("::").splitToList(join.getJoin_Path());
-                            String source = t.get(t.size()-1);
+                            String source = t.get(t.size() - 1);
                             if (t.size() > 2 && source.equals(table)) {
-                                System.out.println("JOIN IGNORED, target table not found: " + join.getJoin_Path());
-
                                 MappingJoin mappingJoin = MappingJoin.create();
                                 mappingJoin.setTarget(join.getTarget());
                                 parseJoinPath(join.getJoin_Path(), mappingJoin, ftm);
@@ -432,31 +432,40 @@ public class JaxbReaderWriter {
 
         xtraServerMapping.getFeatureTypeList(false).forEach(featureTypeName -> {
             String featureTypeNameWithoutPrefix = Splitter.on(':').splitToList(featureTypeName).get(1);
-            // TODO: get from schema
-            //((XtraServerMappingImpl)xtraServerMapping).
-            String propertyName = "adv:position";
-            String propertyNameWithoutPrefix = Splitter.on(':').splitToList(propertyName).get(1);
 
-            try {
-                writer.append("\t<GeoIndex id=\"gidx_");
-                writer.append(featureTypeNameWithoutPrefix);
-                writer.append("_");
-                writer.append(propertyNameWithoutPrefix);
-                writer.append("\">\n\t\t");
-                writer.append("<PGISGeoIndexImpl>\n\t\t\t");
-                writer.append("<PGISGeoIndexFeatures>\n\t\t\t\t");
-                writer.append("<PGISFeatureType>");
-                writer.append(featureTypeName);
-                writer.append("</PGISFeatureType>\n\t\t\t\t");
-                writer.append("<PGISGeoPropertyName>");
-                writer.append(propertyName);
-                writer.append("</PGISGeoPropertyName>\n\t\t\t");
-                writer.append("</PGISGeoIndexFeatures>\n\t\t");
-                writer.append("</PGISGeoIndexImpl>\n\t");
-                writer.append("</GeoIndex>\n");
-            } catch (IOException e) {
+            xtraServerMapping.getFeatureTypeMapping(featureTypeName, true)
+                    .ifPresent(featureTypeMapping -> {
+                        // find the first geometric property descending from top to bottom of the inheritance tree
+                        Optional<MappingValue> geometricProperty = Lists.reverse(featureTypeMapping.getValues()).stream()
+                                .filter(mappingValue -> ((MappingValueImpl) mappingValue).isGeometry())
+                                .findFirst();
 
-            }
+                        if (geometricProperty.isPresent()) {
+                            String propertyName = geometricProperty.get().getTarget();
+                            String propertyNameWithoutPrefix = Splitter.on(':').splitToList(propertyName).get(1);
+
+                            try {
+                                writer.append("\t<GeoIndex id=\"gidx_");
+                                writer.append(featureTypeNameWithoutPrefix);
+                                writer.append("_");
+                                writer.append(propertyNameWithoutPrefix);
+                                writer.append("\">\n\t\t");
+                                writer.append("<PGISGeoIndexImpl>\n\t\t\t");
+                                writer.append("<PGISGeoIndexFeatures>\n\t\t\t\t");
+                                writer.append("<PGISFeatureType>");
+                                writer.append(featureTypeName);
+                                writer.append("</PGISFeatureType>\n\t\t\t\t");
+                                writer.append("<PGISGeoPropertyName>");
+                                writer.append(propertyName);
+                                writer.append("</PGISGeoPropertyName>\n\t\t\t");
+                                writer.append("</PGISGeoIndexFeatures>\n\t\t");
+                                writer.append("</PGISGeoIndexImpl>\n\t");
+                                writer.append("</GeoIndex>\n");
+                            } catch (IOException e) {
+                                // ignore
+                            }
+                        }
+                    });
         });
 
         writer.append("</GeoIndexes>\n");
@@ -541,7 +550,7 @@ public class JaxbReaderWriter {
                                     .filter(value -> value.getTarget().equals(associationTarget.getTarget() + "/@xlink:href"))
                                     .findFirst();
 
-                            Optional<FeatureTypeMapping> refMapping = ((XtraServerMappingImpl)xtraServerMapping).getTypeMapping(associationTarget.getObjectRef(), true);
+                            Optional<FeatureTypeMapping> refMapping = ((XtraServerMappingImpl) xtraServerMapping).getTypeMapping(associationTarget.getObjectRef(), true);
 
                             if (refValue.isPresent() && refMapping.isPresent()) {
                                 // join is not connected to FeatureType
