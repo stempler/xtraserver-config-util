@@ -222,13 +222,15 @@ public class FeatureTypeMappingImpl implements FeatureTypeMapping {
             throw new IllegalArgumentException("Join source table '" + sourceTableName + "' does not exist");
         }
 
-        // if join has target, overwrite table target (for table definitions parsed from value mappings)
-        if (mappingJoin.getTarget() != null && !mappingJoin.getTarget().isEmpty()) {
-            targetTable.get().setTarget(mappingJoin.getTarget());
-        }
-        // if join has no target, overwrite with table target (for exports from hale)
-        else {
-            mappingJoin.setTarget(targetTable.get().getTarget());
+        if (!mappingJoin.isSuppressJoin()) {
+            // if join has target, overwrite table target (for table definitions parsed from value mappings)
+            if (mappingJoin.getTarget() != null && !mappingJoin.getTarget().isEmpty()) {
+                targetTable.get().setTarget(mappingJoin.getTarget());
+            }
+            // if join has no target, overwrite with table target (for exports from hale)
+            else {
+                mappingJoin.setTarget(targetTable.get().getTarget());
+            }
         }
 
         targetTable.get().addJoinPath(mappingJoin);

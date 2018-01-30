@@ -221,6 +221,18 @@ public class JaxbReaderWriter {
                                 //ftm.getTable(table).addJoinPath(mappingJoin);
                                 mappingJoins.add(mappingJoin);
                             }
+                        } else if (ftm.hasTable(table) && !ftm.getTable(table).get().hasTarget()) {
+                            List<String> t = Splitter.on("::").splitToList(join.getJoin_Path());
+                            String source = t.get(t.size()-1);
+                            if (t.size() > 2 && source.equals(table)) {
+                                System.out.println("JOIN IGNORED, target table not found: " + join.getJoin_Path());
+
+                                MappingJoin mappingJoin = MappingJoin.create();
+                                mappingJoin.setTarget(join.getTarget());
+                                parseJoinPath(join.getJoin_Path(), mappingJoin, ftm);
+                                ((MappingJoinImpl) mappingJoin).suppressJoin = true;
+                                mappingJoins.add(mappingJoin);
+                            }
                         }
                     }
                 } catch (ClassCastException e) {
