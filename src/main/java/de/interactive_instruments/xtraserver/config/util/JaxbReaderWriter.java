@@ -3,9 +3,9 @@ package de.interactive_instruments.xtraserver.config.util;
 import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.base.Splitter;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import de.interactive_instruments.xtraserver.config.jaxb.IndentingXMLStreamWriter;
 import de.interactive_instruments.xtraserver.config.schema.*;
 import de.interactive_instruments.xtraserver.config.util.api.*;
 import org.xml.sax.SAXException;
@@ -15,12 +15,14 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.stream.XMLOutputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
 import java.net.URL;
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -88,7 +90,7 @@ public class JaxbReaderWriter {
     }
 
     private static Collection<MappingTable> extractTables(MappingsSequenceType mappings) {
-        Map<String, MappingTable> mappingTables = new HashMap<>();
+        Map<String, MappingTable> mappingTables = new LinkedHashMap<>();
 
         if (mappings != null) {
             for (Object mapping : mappings.getTableOrJoinOrAssociationTarget()) {
@@ -97,7 +99,7 @@ public class JaxbReaderWriter {
 
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty()) {
                         if ((table.getOid_Col() != null && !table.getOid_Col().isEmpty())
-                                || (table.getTarget() != null && !table.getTarget().isEmpty() && table.getValue4() == null)) {
+                                || (table.getTarget() != null && !table.getTarget().isEmpty() && table.getValue() == null)) {
                             //if (table.getValue4() == null || table.getValue4().isEmpty()) {
                             //if (!mappingTables.containsKey(table.getTable_Name())
                             //        || (mappingTables.get(table.getTable_Name()).hasTarget() && (table.getTarget() == null || table.getTarget().isEmpty()))) {
@@ -116,7 +118,7 @@ public class JaxbReaderWriter {
 
                             mappingTable.setTarget(table.getTarget());
                             // table definition from value mapping, shorten target to first path element
-                            if (table.getValue4() != null && !table.getValue4().isEmpty()) {
+                            if (table.getValue() != null && !table.getValue().isEmpty()) {
                                 if (mappingTable.getTarget() != null && mappingTable.getTarget().contains("/")) {
                                     mappingTable.setTarget(mappingTable.getTarget().substring(0, mappingTable.getTarget().indexOf("/")));
                                 }
@@ -154,13 +156,13 @@ public class JaxbReaderWriter {
 
                     if (table.getTable_Name() != null && !table.getTable_Name().isEmpty() && ftm.hasTable(table.getTable_Name())) {
                         if (table.getTarget() != null && !table.getTarget().isEmpty() && table.getTarget().startsWith(ftm.getTable(table.getTable_Name()).get().getTarget())) {
-                            if ((table.getValue4() != null && !table.getValue4().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) || table.getTarget().endsWith("/@xlink:href")) {
+                            if ((table.getValue() != null && !table.getValue().isEmpty() && table.getUse_Geotypes() == null && table.isMapped_Geometry() == null) || table.getTarget().endsWith("/@xlink:href")) {
                                 if (ftm.hasTable(table.getTable_Name())) {
                                     MappingValue mappingValue = MappingValue.create(namespaces);
 
                                     mappingValue.setTable(ftm.getTable(table.getTable_Name()).get());//.getValues().add(mappingValue);
                                     mappingValue.setTarget(table.getTarget());
-                                    mappingValue.setValue(table.getValue4());
+                                    mappingValue.setValue(table.getValue());
                                     mappingValue.setValueType(table.getValue_Type());
                                     if (!table.getMapping_Mode().equals("value")) {
                                         mappingValue.setMappingMode(table.getMapping_Mode());
@@ -246,7 +248,6 @@ public class JaxbReaderWriter {
 
     private static List<MappingJoin.Condition> parseJoinPath(String path, MappingJoin mappingJoin, FeatureTypeMapping ftm) {
         List<MappingJoin.Condition> pathTables = new ArrayList<>();
-        Map<String, MappingTable> mappingTableMap = new HashMap<>();
 
         String pathElems[] = path.split("::|/");
 
@@ -321,9 +322,15 @@ public class JaxbReaderWriter {
         return associationTargets;
     }
 
-    public static void writeToStream(OutputStream outputStream, XtraServerMappingImpl xtraServerMapping, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException {
+    public static void writeToStream(OutputStream outputStream, XtraServerMappingImpl xtraServerMapping, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException {
         ObjectFactory objectFactory = new ObjectFactory();
         FeatureTypes featureTypes = objectFactory.createFeatureTypes();
+
+        if (!xtraServerMapping.getFeatureTypeMappings().isEmpty() && xtraServerMapping.getFeatureTypeMappings().get(0).getName().endsWith(":AbstractFeature")) {
+            FeatureTypeMapping abstractFeature = xtraServerMapping.getFeatureTypeMappings().get(0);
+            xtraServerMapping.getFeatureTypeMappings().remove(abstractFeature);
+            xtraServerMapping.getFeatureTypeMappings().add(abstractFeature);
+        }
 
         featureTypes.getFeatureTypeOrAdditionalMappings().addAll(
                 xtraServerMapping.getFeatureTypeMappings().stream().map(featureTypeMapping -> {
@@ -367,6 +374,7 @@ public class JaxbReaderWriter {
 
         } else {
             marshal(outputStream, featureTypes);
+            outputStream.close();
         }
     }
 
@@ -497,6 +505,19 @@ public class JaxbReaderWriter {
             //if (!(mappingTable.getValues().isEmpty() && mappingTable.getJoinPaths().isEmpty())) {
             if (!(((MappingTableImpl) mappingTable).isJoined && mappingTable.getValues().isEmpty() && mappingTable.getJoinPaths().isEmpty())) {
 
+                TableCommentDecorator table = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
+                table.setTable_Name(mappingTable.getName());
+                table.setOid_Col(mappingTable.getOidCol());
+                table.setTarget(mappingTable.getTarget());
+                /*if (((MappingTableImpl) mappingTable).isReference()) {
+                    table.setComment(mappingTable.getTarget().split(":")[1]);
+                } else*/ if (mappingTable.isPrimary() /*&& !xtraServerMapping.hasFeatureType(featureTypeMapping.getName())*/) {
+                    table.setComment("# " + ((MappingTableImpl) mappingTable).featureType.split(":")[1] + " #");
+                } else /*if (!mappingTable.isPrimary())*/ {
+                    table.setComment(mappingTable.getTarget().split(":")[1]);
+                }
+                mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(table);
+
                 mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
                         mappingTable.getJoinPaths().stream().map(mappingJoin -> {
                             MappingsSequenceType.Join join = objectFactory.createMappingsSequenceTypeJoin();
@@ -507,25 +528,23 @@ public class JaxbReaderWriter {
                         }).collect(Collectors.toList())
                 );
 
-                MappingsSequenceType.Table table = objectFactory.createMappingsSequenceTypeTable();
-                table.setTable_Name(mappingTable.getName());
-                table.setOid_Col(mappingTable.getOidCol());
-                table.setTarget(mappingTable.getTarget());
-
-                mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(table);
-
+                final String[] lastProperty = {""};
                 mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
                         mappingTable.getValues().stream().map(mappingValue -> {
-                            MappingsSequenceType.Table value = objectFactory.createMappingsSequenceTypeTable();
+                            TableCommentDecorator value = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
                             value.setTable_Name(mappingValue.getTable());
                             value.setTarget(mappingValue.getTarget());
                             if (mappingValue.getValue() != null && !mappingValue.getValue().equals(""))
-                                value.setValue4(mappingValue.getValue());
+                                value.setValue(mappingValue.getValue());
                             if (mappingValue.getValueType() != null && !mappingValue.getValueType().equals("value"))
                                 value.setValue_Type(mappingValue.getValueType());
                             value.setMapping_Mode(mappingValue.getMappingMode());
                             value.setDb_Codes(mappingValue.getDbCodes());
                             value.setSchema_Codes(mappingValue.getDbValues());
+                            if (!((MappingTableImpl) mappingTable).isReference() && ((MappingValueImpl) mappingValue).getRootProperty() != null && !lastProperty[0].equals(((MappingValueImpl) mappingValue).getRootProperty())) {
+                                value.setComment(((MappingValueImpl) mappingValue).getRootProperty());
+                                lastProperty[0] = ((MappingValueImpl) mappingValue).getRootProperty();
+                            }
                             return value;
                         }).collect(Collectors.toList())
                 );
@@ -659,16 +678,21 @@ public class JaxbReaderWriter {
         return FeatureTypes.class.cast(unmarshaller.unmarshal(in));
     }
 
-    private static void marshal(OutputStream outputStream, FeatureTypes featureTypes) throws JAXBException, SAXException, IOException {
+    private static void marshal(OutputStream outputStream, FeatureTypes featureTypes) throws JAXBException, SAXException, XMLStreamException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         Schema schema = schemaFactory.newSchema(getResource(JaxbReaderWriter.class, MAPPING_SCHEMA));
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
+
+        XMLOutputFactory xof = XMLOutputFactory.newFactory();
+        XMLStreamWriter xsw = new IndentingXMLStreamWriter(xof.createXMLStreamWriter(outputStream));
 
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setSchema(schema);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-        marshaller.marshal(featureTypes, outputStream);
+        marshaller.setListener(new MyMarshallerListener(xsw));
+        marshaller.marshal(featureTypes, xsw);
+        xsw.close();
     }
 
     private static MappingsSequenceType extractMappings(FeatureType featureType) {
@@ -696,6 +720,44 @@ public class JaxbReaderWriter {
         checkArgument(url != null, "resource %s relative to %s not found.",
                 resourceName, contextClass.getName());
         return url;
+    }
+
+    public static class MyMarshallerListener extends Marshaller.Listener {
+
+        private XMLStreamWriter xsw;
+        private boolean headerWritten;
+
+        public MyMarshallerListener(XMLStreamWriter xsw) {
+            this.xsw = xsw;
+        }
+
+        @Override
+        public void beforeMarshal(Object source) {
+            try {
+                try {
+                    TableCommentDecorator table = ((TableCommentDecorator) source);
+
+                    if (table.hasComment()) {
+                        xsw.writeComment(table.getComment());
+                    }
+                } catch (ClassCastException e) {
+                    // ignore
+                }
+                try {
+                    FeatureTypes featureTypes = ((FeatureTypes) source);
+
+                    if (!headerWritten) {
+                        xsw.writeComment("\n  created by xtraserver-config-util - " + new Date().toString() + "\n");
+                        this.headerWritten = true;
+                    }
+                } catch (ClassCastException e) {
+                    // ignore
+                }
+            } catch (XMLStreamException e) {
+                // TODO: handle exception
+            }
+        }
+
     }
 
 }

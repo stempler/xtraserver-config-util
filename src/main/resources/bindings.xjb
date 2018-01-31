@@ -6,11 +6,6 @@
 
   <jxb:globalBindings underscoreBinding="asCharInWord"/>
 
-  <jxb:bindings
-        node="//xsd:complexType[@name='MappingsSequenceType']/xsd:sequence/xsd:choice/xsd:element[@name='Table']/xsd:complexType/xsd:simpleContent/xsd:extension/xsd:attribute[@name='value']">
-        <jxb:property name="value4" />
-  </jxb:bindings>
-
 </jxb:bindings> 
 
 <!--jxb:bindings schemaLocation="file:///home/zahnen/development/XtraServer/schema/w3/xlink/1.1/xlink.xsd">

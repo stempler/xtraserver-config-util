@@ -6,6 +6,7 @@ import de.interactive_instruments.xtraserver.config.util.XtraServerMappingImpl;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -97,5 +98,5 @@ public interface XtraServerMapping {
      *
      * @param outputStream
      */
-    void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException;
+    void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException;
 }

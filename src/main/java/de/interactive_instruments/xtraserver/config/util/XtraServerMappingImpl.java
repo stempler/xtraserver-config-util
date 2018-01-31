@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
+import javax.xml.stream.XMLStreamException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -151,6 +152,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
 
                         MappingTable parentMappingTable = parentFeatureTypeMapping.getTable(mappingTable.getName())
                                 .orElse(copyTableShallow(parentFeatureTypeMapping, mappingTable));
+                        ((MappingTableImpl)parentMappingTable).featureType = featureTypeMapping.getName();
 
                         for (MappingValue mappingValue : mappingTable.getValues()) {
                             List<QName> pathElements = applicationSchema.getNamespaces().getQualifiedPathElements(mappingValue.getTarget());
@@ -158,6 +160,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
                             if (!pathElements.isEmpty() && applicationSchema.hasProperty(type, pathElements.get(0))) {
                                 //System.out.println("Property2:" + mappingValue.getTarget() + " || " + type.getName());
 
+                                ((MappingValueImpl)mappingValue).setRootProperty(pathElements.get(0).getLocalPart());
                                 if (applicationSchema.isGeometry(type, pathElements.get(0))) {
                                     ((MappingValueImpl)mappingValue).setGeometry(true);
                                 }
@@ -244,7 +247,7 @@ public class XtraServerMappingImpl implements XtraServerMapping {
     }
 
     @Override
-    public void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException {
+    public void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException {
         JaxbReaderWriter.writeToStream(outputStream, this, createArchiveWithAdditionalFiles);
     }
 
@@ -309,6 +312,10 @@ public class XtraServerMappingImpl implements XtraServerMapping {
             name += "[" + table.getTarget() + "]";
             return name;
         });
+    }
+
+    Namespaces getNamespaces() {
+        return applicationSchema.getNamespaces();
     }
 
     @Override

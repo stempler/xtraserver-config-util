@@ -22,6 +22,7 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
     private String dbValues;
     private Namespaces namespaces;
     private boolean isGeometry;
+    private String rootProperty;
 
     public MappingValueImpl(Namespaces namespaces) {
         this.valueType = "value";
@@ -139,6 +140,14 @@ public class MappingValueImpl implements de.interactive_instruments.xtraserver.c
 
     public void setGeometry(boolean geometry) {
         isGeometry = geometry;
+    }
+
+    public String getRootProperty() {
+        return rootProperty;
+    }
+
+    public void setRootProperty(String rootProperty) {
+        this.rootProperty = rootProperty;
     }
 
     @Override

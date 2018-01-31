@@ -22,6 +22,7 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     private String oidCol;
     private String target;
     public boolean isJoined;
+    public String featureType;
 
     private final List<MappingJoin> joinPaths;
     private final List<MappingValue> values;
@@ -145,6 +146,10 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     @Override
     public List<MappingValue> getValues() {
         return values;
+    }
+
+    public boolean isReference() {
+        return hasTarget() && getJoinPaths().size() == 1 && getValues().size() == 1 && getAssociationTargets().size() == 1;
     }
 
     @Override

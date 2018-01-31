@@ -14,8 +14,6 @@
 			<xsd:choice minOccurs="0" maxOccurs="unbounded">
 				<xsd:element name="Table">
 					<xsd:complexType>
-						<xsd:simpleContent>
-							<xsd:extension base="xsd:string">
 								<xsd:attribute name="apply_mapping_to_path" use="optional" type="xsd:boolean"/>
 								<xsd:attribute name="applyMappingToPath" use="optional" type="xsd:boolean"/>
 								<xsd:attribute name="assign" use="optional" type="xsd:string"/>
@@ -65,8 +63,6 @@
 								<xsd:attribute name="value" use="optional" type="xsd:string"/>
 								<xsd:attribute name="value_type" use="optional" type="xsd:string"/>
 								<xsd:attribute name="valueType" use="optional" type="xsd:string"/>
-							</xsd:extension>
-						</xsd:simpleContent>
 					</xsd:complexType>
 				</xsd:element>
 				<xsd:element name="Join">
