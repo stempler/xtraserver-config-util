@@ -684,7 +684,7 @@ public class JaxbReaderWriter {
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
 
         XMLOutputFactory xof = XMLOutputFactory.newFactory();
-        XMLStreamWriter xsw = new IndentingXMLStreamWriter(xof.createXMLStreamWriter(outputStream));
+        XMLStreamWriter xsw = new IndentingXMLStreamWriter(xof.createXMLStreamWriter(outputStream, "UTF-8"));
 
         Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setSchema(schema);
