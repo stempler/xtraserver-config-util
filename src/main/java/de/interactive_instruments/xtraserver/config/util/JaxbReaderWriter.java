@@ -228,7 +228,7 @@ public class JaxbReaderWriter {
                         } else if (ftm.hasTable(table) && !ftm.getTable(table).get().hasTarget()) {
                             List<String> t = Splitter.on("::").splitToList(join.getJoin_Path());
                             String source = t.get(t.size() - 1);
-                            if (t.size() > 2 && source.equals(table)) {
+                            if (t.size() >= 2 && source.equals(table)) {
                                 MappingJoin mappingJoin = MappingJoin.create();
                                 mappingJoin.setTarget(join.getTarget());
                                 parseJoinPath(join.getJoin_Path(), mappingJoin, ftm);
