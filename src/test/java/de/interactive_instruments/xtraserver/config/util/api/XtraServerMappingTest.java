@@ -1,28 +1,38 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
 import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
 import de.interactive_instruments.xtraserver.config.util.MappingTableImpl;
 import de.interactive_instruments.xtraserver.config.util.Namespaces;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import org.xmlunit.builder.Input;
 import org.xmlunit.diff.*;
+import org.xmlunit.xpath.JAXPXPathEngine;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.transform.Source;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import static com.shazam.shazamcrest.MatcherAssert.assertThat;
 import static com.shazam.shazamcrest.matcher.Matchers.sameBeanAs;
 import static org.hamcrest.core.StringStartsWith.startsWith;
+import static org.junit.Assert.assertFalse;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 public class XtraServerMappingTest {
@@ -165,11 +175,11 @@ public class XtraServerMappingTest {
         assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(mappingElementSelector)));
     }
 
-    //@Test
+    @Test
     public void testLocalImportExport() throws JAXBException, IOException, SAXException, XMLStreamException {
         StreamSource schemaSource = new StreamSource(new FileInputStream("/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema/AAA-Fachschema_XtraServer.xsd"), "/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema");
         ApplicationSchema localApplicationSchema = new ApplicationSchema(schemaSource);
-        String mappingFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/2/includes/XtraSrvConfig_Mapping.inc.xml";
+        String mappingFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/XtraSrvConfig_Mapping.inc.xml";
         XtraServerMapping xtraServerMappingImport = XtraServerMapping.createFromStream(new FileInputStream(mappingFile), localApplicationSchema);
 
         XtraServerMapping xtraServerMappingFlattenFanout = XtraServerMapping.create(localApplicationSchema);
@@ -184,13 +194,80 @@ public class XtraServerMappingTest {
 
         Source expected = Input.fromStream(new FileInputStream(mappingFile)).build();
         //Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
-        Source actual = Input.fromStream(new FileInputStream("/home/zahnen/Downloads/alkis-mapping.xml")).build();
+        Source actual = Input.fromStream(new FileInputStream("/home/zahnen/Downloads/alkis-mapping3.xml")).build();
+
+        List<String> ignoreAttributes = ImmutableList.of(
+                "FTCode",
+                "logging",
+                "tempTableName",
+                "useTempTable",
+                "derivation_pattern",
+                "assign",
+                "no_output",
+                "value_type",
+                "oid_col",
+                "gmlVersion",
+                "generator",
+                "filter_mapping",
+                "significant_for_emptiness"
+        );
+
+        List<String> targetsNotSupportedInHaleForAlkis1 = ImmutableList.of(
+                "adv:beziehtSichAufFlurstueck",
+                "adv:gehoertZu"
+                );
+
+        Map<String, String> targetsNotSupportedInHaleForAlkis11 = ImmutableMap.<String, String>builder()
+                .put("adv:beziehtSichAufFlurstueck", "adv:AX_Flurstueck")
+                //.put("adv:gehoertZu", "adv:AX_Gebaeude")
+                .put("adv:inversZu_an", "adv:AX_Buchungsstelle")
+                .put("adv:haengtZusammenMit","adv:AX_Gebaeude")
+                .put("adv:istTeilVon", "*")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_PTO", "*")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_PPO", "*")
+                .put("adv:istAbgeleitetAus", "*")
+                .put("adv:hatDirektUnten", "*")
+                .put("adv:inversZu_hatDirektUnten", "*")
+                .build();
+
+        List<String> targetsNotSupportedInHaleForAlkis2 = ImmutableList.of(
+                "adv:beziehtSichAufFlurstueck",
+                "adv:inversZu_an",
+                "adv:gehoertZu",
+                "adv:haengtZusammenMit",
+                "adv:istTeilVon",
+                "adv:inversZu_dientZurDarstellungVon_AP_PTO",
+                "adv:inversZu_dientZurDarstellungVon_AP_PPO",
+                "adv:istAbgeleitetAus",
+                "adv:hatDirektUnten",
+                "adv:inversZu_hatDirektUnten"
+        );
+
+        Map<String, String> targetsNotSupportedInHaleForAlkisFull = ImmutableMap.<String, String>builder()
+                .put("adv:beziehtSichAufFlurstueck", "adv:AX_Flurstueck")
+                .put("adv:gehoertZu", "adv:AX_Gebaeude")
+                .put("adv:inversZu_an", "adv:AX_Buchungsstelle")
+                .put("adv:haengtZusammenMit","adv:AX_Gebaeude")
+                .put("adv:istTeilVon", "*")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_PTO", "*")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_PPO", "*")
+                .put("adv:istAbgeleitetAus", "*")
+                .put("adv:hatDirektUnten", "*")
+                .put("adv:inversZu_hatDirektUnten", "*")
+                .put("adv:inversZu_zeigtAuf", "adv:AX_Grenzpunkt")
+                .put("adv:gehoert","adv:AX_Gebaeude")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_Darstellung", "adv:AA_Objekt")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_LTO", "adv:AA_Objekt")
+                .put("adv:inversZu_dientZurDarstellungVon_AP_LPO", "adv:AA_Objekt")
+                .put("adv:bestehtAus", "adv:AA_ZUSO") // TODO
+                .build();
+
 
         assertThat(actual, isSimilarTo(expected)
                 .throwComparisonFailure()
                 .ignoreComments()
                 .ignoreWhitespace()
-                .withAttributeFilter(attr -> !ImmutableList.of("FTCode", "logging", "tempTableName", "useTempTable", "derivation_pattern", "assign", "no_output", "value_type", "oid_col", "gmlVersion", "generator", "filter_mapping", "significant_for_emptiness").contains(attr.getLocalName()))
+                .withAttributeFilter(attr -> !ignoreAttributes.contains(attr.getLocalName()))
                 .withNodeFilter(node -> {
                     if (node.getLocalName() != null) {
                         if (node.getLocalName().equals("Table") && node.getAttributes() != null && node.getAttributes().getLength() == 3
@@ -205,12 +282,8 @@ public class XtraServerMappingTest {
                         } else if (node.getLocalName().equals("Table") && node.getAttributes() != null && node.getAttributes().getNamedItem("mapped_geometry") != null && node.getAttributes().getNamedItem("mapped_geometry").getNodeValue().equals("true")) {
                             return false;
                         } else if ((node.getLocalName().equals("Table") || node.getLocalName().equals("Join") || node.getLocalName().equals("AssociationTarget"))
-                                && (node.getAttributes() != null && node.getAttributes().getNamedItem("target") != null
-                                && (node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:beziehtSichAufFlurstueck") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_an")
-                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:gehoertZu") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:haengtZusammenMit")
-                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:istTeilVon") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_dientZurDarstellungVon_AP_PTO")
-                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_dientZurDarstellungVon_AP_PPO") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:istAbgeleitetAus")
-                                || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:hatDirektUnten") || node.getAttributes().getNamedItem("target").getNodeValue().contains("adv:inversZu_hatDirektUnten")))) {
+                                && node.getAttributes() != null && node.getAttributes().getNamedItem("target") != null
+                                && targetsNotSupportedInHaleForAlkisFull.keySet().stream().anyMatch(node.getAttributes().getNamedItem("target").getNodeValue()::startsWith)) {
                             return false;
                         } else if (node.getLocalName().equals("FeatureType") && node.getFirstChild() != null && node.getFirstChild().getTextContent() != null && node.getFirstChild().getTextContent().startsWith("gmlx:_Feature")) {
                             return false;
@@ -221,6 +294,30 @@ public class XtraServerMappingTest {
                 .withNodeMatcher(new DefaultNodeMatcher(mappingElementSelector))
                 .withDifferenceEvaluator(DifferenceEvaluators.downgradeDifferencesToSimilar(ComparisonType.CHILD_NODELIST_LENGTH, ComparisonType.CHILD_NODELIST_SEQUENCE, ComparisonType.ELEMENT_NUM_ATTRIBUTES))
         );
+
+        //Source actual2 = Input.fromByteArray(outputStream.toByteArray()).build();
+        Source actual2 = Input.fromStream(new FileInputStream("/home/zahnen/Downloads/alkis-mapping3.xml")).build();
+        String xpathMatcher = "//*[" + targetsNotSupportedInHaleForAlkisFull.entrySet().stream().map(target -> "(starts-with(@target, '" + target.getKey() + "') and ../../*[1][.='" + target.getValue() + "'])").collect(Collectors.joining(" or ")) + "]";
+        System.out.println(xpathMatcher);
+
+        Iterable<Node> i = new JAXPXPathEngine().selectNodes(xpathMatcher, actual2);
+        String message = "Mappings should not be contained in export:\n" + StreamSupport.stream(i.spliterator(), false).map(this::nodeToString).collect(Collectors.joining("\n"));
+
+        assertFalse(message, i.iterator().hasNext());
+
+    }
+
+    private String nodeToString(Node node) {
+        StringWriter sw = new StringWriter();
+        try {
+            Transformer t = TransformerFactory.newInstance().newTransformer();
+            t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+            t.setOutputProperty(OutputKeys.INDENT, "yes");
+            t.transform(new DOMSource(node), new StreamResult(sw));
+        } catch (TransformerException te) {
+            System.out.println("nodeToString Transformer Exception");
+        }
+        return sw.toString();
     }
 
     private XtraServerMapping buildCitiesMapping() throws IOException {
