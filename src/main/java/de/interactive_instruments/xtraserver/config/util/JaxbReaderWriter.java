@@ -573,8 +573,7 @@ public class JaxbReaderWriter {
 
                             if (refValue.isPresent() && refMapping.isPresent()) {
                                 // join is not connected to FeatureType
-                                if ((refJoin.isPresent() && !refMapping.get().getPrimaryTableNames().contains(refJoin.get().getTargetTable()))
-                                        || !refMapping.get().getPrimaryTableNames().contains(refValue.get().getTable())) {
+                                if (!refJoin.isPresent() || !refMapping.get().getPrimaryTableNames().contains(refJoin.get().getTargetTable())) {
                                     //System.out.println("Adding navigation join for AssociationTarget " + associationTarget.toString());
                                     String sourceTable = refValue.get().getTable();
                                     String sourceField = refValue.get().getValue().replaceAll(".*\\$T\\$\\.", "");
