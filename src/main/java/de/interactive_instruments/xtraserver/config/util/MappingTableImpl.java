@@ -126,7 +126,9 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
 
     @Override
     public void addJoinPath(MappingJoin joinPath) {
-        this.joinPaths.add(joinPath);
+        if (!this.joinPaths.contains(joinPath)) {
+            this.joinPaths.add(joinPath);
+        }
     }
 
     @Override
@@ -140,7 +142,9 @@ public class MappingTableImpl implements de.interactive_instruments.xtraserver.c
     }
 
     void addValue(MappingValue value) {
-        values.add(value);
+        if (!this.values.contains(value)) {
+            values.add(value);
+        }
     }
 
     @Override
