@@ -1,4 +1,4 @@
-package de.interactive_instruments.xtraserver.config.jaxb;
+package de.interactive_instruments.xtraserver.config.io;
 
 /**
  * @author zahnen

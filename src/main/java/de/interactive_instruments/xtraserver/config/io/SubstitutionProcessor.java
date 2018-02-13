@@ -1,4 +1,4 @@
-package de.interactive_instruments.xtraserver.config.util;
+package de.interactive_instruments.xtraserver.config.io;
 
 import java.io.*;
 import java.util.*;

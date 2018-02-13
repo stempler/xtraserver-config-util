@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class ApplicationSchema {
 
-    public final XmlSchema xmlSchema;
+    private final XmlSchema xmlSchema;
     private final Namespaces namespaces;
 
     public ApplicationSchema(final StreamSource streamSource) {
@@ -58,152 +58,63 @@ public class ApplicationSchema {
         }
     }
 
-    public boolean isAbstract(String featureType) {
-        QName ft = namespaces.getQualifiedName(featureType);
-        if (ft != null) {
-            XmlSchemaElement elem = xmlSchema.getElementByName(ft);
+    public boolean isAbstract(QName featureTypeName) {
+        if (featureTypeName != null) {
+            XmlSchemaElement elem = xmlSchema.getElementByName(featureTypeName);
             return elem != null && elem.isAbstract();
         }
         return false;
     }
 
-    public String getParent(String featureType) {
-        String parent = null;
-        QName ft = namespaces.getQualifiedName(featureType);
+    public Optional<String> getSuperTypeName(QName featureTypeName) {
+        final XmlSchemaElement featureType = xmlSchema.getElementByName(featureTypeName);
 
-        if (ft != null && getParent(ft) != null) {
-            parent = namespaces.getPrefixedName(getParent(ft));
+        if (featureType != null && featureType.getSubstitutionGroup() != null) {
+            return Optional.ofNullable(namespaces.getPrefixedName(featureType.getSubstitutionGroup()));
         }
 
-        return parent;
+        return Optional.empty();
     }
 
-    private QName getParent(QName featureType) {
-        QName parent = null;
-        XmlSchemaElement elem = xmlSchema.getElementByName(featureType);
 
-        if (elem != null) {
-            //parent = getParent(elem.getSchemaType());
-            parent = elem.getSubstitutionGroup();
-        }
-
-        return parent;
-    }
-
-    public QName getType(String featureType) {
-        QName ft = namespaces.getQualifiedName(featureType);
-        if (ft != null) {
-            XmlSchemaElement elem = xmlSchema.getElementByName(ft);
-            if (elem!= null) {
-                return elem.getSchemaType().getQName();
+    public XmlSchemaComplexType getType(QName qualifiedTypeName) {
+        if (qualifiedTypeName != null) {
+            XmlSchemaElement element = xmlSchema.getElementByName(qualifiedTypeName);
+            if (element!= null) {
+                return (XmlSchemaComplexType)element.getSchemaType();
             }
         }
         return null;
+    }
+
+    public boolean hasElement(QName qualifiedName) {
+        return getType(qualifiedName) != null;
+    }
+
+    public boolean hasElement(String elementName) {
+        return hasElement(namespaces.getQualifiedName(elementName));
     }
 
     public Namespaces getNamespaces() {
         return namespaces;
     }
 
-    private QName getParentForType(QName featureType) {
-        QName parent = null;
-        XmlSchemaType type = xmlSchema.getTypeByName(featureType);
+    public List<String> getAllSuperTypeNames(QName featureTypeName) {
+        final List<String> superTypes = new ArrayList<>();
+        Optional<String> superTypeName = getSuperTypeName(featureTypeName);
 
-        if (type != null) {
-            parent = getParent(type);
+        while (superTypeName.isPresent()) {
+            superTypes.add(superTypeName.get());
+            superTypeName = getSuperTypeName(namespaces.getQualifiedName(superTypeName.get()));
         }
 
-        return parent;
+        return superTypes;
     }
 
-    private QName getParent(XmlSchemaType type) {
-        QName parent = null;
-
-        try {
-            XmlSchemaComplexType complexType = (XmlSchemaComplexType) type;
-            parent = complexType.getBaseSchemaTypeName();
-        } catch (ClassCastException e) {
-            // ignore
-        }
-
-        return parent;
-    }
-
-    private XmlSchemaComplexType getParentType(XmlSchemaType type) {
-        XmlSchemaComplexType parent = null;
-
-        try {
-            XmlSchemaComplexType complexType = (XmlSchemaComplexType) type;
-            parent = (XmlSchemaComplexType) complexType.getBaseSchemaType();
-        } catch (ClassCastException e) {
-            // ignore
-        }
-
-        return parent;
-    }
-
-    public List<String> getAllParents(String featureType) {
-        List<String> parents = new ArrayList<>();
-
-        QName ft = namespaces.getQualifiedName(featureType);
-
-        /*if (ft != null && getParent(ft) != null) {
-            parents.add(namespaces.getPrefixedName(getParent(ft)));
-
-            ft = getParent(ft);
-
-            while (ft != null && getParentForType(ft) != null) {
-                parents.add(namespaces.getPrefixedName(getParentForType(ft)));
-                ft = getParentForType(ft);
-            }
-        }*/
-
-        while (ft != null && getParent(ft) != null) {
-            parents.add(namespaces.getPrefixedName(getParent(ft)));
-            ft = getParent(ft);
-        }
-
-        return parents;
-    }
-
-    public List<XmlSchemaComplexType> getAllTypes(QName featureType) {
-         return getAllParentTypes(xmlSchema.getTypeByName(featureType));
-    }
-
-    public List<XmlSchemaComplexType> getAllParentTypes(XmlSchemaType type) {
-        List<XmlSchemaComplexType> types = new ArrayList<>();
-
-        try {
-            XmlSchemaComplexType complexType = (XmlSchemaComplexType) type;
-            QName lastBaseType = null;
-
-            // recursively find the extension base type and add it to the list
-            while (complexType != null) {
-                types.add(complexType);
-
-                XmlSchemaContentModel model = complexType.getContentModel();
-                if (model != null) {
-                    XmlSchemaContent content = model.getContent();
-                    if (content != null && content instanceof XmlSchemaComplexContentExtension) {
-                        XmlSchemaComplexContentExtension ext = (XmlSchemaComplexContentExtension)content;
-                        QName baseType = ext.getBaseTypeName();
-
-                        if (baseType != null) {
-                            complexType = (XmlSchemaComplexType) xmlSchema.getTypeByName(baseType);
-                            boolean next = complexType != null && !baseType.equals(lastBaseType);
-                            lastBaseType = baseType;
-                            if (next) continue;
-                        }
-                    }
-                }
-
-                break;
-            }
-        } catch (ClassCastException e) {
-            // ignore
-        }
-
-        return Lists.reverse(types);
+    public List<QName> getAllSuperTypeQualifiedNames(QName featureTypeName) {
+        return getAllSuperTypeNames(featureTypeName).stream()
+                .map(namespaces::getQualifiedName)
+                .collect(Collectors.toList());
     }
 
     // TODO
@@ -228,30 +139,6 @@ public class ApplicationSchema {
         return false;
     }
 
-    public List<XmlSchemaElement> getAllElements(QName featureType) {
-        List<XmlSchemaComplexType> types = getAllTypes(featureType);
-
-        List<XmlSchemaElement> elements = types.stream().map(type -> {
-
-            Iterator i = xmlSchema.getElements().getValues();
-            while (i.hasNext()) {
-                XmlSchemaElement element = (XmlSchemaElement) i.next();
-                //System.out.println("FeatureTypes:" + type.getName() + " - " + element.getName());
-                if (type.getQName().equals(element.getSchemaTypeName())) {
-                    return element;
-                }
-            }
-
-            XmlSchemaElement element = new XmlSchemaElement();
-            element.setSchemaType(type);
-            element.setSchemaTypeName(type.getQName());
-            element.setQName(new QName(type.getQName().getNamespaceURI(), type.getQName().getLocalPart().replace("Type", "")));
-            return element;
-        }).collect(Collectors.toList());
-
-        return elements;
-    }
-
     public boolean hasProperty(XmlSchemaComplexType type, QName propertyName) {
         try {
             // check if property is contained in the element sequence of the type
@@ -264,7 +151,7 @@ public class ApplicationSchema {
                     Iterator i = sequence.getItems().getIterator();
                     while(i.hasNext()) {
                         XmlSchemaElement element = (XmlSchemaElement) i.next();
-                       if (element.getQName() != null && element.getQName().equals(propertyName)) {
+                        if (element.getQName() != null && element.getQName().equals(propertyName)) {
                             return true;
                         }
                     }
@@ -292,7 +179,7 @@ public class ApplicationSchema {
 
 
 
-    public XmlSchemaElement getProperty(XmlSchemaComplexType type, QName propertyName) {
+    private XmlSchemaElement getProperty(XmlSchemaComplexType type, QName propertyName) {
         try {
             // check if property is contained in the element sequence of the type
             XmlSchemaContentModel model = type.getContentModel();

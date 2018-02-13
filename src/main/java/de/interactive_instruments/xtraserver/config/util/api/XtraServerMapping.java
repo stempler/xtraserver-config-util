@@ -1,102 +1,129 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.config.util.JaxbReaderWriter;
-import de.interactive_instruments.xtraserver.config.util.XtraServerMappingImpl;
-import org.xml.sax.SAXException;
+import com.google.common.collect.ImmutableList;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * A collection of FeatureType mappings
+ * Collection of mappings for feature types from a common GML application schema
  *
  * @author zahnen
  */
-public interface XtraServerMapping {
+public class XtraServerMapping {
+    private final Map<String, FeatureTypeMapping> featureTypeMappings;
+    // TODO: add description with targetNamespace and version from applicationSchema
 
-    /**
-     * Factory method, parses mappings from InputStream
-     *
-     * @param inputStream input mapping
-     * @param applicationSchema Application Schema for the mapping
-     * @return XtraServerMapping
-     * @throws JAXBException
-     * @throws SAXException
-     * @throws IOException
-     */
-    static XtraServerMapping createFromStream(final InputStream inputStream, final ApplicationSchema applicationSchema) throws JAXBException, SAXException, IOException {
-        return JaxbReaderWriter.readFromStream(inputStream, applicationSchema);
+    XtraServerMapping(final Map<String, FeatureTypeMapping> featureTypeMappings) {
+        this.featureTypeMappings = featureTypeMappings;
     }
 
     /**
-     * Create a new empty XtraServerMapping
+     * Get the list of mappings for all feature types
      *
-     * @param applicationSchema ApplicationSchema to use
-     * @return new, empty XtraServerMapping
+     * @return the list of mappings
      */
-    static XtraServerMapping create(final ApplicationSchema applicationSchema) {
-        return new XtraServerMappingImpl(applicationSchema);
+    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappings() {
+        return getFeatureTypeMappings(false);
     }
 
     /**
-     * Does a mapping exist for the given non-abstract FeatureType?
+     * Get the list of mappings for all or all non-abstract feature types
      *
-     * @param featureType
-     * @return
+     * @param excludeAbstract if true exclude abstract FeatureTypes
+     * @return the list of mappings
      */
-    boolean hasFeatureType(String featureType);
+    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappings(boolean excludeAbstract) {
+        return featureTypeMappings.values().stream()
+                .filter(featureTypeMapping -> !excludeAbstract || !featureTypeMapping.isAbstract())
+                // TODO: can be replaced with ImmutableList.toImmutableList() starting with guava 21
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+    }
 
     /**
-     * Does a mapping exist for the given abstract FeatureType or DataType?
+     * Get the names of all feature types
      *
-     * @param type
-     * @return
+     * @return the list of prefixed feature type names
      */
-    boolean hasType(String type);
+    public ImmutableList<String> getFeatureTypeNames() {
+        return getFeatureTypeNames(false);
+    }
 
     /**
-     * Returns the mappings for given FeatureType
+     * Get the names of all or all non-abstract feature types
      *
-     * @param featureType
-     * @param flattenInheritance If true mappings from supertypes will be merged down
-     * @return
+     * @param excludeAbstract if true exclude abstract FeatureTypes
+     * @return the list of prefixed feature type names
      */
-    Optional<FeatureTypeMapping> getFeatureTypeMapping(String featureType, boolean flattenInheritance);
+    public ImmutableList<String> getFeatureTypeNames(boolean excludeAbstract) {
+        return featureTypeMappings.values().stream()
+                .filter(featureTypeMapping -> !excludeAbstract || !featureTypeMapping.isAbstract())
+                .map(FeatureTypeMapping::getName)
+                // TODO: can be replaced with ImmutableList.toImmutableList() starting with guava 21
+                .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+    }
 
     /**
-     * Get the list of non-abstract FeatureTypes
+     * Does a mapping exist for the given feature type?
      *
-     * @return
+     * @param featureTypeName the prefixed feature type name
+     * @return true if exists
      */
-    Collection<String> getFeatureTypeList();
+    public boolean hasFeatureType(String featureTypeName) {
+        return featureTypeMappings.containsKey(featureTypeName);
+    }
 
     /**
-     * Get the list of FeatureTypes
+     * Returns the mapping for the given feature type if found
      *
-     * @param includeAbstract If true include abstract FeatureTypes
-     * @return
+     * @param featureTypeName the prefixed feature type name
+     * @return the mapping
      */
-    Collection<String> getFeatureTypeList(boolean includeAbstract);
+    public Optional<FeatureTypeMapping> getFeatureTypeMapping(String featureTypeName) {
+        return Optional.ofNullable(featureTypeMappings.get(featureTypeName));
+    }
 
     /**
-     * Add mappings for a specific FeatureType
+     * Returns the mapping for the given feature type if found as well as the mappings for all recursively found supertypes.
+     * Sorting order is from top to bottom, so normally starting with gml:AbstractFeature if available.
      *
-     * @param featureTypeMapping
+     * @param featureTypeName the prefixed feature type name
+     * @return the list of mappings
      */
-    void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping);
+    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappingInheritanceChain(String featureTypeName) {
+        ImmutableList.Builder<FeatureTypeMapping> inheritanceChain = new ImmutableList.Builder<>();
 
-    void addFeatureTypeMapping(FeatureTypeMapping featureTypeMapping, boolean fanOutInheritance);
+        FeatureTypeMapping featureTypeMapping = featureTypeMappings.get(featureTypeName);
+        while (featureTypeMapping != null) {
+            inheritanceChain.add(featureTypeMapping);
+            featureTypeMapping = featureTypeMapping.getSuperTypeName()
+                    .map(featureTypeMappings::get)
+                    .orElse(null);
+        }
 
-    /**
-     * Write mappings to OutputStream
-     *
-     * @param outputStream
-     */
-    void writeToStream(OutputStream outputStream, boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException;
+        return inheritanceChain.build().reverse();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        XtraServerMapping that = (XtraServerMapping) o;
+        return Objects.equals(featureTypeMappings, that.featureTypeMappings);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(featureTypeMappings);
+    }
+
+    @Override
+    public String toString() {
+        return "\nXtraServerMappingImpl{" +
+                "\nfeatureTypeMappings=" + featureTypeMappings +
+                "\n}";
+    }
 }

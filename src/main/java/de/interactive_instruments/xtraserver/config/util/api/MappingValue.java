@@ -1,56 +1,159 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
-import de.interactive_instruments.xtraserver.config.util.MappingValueImpl;
-import de.interactive_instruments.xtraserver.config.util.Namespaces;
-
 import javax.xml.namespace.QName;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
- * A value mapping
+ * Represents a value mapping for a mapping target path
  *
  * @author zahnen
  */
-public interface MappingValue {
+public class MappingValue {
+    enum TYPE {COLUMN, EXPRESSION, CONSTANT, REFERENCE, GEOMETRY, CLASSIFICATION, NIL}
 
-    /**
-     * factory method
-     *
-     * @return
-     */
-    static MappingValue create(Namespaces namespaces) {
-        return new MappingValueImpl(namespaces);
+    private final String targetPath;
+    private final List<QName> qualifiedTargetPath;
+    private final String value;
+    private final String description;
+    private final TYPE type;
+
+    MappingValue(final String targetPath, List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type) {
+        this.targetPath = targetPath;
+        this.qualifiedTargetPath = qualifiedTargetPath;
+        this.value = value;
+        this.description = description;
+        this.type = type;
     }
 
-    String getTable();
+    /**
+     * Returns the column referenced in the value, if any
+     *
+     * @return the column name
+     */
+    public Optional<String> getValueColumn() {
+        return Optional.of(value);
+    }
 
-    String getTarget();
+    /**
+     * Returns the mapping target path
+     *
+     * @return the target path
+     */
+    public String getTargetPath() {
+        return targetPath;
+    }
 
-    QName getTargetQName();
+    /**
+     * Returns the list of qualified path elements in the target path
+     *
+     * @return the target path
+     */
+    public List<QName> getQualifiedTargetPath() {
+        return qualifiedTargetPath;
+    }
 
-    List<QName> getTargetQNameList();
+    /**
+     * Returns the value, might be a column name, an expression or a constant
+     *
+     * @return the value
+     */
+    public String getValue() {
+        return value;
+    }
 
-    String getValue();
+    /**
+     * Returns the description
+     *
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
 
-    String getValueType();
+    TYPE getType() {
+        return type;
+    }
 
-    String getMappingMode();
+    /**
+     * Is this value mapping of type column?
+     *
+     * @return true if column or geometry
+     */
+    public boolean isColumn() {
+        return type.equals(TYPE.COLUMN) || type.equals(TYPE.GEOMETRY);
+    }
 
-    String getDbCodes();
+    /**
+     * Is this value mapping of type expression?
+     *
+     * @return true if expression or reference
+     */
+    public boolean isExpression() {
+        return type.equals(TYPE.EXPRESSION) || type.equals(TYPE.REFERENCE);
+    }
 
-    String getDbValues();
+    /**
+     * Is this value mapping of type constant?
+     *
+     * @return true if constant
+     */
+    public boolean isConstant() {
+        return type.equals(TYPE.CONSTANT);
+    }
 
-    void setTable(MappingTable table);
+    /**
+     * Is this value mapping of type reference?
+     *
+     * @return true if reference
+     */
+    public boolean isReference() {
+        return type.equals(TYPE.REFERENCE);
+    }
 
-    void setTarget(String target);
+    /**
+     * Is this value mapping of type geometry?
+     *
+     * @return true if geometry
+     */
+    public boolean isGeometry() {
+        return type.equals(TYPE.GEOMETRY);
+    }
 
-    void setValue(String value);
+    /**
+     * Is this value mapping of type classification?
+     *
+     * @return true if classification or nil
+     */
+    public boolean isClassification() {
+        return type.equals(TYPE.CLASSIFICATION) || type.equals(TYPE.NIL);
+    }
 
-    void setValueType(String valueType);
+    /**
+     * Is this value mapping of type nil?
+     *
+     * @return true if nil
+     */
+    public boolean isNil() {
+        return type.equals(TYPE.NIL);
+    }
 
-    void setMappingMode(String mappingMode);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MappingValue that = (MappingValue) o;
+        return Objects.equals(targetPath, that.targetPath) &&
+                Objects.equals(qualifiedTargetPath, that.qualifiedTargetPath) &&
+                Objects.equals(value, that.value) &&
+                Objects.equals(description, that.description) &&
+                type == that.type;
+    }
 
-    void setDbCodes(String dbCodes);
+    @Override
+    public int hashCode() {
 
-    void setDbValues(String dbValues);
+        return Objects.hash(targetPath, qualifiedTargetPath, value, description, type);
+    }
 }

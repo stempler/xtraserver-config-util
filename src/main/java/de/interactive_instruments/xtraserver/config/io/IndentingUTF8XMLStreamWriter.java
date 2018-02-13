@@ -1,4 +1,4 @@
-package de.interactive_instruments.xtraserver.config.jaxb;
+package de.interactive_instruments.xtraserver.config.io;
 
 /**
  * @author zahnen
@@ -8,7 +8,7 @@ import java.util.Stack;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-public class IndentingXMLStreamWriter extends DelegatingXMLStreamWriter {
+public class IndentingUTF8XMLStreamWriter extends DelegatingXMLStreamWriter {
     private static final Object SEEN_NOTHING = new Object();
     private static final Object SEEN_ELEMENT = new Object();
     private static final Object SEEN_DATA = new Object();
@@ -18,7 +18,7 @@ public class IndentingXMLStreamWriter extends DelegatingXMLStreamWriter {
     private int depth;
     private boolean empty;
 
-    public IndentingXMLStreamWriter(XMLStreamWriter writer) {
+    public IndentingUTF8XMLStreamWriter(XMLStreamWriter writer) {
         super(writer);
         this.state = SEEN_NOTHING;
         this.stateStack = new Stack();

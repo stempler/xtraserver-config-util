@@ -1,61 +1,166 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
-import de.interactive_instruments.xtraserver.config.util.MappingJoinImpl;
-
 import java.util.List;
+import java.util.Objects;
 
 /**
- * A join definition
+ * Represents a join path that joins multiple tables based on conditions
  *
  * @author zahnen
  */
-public interface MappingJoin {
-    /**
-     * factory method
-     *
-     * @return
-     */
-    static MappingJoin create() {
-        return new MappingJoinImpl();
+public class MappingJoin {
+    private String targetPath;
+    private final List<Condition> joinConditions;
+
+    MappingJoin(String targetPath, List<Condition> joinConditions) {
+        this.targetPath = targetPath;
+        this.joinConditions = joinConditions;
     }
 
-    String getTarget();
-
-    String getAxis();
-
-    String getPath();
-
-    void setTarget(String target);
-
-    boolean isSuppressJoin();
-
-    List<Condition> getJoinConditions();
-
-    void addCondition(Condition condition);
-
-    String getSourceTable();
-
-    String getTargetTable();
+    /**
+     * returns the mapping target path
+     *
+     * @return the target path
+     */
+    public String getTargetPath() {
+        return targetPath;
+    }
 
     /**
-     * A join condition
+     * Returns the join conditions
+     *
+     * @return the join conditions
      */
-    interface Condition {
-        /**
-         * factory method
-         *
-         * @return
-         */
-        static Condition create(MappingTable sourceTable, String sourceField, MappingTable targetTable, String targetField) {
-            return new MappingJoinImpl.ConditionImpl(sourceTable.getName(), sourceField, targetTable.getName(), targetField);
+    public List<Condition> getJoinConditions() {
+        return joinConditions;
+    }
+
+    /**
+     * Returns the source table of the join
+     *
+     * @return the source table of the join
+     */
+    public String getSourceTable() {
+        if (joinConditions.isEmpty()) {
+            return null;
         }
 
-        String getSourceTable();
+        return joinConditions.get(0).getSourceTable();
+    }
 
-        String getSourceField();
+    /**
+     * Returns the target table of the join
+     *
+     * @return the target table of the join
+     */
+    public String getTargetTable() {
+        if (joinConditions.isEmpty()) {
+            return null;
+        }
 
-        String getTargetTable();
+        return joinConditions.get(joinConditions.size() - 1).getTargetTable();
+    }
 
-        String getTargetField();
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MappingJoin that = (MappingJoin) o;
+        return Objects.equals(targetPath, that.targetPath) &&
+                Objects.equals(joinConditions, that.joinConditions);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(targetPath, joinConditions);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder repr = new StringBuilder();
+        int i = 0;
+        for (Condition cndtn : joinConditions) {
+            repr.append(cndtn.toString());
+            if (++i < joinConditions.size()) {
+                repr.append(" && ");
+            }
+        }
+        return repr.toString();
+    }
+
+    /**
+     * Represents the join condition between two tables
+     */
+    public static class Condition {
+        private final String sourceTable;
+        private final String sourceField;
+        private final String targetTable;
+        private final String targetField;
+
+        Condition(String sourceTable, String sourceField, String targetTable, String targetField) {
+            this.sourceTable = sourceTable;
+            this.sourceField = sourceField;
+            this.targetTable = targetTable;
+            this.targetField = targetField;
+        }
+
+        /**
+         * Returns the source table of the condition
+         *
+         * @return the source table of the condition
+         */
+        public String getSourceTable() {
+            return sourceTable;
+        }
+
+        /**
+         * Returns the source field of the condition
+         *
+         * @return the source field of the condition
+         */
+        public String getSourceField() {
+            return sourceField;
+        }
+
+        /**
+         * Returns the target table of the condition
+         *
+         * @return the target table of the condition
+         */
+        public String getTargetTable() {
+            return targetTable;
+        }
+
+        /**
+         * Returns the target field of the condition
+         *
+         * @return the target field of the condition
+         */
+        public String getTargetField() {
+            return targetField;
+        }
+
+        @Override
+        public String toString() {
+            return sourceTable + "[" + sourceField + "]=" + targetTable + "[" + targetField + "]";
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Condition condition = (Condition) o;
+            return Objects.equals(sourceTable, condition.sourceTable) &&
+                    Objects.equals(sourceField, condition.sourceField) &&
+                    Objects.equals(targetTable, condition.targetTable) &&
+                    Objects.equals(targetField, condition.targetField);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(sourceTable, sourceField, targetTable, targetField);
+        }
     }
 }

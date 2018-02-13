@@ -31,6 +31,7 @@ dependencies {
     compile 'com.google.guava:guava:17.0'
     //compile 'org.apache.ws.xmlschema:xmlschema-core:2.2.2'
     compile 'org.apache.ws.commons.schema:XmlSchema:1.4.7'
+    compile group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.0'
 
     testCompile "junit:junit:4.12"
     testCompile "org.xmlunit:xmlunit-core:2.5.1"
@@ -62,6 +63,7 @@ javadoc {
     options.doclet = "com.google.doclava.Doclava"
     options.docletpath = configurations.doclava.files.asType(List)
     title = null
+
 }
 tasks.javadoc.dependsOn configurations.doclava
 

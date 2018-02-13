@@ -1,144 +1,166 @@
 package de.interactive_instruments.xtraserver.config.util.api;
 
-import de.interactive_instruments.xtraserver.config.util.FeatureTypeMappingImpl;
-import de.interactive_instruments.xtraserver.config.util.Namespaces;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import javax.xml.namespace.QName;
-import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * A collection of mappings related to a specific FeatureType
+ * Represents all mappings for a certain feature type
+ *
  * @author zahnen
  */
-public interface FeatureTypeMapping {
+public class FeatureTypeMapping {
+    private final String name;
+    private final QName qualifiedName;
+    private final String superTypeName;
+    private final boolean isAbstract;
+    private final ImmutableSet<MappingTable> tables;
 
-    static FeatureTypeMapping create(String name, QName qualifiedTypeName, Namespaces namespaces) {
-
-        return new FeatureTypeMappingImpl(name, qualifiedTypeName, namespaces);
+    FeatureTypeMapping(final String name, final QName qualifiedName, String superTypeName, final boolean isAbstract, final List<MappingTable> tables) {
+        this.name = name;
+        this.qualifiedName = qualifiedName;
+        this.superTypeName = superTypeName;
+        this.isAbstract = isAbstract;
+        this.tables = ImmutableSet.copyOf(tables);
     }
 
     /**
-     * Get the local name of the FeatureType
-     * @return
-     */
-    String getName();
-
-    /**
-     * Get the qualified name of the FeatureType
-     * @return
-     */
-    QName getQName();
-
-    /**
-     * Get the list of primary tables, i.e. tables that are mapped to the FeatureType without a join
-     * @return
-     */
-    Collection<String> getPrimaryTableNames();
-
-    /**
-     * Get the list of joined tables, i.e. tables that are mapped to the FeatureType with a join and provide at least one value mapping
-     * @return
-     */
-    Collection<String> getJoinedTableNames();
-
-    /**
-     * Get the list of reference tables, i.e. tables that are mapped to the FeatureType with a join, but do not provide values, just references to other Features
-     * @return
-     */
-    Collection<String> getReferenceTableNames();
-
-    /**
-     * Get all table mappings for primary, joined and reference tables
-     * @return
-     */
-    List<MappingTable> getTables();
-
-    /**
-     * Get all join mappings
-     * @return
-     */
-    List<MappingJoin> getJoins();
-
-    /**
-     * Get all value mappings
-     * @return
-     */
-    List<MappingValue> getValues();
-
-    /**
-     * Get all AssociationTargets
-     * @return
-     */
-    List<AssociationTarget> getAssociationTargets();
-
-    /**
-     * Does a table mapping exist for the given table?
-     * @param name
-     * @return
-     */
-    boolean hasTable(String name);
-
-    boolean hasTable(String name, String target);
-
-    /**
-     * Get the table mapping for the given table
-     * @param name
-     * @return
-     */
-    Optional<MappingTable> getTable(String name);
-
-    Optional<MappingTable> getTable(String name, String target);
-
-    /**
-     * Does a value mapping exist for the given table?
-     * @param name
-     * @return
-     */
-    boolean hasValueMappingForTable(String name);
-
-    /**
-     * Does a value mapping exist for the given table and target path?
-     * @param name
-     * @param target
-     * @return
-     */
-    boolean hasValueMappingForTable(String name, String target);
-
-    /**
-     * Does a reference mapping exist for the given table and target path?
-     * @param name
-     * @param target
-     * @return
-     */
-    boolean hasReferenceMappingForTable(String name, String target);
-
-    /**
-     * Add a table mapping
+     * Returns the prefixed feature type name
      *
-     * @param mappingTable
+     * @return the prefixed feature type name
      */
-    void addTable(MappingTable mappingTable);
+    public String getName() {
+        return name;
+    }
 
     /**
-     * Add a join mapping
+     * Returns the qualified feature type name
      *
-     * @param mappingJoin
+     * @return the qualified feature type name
      */
-    void addJoin(MappingJoin mappingJoin);
+    public QName getQualifiedName() {
+        return qualifiedName;
+    }
 
     /**
-     * Add a value mapping
+     * Returns the prefixed super type name
      *
-     * @param mappingValue
+     * @return the prefixed super type name
      */
-    void addValue(MappingValue mappingValue);
+    Optional<String> getSuperTypeName() {
+        return Optional.ofNullable(superTypeName);
+    }
 
     /**
-     * Add an AssociationTarget
+     * Is the feature type abstract?
      *
-     * @param associationTarget
+     * @return true if abstract
      */
-    void addAssociationTarget(AssociationTarget associationTarget);
+    public boolean isAbstract() {
+        return isAbstract;
+    }
+
+    /**
+     * Returns the primary table mappings
+     *
+     * @return the list of {@link MappingTable}s
+     */
+    public ImmutableList<MappingTable> getPrimaryTables() {
+        return tables.asList();
+    }
+
+    /**
+     * Returns the primary table names for this mapping
+     *
+     * @return the list of table names
+     */
+    public List<String> getPrimaryTableNames() {
+
+        return tables.stream().map(MappingTable::getName).collect(Collectors.toList());
+    }
+
+    /**
+     * Does a mapping exist for the given table name?
+     *
+     * @param name the table name
+     * @return true if exists
+     */
+    public boolean hasTable(String name) {
+        return getTableOptional(name).isPresent();
+    }
+
+    /**
+     * Returns the mapping for the given table name if found
+     *
+     * @param name the table name
+     * @return the {@link MappingTable}, if exists
+     */
+    public Optional<MappingTable> getTable(String name) {
+        return getTableOptional(name);
+    }
+
+    /**
+     * Return the first found value mapping of type geometry contained in the nested {@link MappingTable}s
+     *
+     * @return a {@link MappingValue} of type geometry, if found
+     */
+    public Optional<MappingValue> getGeometry() {
+        return tables.stream()
+                .flatMap(MappingTable::getAllValues)
+                .filter(MappingValue::isGeometry)
+                .findFirst();
+    }
+
+    /**
+     * Returns all table and value mappings, where the value target path matches the given one
+     *
+     * @param targetPath the mapping target path
+     * @return a map of found {@link MappingTable}s and {@link MappingValue}s
+     */
+    public ImmutableMap<MappingTable, MappingValue> getTableValuesForPath(final String targetPath) {
+        ImmutableMap.Builder<MappingTable, MappingValue> map = ImmutableMap.builder();
+
+        tables.stream()
+                .filter(table -> table.hasValueForPath(targetPath))
+                .forEach(table -> map.putAll(table.getTableValuesForPath(targetPath)));
+
+        return map.build();
+    }
+
+    private Optional<MappingTable> getTableOptional(String tableName) {
+        return tables.stream()
+                .filter(table -> tableName.equals(table.getName()))
+                .findFirst();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FeatureTypeMapping that = (FeatureTypeMapping) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(qualifiedName, that.qualifiedName) &&
+                Objects.equals(tables, that.tables);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(name, qualifiedName, tables);
+    }
+
+    @Override
+    public String toString() {
+        return "\nFeatureTypeMappingImpl{" +
+                "\nname='" + name + '\'' +
+                "\n, qualifiedTypeName=" + qualifiedName +
+                "\n, tables=" + tables +
+                "\n}";
+    }
 }
