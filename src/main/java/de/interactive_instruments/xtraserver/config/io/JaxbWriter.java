@@ -17,8 +17,8 @@ package de.interactive_instruments.xtraserver.config.io;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.Resources;
+import de.interactive_instruments.xtraserver.config.api.*;
 import de.interactive_instruments.xtraserver.config.schema.*;
-import de.interactive_instruments.xtraserver.config.util.api.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -41,7 +41,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Helper methods for JAXB marshalling
  */
-public class JaxbWriter {
+class JaxbWriter {
 
     private static final String MAPPING_FILE = "XtraSrvConfig_Mapping.inc.xml";
     private static final String GML_ABSTRACT_FEATURE = "gml:AbstractFeature";
@@ -49,12 +49,12 @@ public class JaxbWriter {
     private final XtraServerMapping xtraServerMapping;
     private final ObjectFactory objectFactory;
 
-    public JaxbWriter(XtraServerMapping xtraServerMapping) {
+    JaxbWriter(final XtraServerMapping xtraServerMapping) {
         this.xtraServerMapping = xtraServerMapping;
         this.objectFactory = new ObjectFactory();
     }
 
-    public void writeToStream(final OutputStream outputStream, final boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException {
+    void writeToStream(final OutputStream outputStream, final boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException {
         final FeatureTypes featureTypes = objectFactory.createFeatureTypes();
 
         featureTypes.getFeatureTypeOrAdditionalMappings().addAll(createFeatureTypes());
@@ -62,7 +62,7 @@ public class JaxbWriter {
 
         if (createArchiveWithAdditionalFiles) {
 
-            ZipOutputStream zipStream = new ZipOutputStream(outputStream);
+            final ZipOutputStream zipStream = new ZipOutputStream(outputStream);
 
             zipStream.putNextEntry(new ZipEntry(MAPPING_FILE));
             marshal(zipStream, featureTypes);
@@ -95,12 +95,12 @@ public class JaxbWriter {
     private Function<FeatureTypeMapping, FeatureType> createFeatureType() {
         return featureTypeMapping -> {
 
-            SQLFeatureTypeImplType sqlFeatureTypeImplType = objectFactory.createSQLFeatureTypeImplType();
+            final SQLFeatureTypeImplType sqlFeatureTypeImplType = objectFactory.createSQLFeatureTypeImplType();
 
             createMappings(sqlFeatureTypeImplType, featureTypeMapping);
             createXtraServerParameters(sqlFeatureTypeImplType, featureTypeMapping);
 
-            FeatureType featureType = objectFactory.createFeatureType();
+            final FeatureType featureType = objectFactory.createFeatureType();
             featureType.setName(featureTypeMapping.getName());
             featureType.setPGISFeatureTypeImpl(sqlFeatureTypeImplType);
 
@@ -126,15 +126,13 @@ public class JaxbWriter {
     }
 
 
-    private void createMappings(MappingsSequenceType mappingsSequenceType, FeatureTypeMapping featureTypeMapping) {
-        featureTypeMapping.getPrimaryTables().forEach(mappingTable -> {
-            createTableMapping(mappingsSequenceType, mappingTable);
-        });
+    private void createMappings(final MappingsSequenceType mappingsSequenceType, final FeatureTypeMapping featureTypeMapping) {
+        featureTypeMapping.getPrimaryTables().forEach(mappingTable -> createTableMapping(mappingsSequenceType, mappingTable));
     }
 
-    private void createTableMapping(MappingsSequenceType mappingsSequenceType, MappingTable mappingTable) {
+    private void createTableMapping(final MappingsSequenceType mappingsSequenceType, final MappingTable mappingTable) {
         if (!mappingTable.isJoined() || !mappingTable.getValues().isEmpty()) {
-            TableCommentDecorator table = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
+            final TableCommentDecorator table = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
             table.setTable_Name(mappingTable.getName());
             if (mappingTable.getPredicate() != null && !mappingTable.getPredicate().isEmpty()) {
                 table.setTable_Name(mappingTable.getName() + "[" + mappingTable.getPredicate() + "]");
@@ -168,8 +166,9 @@ public class JaxbWriter {
                     TableCommentDecorator value = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
                     value.setTable_Name(mappingTable.getName());
                     value.setTarget(mappingValue.getTargetPath());
-                    if (mappingValue.getValue() != null && !mappingValue.getValue().equals(""))
+                    if (mappingValue.getValue() != null && !mappingValue.getValue().equals("")) {
                         value.setValue(mappingValue.getValue());
+                    }
                     value.setValue_Type(buildValueType(mappingValue));
                     if (mappingValue.isNil()) {
                         value.setMapping_Mode("nil");
@@ -201,7 +200,7 @@ public class JaxbWriter {
         mappingTable.getJoiningTables().forEach(joiningTable -> createTableMapping(mappingsSequenceType, joiningTable));
     }
 
-    private String buildValueType(MappingValue mappingValue) {
+    private String buildValueType(final MappingValue mappingValue) {
         if (mappingValue.isExpression()) {
             return "expression";
         } else if (mappingValue.isConstant()) {
@@ -214,10 +213,10 @@ public class JaxbWriter {
         return null;
     }
 
-    private String buildJoinPath(List<MappingJoin.Condition> conditions) {
-        StringBuilder stringBuilder = new StringBuilder();
+    private String buildJoinPath(final List<MappingJoin.Condition> conditions) {
+        final StringBuilder stringBuilder = new StringBuilder();
 
-        for (MappingJoin.Condition condition : conditions) {
+        for (final MappingJoin.Condition condition : conditions) {
             if (stringBuilder.length() == 0) {
                 stringBuilder.insert(0, condition.getSourceTable());
             }
@@ -233,7 +232,7 @@ public class JaxbWriter {
     }
 
 
-    private void createXtraServerParameters(SQLFeatureTypeImplType sqlFeatureTypeImplType, FeatureTypeMapping featureTypeMapping) {
+    private void createXtraServerParameters(final SQLFeatureTypeImplType sqlFeatureTypeImplType, final FeatureTypeMapping featureTypeMapping) {
         sqlFeatureTypeImplType.setLogging("false");
         sqlFeatureTypeImplType.setUseTempTable(false);
         if (!featureTypeMapping.getName().endsWith(":AbstractFeature")) {
@@ -241,15 +240,15 @@ public class JaxbWriter {
         }
     }
 
-    private void marshal(OutputStream outputStream, FeatureTypes featureTypes) throws JAXBException, SAXException, XMLStreamException {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(Resources.getResource(JaxbReader.class, JaxbReader.MAPPING_SCHEMA));
-        JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
+    private void marshal(final OutputStream outputStream, final FeatureTypes featureTypes) throws JAXBException, SAXException, XMLStreamException {
+        final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final Schema schema = schemaFactory.newSchema(Resources.getResource(JaxbReader.class, JaxbReader.MAPPING_SCHEMA));
+        final JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
 
-        XMLOutputFactory xof = XMLOutputFactory.newFactory();
-        XMLStreamWriter xsw = new IndentingUTF8XMLStreamWriter(xof.createXMLStreamWriter(outputStream, "UTF-8"));
+        final XMLOutputFactory xof = XMLOutputFactory.newFactory();
+        final XMLStreamWriter xsw = new IndentingUTF8XMLStreamWriter(xof.createXMLStreamWriter(outputStream, "UTF-8"));
 
-        Marshaller marshaller = jaxbContext.createMarshaller();
+        final Marshaller marshaller = jaxbContext.createMarshaller();
         marshaller.setSchema(schema);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

@@ -17,9 +17,9 @@ package de.interactive_instruments.xtraserver.config.io;
 
 import com.google.common.base.Splitter;
 import com.google.common.io.Resources;
-import de.interactive_instruments.xtraserver.config.util.api.FeatureTypeMapping;
-import de.interactive_instruments.xtraserver.config.util.api.MappingValue;
-import de.interactive_instruments.xtraserver.config.util.api.XtraServerMapping;
+import de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping;
+import de.interactive_instruments.xtraserver.config.api.MappingValue;
+import de.interactive_instruments.xtraserver.config.api.XtraServerMapping;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * @author zahnen
  */
-public class AdditionalFilesWriter {
+class AdditionalFilesWriter {
 
     void generate(final ZipOutputStream zipStream, final XtraServerMapping xtraServerMapping) throws IOException {
 
@@ -80,7 +80,7 @@ public class AdditionalFilesWriter {
                 writer.append(featureTypeNameWithoutPrefix);
                 writer.append(".metadataUrl}</MetadataURL>{fi}{fi}{fi}\n\t");
                 writer.append("</FeatureType>\n");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
             }
         });
@@ -100,15 +100,15 @@ public class AdditionalFilesWriter {
             final String featureTypeNameWithoutPrefix = featureTypeMapping.getQualifiedName().getLocalPart();
 
             // find the first geometric property descending from top to bottom of the inheritance tree
-            Optional<MappingValue> geometricProperty = xtraServerMapping.getFeatureTypeMappingInheritanceChain(featureTypeName).stream()
+            final Optional<MappingValue> geometricProperty = xtraServerMapping.getFeatureTypeMappingInheritanceChain(featureTypeName).stream()
                     .map(FeatureTypeMapping::getGeometry)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .findFirst();
 
-            if (geometricProperty.isPresent()) {
-                final String propertyName = geometricProperty.get().getTargetPath();
-                String propertyNameWithoutPrefix = Splitter.on(':').splitToList(propertyName).get(1);
+            geometricProperty.ifPresent(mappingValue -> {
+                final String propertyName = mappingValue.getTargetPath();
+                final String propertyNameWithoutPrefix = Splitter.on(':').splitToList(propertyName).get(1);
 
                 try {
                     writer.append("\t<GeoIndex id=\"gidx_");
@@ -127,10 +127,10 @@ public class AdditionalFilesWriter {
                     writer.append("</PGISGeoIndexFeatures>\n\t\t");
                     writer.append("</PGISGeoIndexImpl>\n\t");
                     writer.append("</GeoIndex>\n");
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     // ignore
                 }
-            }
+            });
         });
 
         writer.append("</GeoIndexes>\n");
@@ -145,7 +145,7 @@ public class AdditionalFilesWriter {
                 writer.append("\t\t\t<wfs:Query srsName=\"${CRS}\" typeNames=\"");
                 writer.append(featureTypeName);
                 writer.append("\"/>\n");
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 // ignore
             }
         });

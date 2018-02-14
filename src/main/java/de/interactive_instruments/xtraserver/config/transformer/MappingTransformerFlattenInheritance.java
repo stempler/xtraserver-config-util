@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util;
+package de.interactive_instruments.xtraserver.config.transformer;
 
-import de.interactive_instruments.xtraserver.config.util.api.*;
+import de.interactive_instruments.xtraserver.config.api.*;
 
 import javax.xml.namespace.QName;
 import java.util.List;
@@ -26,14 +26,12 @@ import java.util.stream.Collectors;
 /**
  * @author zahnen
  */
-public class MappingTransformerFlattenInheritance implements MappingTransformer {
+class MappingTransformerFlattenInheritance implements MappingTransformer {
 
     private final XtraServerMapping xtraServerMapping;
-    private final ApplicationSchema applicationSchema;
 
-    public MappingTransformerFlattenInheritance(XtraServerMapping xtraServerMapping, ApplicationSchema applicationSchema) {
+    MappingTransformerFlattenInheritance(final XtraServerMapping xtraServerMapping) {
         this.xtraServerMapping = xtraServerMapping;
-        this.applicationSchema = applicationSchema;
     }
 
     @Override
@@ -55,7 +53,7 @@ public class MappingTransformerFlattenInheritance implements MappingTransformer 
     }
 
     @Override
-    public FeatureTypeMapping transform(FeatureTypeMapping featureTypeMapping) {
+    public FeatureTypeMapping transform(final FeatureTypeMapping featureTypeMapping) {
 
         return transformFeatureType().apply(featureTypeMapping);
     }
@@ -78,7 +76,7 @@ public class MappingTransformerFlattenInheritance implements MappingTransformer 
         };
     }
 
-    private FeatureTypeMapping mergeMappings(FeatureTypeMapping mainMapping, List<MappingTable> mergingTables) {
+    private FeatureTypeMapping mergeMappings(final FeatureTypeMapping mainMapping, final List<MappingTable> mergingTables) {
 
         final List<MappingTable> transformedTables = mainMapping.getPrimaryTables().stream()
                 .map(mergeTables(mergingTables))
@@ -90,10 +88,10 @@ public class MappingTransformerFlattenInheritance implements MappingTransformer 
                 .build();
     }
 
-    private Function<MappingTable, MappingTable> mergeTables(List<MappingTable> mergingTables) {
+    private Function<MappingTable, MappingTable> mergeTables(final List<MappingTable> mergingTables) {
         return mainTable -> {
             // if primary do not copy values ???
-            MappingTable initialTable = mainTable.isPrimary()
+            final MappingTable initialTable = mainTable.isPrimary()
                     ? new MappingTableBuilder().shallowCopyOf(mainTable).joiningTables(mainTable.getJoiningTables()).build()
                     : new MappingTableBuilder().copyOf(mainTable).build();
 
@@ -103,7 +101,7 @@ public class MappingTransformerFlattenInheritance implements MappingTransformer 
         };
     }
 
-    private MappingTable mergeTable(MappingTable mainTable, MappingTable mergingTable) {
+    private MappingTable mergeTable(final MappingTable mainTable, final MappingTable mergingTable) {
 
         // TODO: for joining tables we do not want an intersection but a union
         // nontheless matching tables might have to be merged

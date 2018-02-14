@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util.api;
+package de.interactive_instruments.xtraserver.config.transformer;
 
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.config.util.MappingTransformerFanOutInheritance;
-import de.interactive_instruments.xtraserver.config.util.MappingTransformerFlattenInheritance;
-import de.interactive_instruments.xtraserver.config.util.MappingTransformerRelationNavigability;
+import de.interactive_instruments.xtraserver.config.api.XtraServerMapping;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Transformer chain builder for {@link XtraServerMapping}s.
@@ -34,7 +34,7 @@ public class XtraServerMappingTransformer {
     private final boolean fanOutInheritance;
     private final boolean ensureRelationNavigability;
 
-    XtraServerMappingTransformer(XtraServerMapping xtraServerMapping, ApplicationSchema applicationSchema, boolean flattenInheritance, boolean fanOutInheritance, boolean ensureRelationNavigability) {
+    private XtraServerMappingTransformer(final XtraServerMapping xtraServerMapping, final ApplicationSchema applicationSchema, final boolean flattenInheritance, final boolean fanOutInheritance, final boolean ensureRelationNavigability) {
         this.xtraServerMapping = xtraServerMapping;
         this.applicationSchema = applicationSchema;
         this.flattenInheritance = flattenInheritance;
@@ -48,15 +48,19 @@ public class XtraServerMappingTransformer {
      * @param xtraServerMapping the mapping that should be transformed
      * @return the transformer builder
      */
-    public static SchemaInfo forMapping(XtraServerMapping xtraServerMapping) {
+    public static SchemaInfo forMapping(final XtraServerMapping xtraServerMapping) {
         return new Builder(xtraServerMapping);
     }
 
-    XtraServerMapping transform() {
+    private XtraServerMapping transform() {
         XtraServerMapping transformedXtraServerMapping = xtraServerMapping;
 
+        // TODO: validate: schema not null
+
+        transformedXtraServerMapping = new MappingTransformerSchemaInfo(transformedXtraServerMapping, applicationSchema).transform();
+
         if (flattenInheritance) {
-            transformedXtraServerMapping = new MappingTransformerFlattenInheritance(transformedXtraServerMapping, applicationSchema).transform();
+            transformedXtraServerMapping = new MappingTransformerFlattenInheritance(transformedXtraServerMapping).transform();
         }
         if (fanOutInheritance) {
             transformedXtraServerMapping = new MappingTransformerFanOutInheritance(transformedXtraServerMapping, applicationSchema).transform();
@@ -77,10 +81,10 @@ public class XtraServerMappingTransformer {
          * Adds schema info like qualified names, super types and geometry properties to the mapping.
          * Prerequisite for all other transformers
          *
-         * @param applicationSchema the application schema
+         * @param applicationSchemaUri the application schema URI
          * @return the transformer builder
          */
-        Transform applySchemaInfo(ApplicationSchema applicationSchema);
+        Transform applySchemaInfo(URI applicationSchemaUri);
     }
 
     /**
@@ -119,23 +123,23 @@ public class XtraServerMappingTransformer {
          *
          * @return the transformed {@link XtraServerMapping}
          */
-        XtraServerMapping transform();
+        XtraServerMapping transform() throws IOException;
     }
 
     private static class Builder implements SchemaInfo, Transform {
         private final XtraServerMapping xtraServerMapping;
-        private ApplicationSchema applicationSchema;
+        private URI applicationSchemaUri;
         private boolean flattenInheritance;
         private boolean fanOutInheritance;
         private boolean ensureRelationNavigability;
 
-        Builder(XtraServerMapping xtraServerMapping) {
+        Builder(final XtraServerMapping xtraServerMapping) {
             this.xtraServerMapping = xtraServerMapping;
         }
 
         @Override
-        public Transform applySchemaInfo(ApplicationSchema applicationSchema) {
-            this.applicationSchema = applicationSchema;
+        public Transform applySchemaInfo(final URI applicationSchemaUri) {
+            this.applicationSchemaUri = applicationSchemaUri;
             return this;
         }
 
@@ -158,8 +162,8 @@ public class XtraServerMappingTransformer {
         }
 
         @Override
-        public XtraServerMapping transform() {
-            return new XtraServerMappingTransformer(xtraServerMapping, applicationSchema, flattenInheritance, fanOutInheritance, ensureRelationNavigability)
+        public XtraServerMapping transform() throws IOException {
+            return new XtraServerMappingTransformer(xtraServerMapping, new ApplicationSchema(applicationSchemaUri), flattenInheritance, fanOutInheritance, ensureRelationNavigability)
                     .transform();
         }
     }

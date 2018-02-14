@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util.api;
+package de.interactive_instruments.xtraserver.config.api;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.config.util.Namespaces;
+import com.google.common.io.Resources;
+import de.interactive_instruments.xtraserver.config.io.XtraServerMappingFile;
+import de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Node;
@@ -31,28 +32,23 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.StringWriter;
+import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 
 import static com.shazam.shazamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
 import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 public class XtraServerMappingTest {
 
-    private Namespaces namespaces;
-    private ApplicationSchema applicationSchema;
+    private URI applicationSchemaUri;
     private ElementSelector mappingElementSelector;
 
     @Before
-    public void setup() throws IOException {
-//        this.applicationSchema = new ApplicationSchema(Resources.asByteSource(Resources.getResource("Cities.xsd")).openBufferedStream());
-  //      this.namespaces = applicationSchema.getNamespaces();
+    public void setup() throws IOException, URISyntaxException {
+        this.applicationSchemaUri = Resources.getResource("Cities.xsd").toURI();
         this.mappingElementSelector = ElementSelectors.conditionalBuilder()
                 .whenElementIsNamed("FeatureType").thenUse(ElementSelectors.byXPath("./*[1]", ElementSelectors.byNameAndText))
                 .whenElementIsNamed("AdditionalMappings").thenUse(ElementSelectors.byXPath("./*[1]", ElementSelectors.byNameAndText))
@@ -186,16 +182,15 @@ public class XtraServerMappingTest {
 
     //@Test
     public void testLocalImportExport() throws JAXBException, IOException, SAXException, XMLStreamException {
-        StreamSource schemaSource = new StreamSource(new FileInputStream("/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema/AAA-Fachschema_XtraServer.xsd"), "/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema");
-        ApplicationSchema localApplicationSchema = new ApplicationSchema(schemaSource);
-        String inputFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/1/includes/XtraSrvConfig_Mapping.inc.xml";
-        String outputFile = "/home/zahnen/Downloads/alkis-mapping.xml";
+        //final StreamSource schemaSource = new StreamSource(new FileInputStream(""), "/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema");
+        final URI localApplicationSchema = new File("/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema/AAA-Fachschema_XtraServer.xsd").toURI();
+        final String inputFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/1/includes/XtraSrvConfig_Mapping.inc.xml";
+        final String outputFile = "/home/zahnen/Downloads/alkis-mapping.xml";
         //XtraServerMapping xtraServerMappingImport = XtraServerMapping.createFromStream(new FileInputStream(inputFile), localApplicationSchema);
-        XtraServerMapping xtraServerMappingImport = XtraServerMappingFile.read()
-                .withSchema(localApplicationSchema)
+        final XtraServerMapping xtraServerMappingImport = XtraServerMappingFile.read()
                 .fromStream(new FileInputStream(inputFile));
 
-        XtraServerMapping xtraServerMappingNav = XtraServerMappingTransformer
+        final XtraServerMapping xtraServerMappingNav = XtraServerMappingTransformer
                 .forMapping(xtraServerMappingImport)
                 .applySchemaInfo(localApplicationSchema)
                 .flattenInheritance()
@@ -208,7 +203,7 @@ public class XtraServerMappingTest {
             xtraServerMappingFlattenFanout.addFeatureTypeMapping(xtraServerMappingImport.getFeatureTypeMapping(featureType, true).get(), true);
         }*/
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         XtraServerMappingFile.write()
                 .mapping(xtraServerMappingNav)
                 //.createArchiveWithAdditionalFiles()
@@ -216,11 +211,11 @@ public class XtraServerMappingTest {
 
         System.out.println(outputStream.toString());
 
-        Source expected = Input.fromStream(new FileInputStream(inputFile)).build();
-        Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
+        final Source expected = Input.fromStream(new FileInputStream(inputFile)).build();
+        final Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
         //Source actual = Input.fromStream(new FileInputStream(outputFile)).build();
 
-        List<String> ignoreAttributes = ImmutableList.of(
+        final List<String> ignoreAttributes = ImmutableList.of(
                 "FTCode",
                 "logging",
                 "tempTableName",
@@ -236,7 +231,7 @@ public class XtraServerMappingTest {
                 "significant_for_emptiness"
         );
 
-        Map<String, String> targetsNotSupportedInHaleForAlkis = ImmutableMap.<String, String>builder()
+        final Map<String, String> targetsNotSupportedInHaleForAlkis = new ImmutableMap.Builder<String, String>()
                 .put("adv:beziehtSichAufFlurstueck", "adv:AX_Flurstueck")
                 .put("adv:inversZu_an", "adv:AX_Buchungsstelle")
                 .put("adv:haengtZusammenMit", "adv:AX_Gebaeude")
@@ -248,7 +243,7 @@ public class XtraServerMappingTest {
                 .put("adv:inversZu_hatDirektUnten", "*")
                 .build();
 
-        Map<String, String> targetsNotSupportedInHaleForAlkisFull = ImmutableMap.<String, String>builder()
+        final Map<String, String> targetsNotSupportedInHaleForAlkisFull = new ImmutableMap.Builder<String, String>()
                 .put("adv:beziehtSichAufFlurstueck", "adv:AX_Flurstueck")
                 .put("adv:gehoertZu", "adv:AX_Gebaeude")
                 .put("adv:inversZu_an", "adv:AX_Buchungsstelle")
@@ -300,7 +295,7 @@ public class XtraServerMappingTest {
                         } else if (node.getLocalName().equals("Join")
                                 && node.getAttributes() != null && node.getAttributes().getNamedItem("target") != null
                                 && (node.getAttributes().getNamedItem("target").getNodeValue().startsWith("adv:inversZu_hatDirektUnten/adv:")
-                        || node.getAttributes().getNamedItem("target").getNodeValue().startsWith("adv:hatDirektUnten/adv:"))) {
+                                || node.getAttributes().getNamedItem("target").getNodeValue().startsWith("adv:hatDirektUnten/adv:"))) {
                             return false;
                         } else if (node.getLocalName().equals("FeatureType") && node.getFirstChild() != null && node.getFirstChild().getTextContent() != null && node.getFirstChild().getTextContent().startsWith("gmlx:_Feature")) {
                             return false;
@@ -324,14 +319,14 @@ public class XtraServerMappingTest {
 
     }
 
-    private String nodeToString(Node node) {
-        StringWriter sw = new StringWriter();
+    private String nodeToString(final Node node) {
+        final StringWriter sw = new StringWriter();
         try {
-            Transformer t = TransformerFactory.newInstance().newTransformer();
+            final Transformer t = TransformerFactory.newInstance().newTransformer();
             t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             t.setOutputProperty(OutputKeys.INDENT, "yes");
             t.transform(new DOMSource(node), new StreamResult(sw));
-        } catch (TransformerException te) {
+        } catch (final TransformerException te) {
             System.out.println("nodeToString Transformer Exception");
         }
         return sw.toString();

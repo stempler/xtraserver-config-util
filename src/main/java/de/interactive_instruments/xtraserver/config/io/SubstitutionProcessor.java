@@ -21,31 +21,31 @@ import java.util.*;
 /**
  * @author zahnen
  */
-public class SubstitutionProcessor {
+class SubstitutionProcessor {
 
     // Data
 
     // Substitution map
-    Map<String, String> m_substmap;
+    private final Map<String, String> m_substmap;
     // Basic input object, unread buffer, savepoint buffer
     //Input* m_pIn;
     Reader in;
-    StringBuffer m_unread;
-    StringBuffer m_saved;
-    int m_nSaved;
+    private final StringBuffer m_unread;
+    private final StringBuffer m_saved;
+    private int m_nSaved;
     // Processed output, unread buffer
-    StringBuffer m_unread_prd;
+    private final StringBuffer m_unread_prd;
 
-    Set<String> m_missingKeys;
+    private final Set<String> m_missingKeys;
 
     // process xincludes
-    boolean m_processXincludes;
-    File m_xincludeConfigDir;
+    private boolean m_processXincludes;
+    private File m_xincludeConfigDir;
     // Xinclude map
-    Map<String,File> m_xincludemap;
+    private final Map<String, File> m_xincludemap;
 
-    public SubstitutionProcessor() {
-        this.m_substmap =new HashMap<>();
+    SubstitutionProcessor() {
+        this.m_substmap = new HashMap<>();
         this.m_missingKeys = new HashSet<>();
         this.m_xincludemap = new HashMap<>();
 
@@ -54,28 +54,28 @@ public class SubstitutionProcessor {
         this.m_unread_prd = new StringBuffer();
     }
 
-    public void addParameter(String key, String value) {
+    void addParameter(final String key, final String value) {
         //TODO: EncodeXMLEntities
         m_substmap.put(key, value);
     }
 
-    public void addParametersFromProperties() {
+    void addParametersFromProperties() {
 
     }
 
-    public void enableXIncludes(File baseDir) {
+    void enableXIncludes(final File baseDir) {
         this.m_xincludeConfigDir = baseDir;
         this.m_processXincludes = true;
     }
 
-    public void process(File input, Writer output) throws IOException {
-        Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(input),"UTF-8"));
+    void process(final File input, final Writer output) throws IOException {
+        final Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(input), "UTF-8"));
 
         process(reader, output);
     }
 
-    public void process(Reader input, Writer output) throws IOException {
-        String config = "";
+    void process(final Reader input, final Writer output) throws IOException {
+        final String config = "";
         int ich;
 
         while ((ich = getProcessedChar(input)) != -1) {
@@ -86,110 +86,94 @@ public class SubstitutionProcessor {
         output.close();
 
         if (m_processXincludes) {
-            for (Map.Entry<String,File> include: m_xincludemap.entrySet()) {
-                Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(m_xincludeConfigDir, include.getKey())),"UTF-8"));
-                Writer writer = new OutputStreamWriter(new FileOutputStream(include.getValue()));
+            for (final Map.Entry<String, File> include : m_xincludemap.entrySet()) {
+                final Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(new File(m_xincludeConfigDir, include.getKey())), "UTF-8"));
+                final Writer writer = new OutputStreamWriter(new FileOutputStream(include.getValue()));
 
                 process(reader, writer);
             }
         }
     }
 
-    private int getProcessedChar(Reader input) throws IOException {
+    private int getProcessedChar(final Reader input) throws IOException {
         int ich;
 
         // Wenn was im unread-Puffer steht, dieses abholen, ansonsten
         // vom Input lesen
-        if( m_unread_prd.length() > 0)
-        {
+        if (m_unread_prd.length() > 0) {
             // Vom unread-Puffer
-            ich = m_unread_prd.charAt(m_unread_prd.length()-1);
-            m_unread_prd.setLength(m_unread_prd.length()-1);
-        }
-        else
-            // Nichts da. Weiter im Input ...
+            ich = m_unread_prd.charAt(m_unread_prd.length() - 1);
+            m_unread_prd.setLength(m_unread_prd.length() - 1);
+        } else
+        // Nichts da. Weiter im Input ...
+        {
             ich = readByte(input);
+        }
 
         // EOD muss nicht weiter verarbeitet werden
-        if( ich == -1 )
+        if (ich == -1) {
             return ich;
+        }
 
         // Liegt möglicherweise ein Einsetzpunkt vor?
-        if( ich == '{' )
-        {
+        if (ich == '{') {
             // Das nächste Zeichen inspizieren
-            int jch, kch;
-            if( m_unread_prd.length() > 1 )
-            {
-                jch = m_unread_prd.charAt(m_unread_prd.length()-1);
-                kch = m_unread_prd.charAt(m_unread_prd.length()-1);
-            }
-            else if( m_unread_prd.length() > 0 )
-            {
-                jch = m_unread_prd.charAt(m_unread_prd.length()-1);
+            final int jch;
+            final int kch;
+            if (m_unread_prd.length() > 1) {
+                jch = m_unread_prd.charAt(m_unread_prd.length() - 1);
+                kch = m_unread_prd.charAt(m_unread_prd.length() - 1);
+            } else if (m_unread_prd.length() > 0) {
+                jch = m_unread_prd.charAt(m_unread_prd.length() - 1);
                 kch = readByte(input);
-                unreadByte( kch );
-            }
-            else
-            {
+                unreadByte(kch);
+            } else {
                 jch = readByte(input);
                 kch = readByte(input);
-                unreadByte( kch );
-                unreadByte( jch );
+                unreadByte(kch);
+                unreadByte(jch);
             }
 
             // Verzweigen je nach nächsten Zeichen
-            if( jch == -1 )
-            {
+            if (jch == -1) {
                 // EOD nach geschweifter Klammer
                 return '{';
             }
-            if( jch == '$' )
-            {
+            if (jch == '$') {
                 // $: Muss Substitution sein
                 ich = doSubstitution(input);
-            }
-            else if( jch == 'f' )
-            {
+            } else if (jch == 'f') {
                 // f: sollte ein {forall ...}...{end} sein
                 ich = doForAll(input);
-            }
-            else if( jch == 'i' )
-            {
+            } else if (jch == 'i') {
                 // in: sollte ein {intersects s1 s2 true false} sein
                 //if ( kch == 'n' )
                 //    ich = doIntersects(input);
                 // if: sollte ein {if s1 s2}...{else}...{fi} sein
-                if ( kch == 'f' )
+                if (kch == 'f') {
                     ich = doIf(input);
+                }
             }
-        }
-        else if( m_processXincludes && ich == '<' )
-        {
+        } else if (m_processXincludes && ich == '<') {
             // Die nächsten beiden Zeichen inspizieren
-            int jch, kch;
-            if( m_unread_prd.length() > 1 )
-            {
-                jch = m_unread_prd.charAt(m_unread_prd.length()-1);
-                kch = m_unread_prd.charAt(m_unread_prd.length()-1);
-            }
-            else if( m_unread_prd.length() > 0 )
-            {
-                jch = m_unread_prd.charAt(m_unread_prd.length()-1);
+            final int jch;
+            final int kch;
+            if (m_unread_prd.length() > 1) {
+                jch = m_unread_prd.charAt(m_unread_prd.length() - 1);
+                kch = m_unread_prd.charAt(m_unread_prd.length() - 1);
+            } else if (m_unread_prd.length() > 0) {
+                jch = m_unread_prd.charAt(m_unread_prd.length() - 1);
                 kch = readByte(input);
-                unreadByte( kch );
-            }
-            else
-            {
+                unreadByte(kch);
+            } else {
                 jch = readByte(input);
                 kch = readByte(input);
-                unreadByte( kch );
-                unreadByte( jch );
+                unreadByte(kch);
+                unreadByte(jch);
             }
 
             // Verzweigen je nach nächsten Zeichen
-            if( jch == 'x' && kch == 'i' )
-            {
+            if (jch == 'x' && kch == 'i') {
                 // xi: sollte xinclude sein
                 ich = doXinclude(input);
             }
@@ -199,38 +183,35 @@ public class SubstitutionProcessor {
 
 
     // Ein Zeichen lesen
-    private int readByte(Reader input) throws IOException {
+    private int readByte(final Reader input) throws IOException {
         // Input besorgen
-        int ich;
-        if( m_unread.length() > 0 )
-        {
+        final int ich;
+        if (m_unread.length() > 0) {
             // Aus dem unread-Stack
-            ich = m_unread.charAt(m_unread.length()-1);
-            m_unread.setLength(m_unread.length()-1);
-        }
-        else
-        {
+            ich = m_unread.charAt(m_unread.length() - 1);
+            m_unread.setLength(m_unread.length() - 1);
+        } else {
             // Echter Input
             ich = input.read();
         }
 
         // Falls es Savepoints gibt, aufzeichnen
-        if( m_nSaved > 0 )
+        if (m_nSaved > 0) {
             m_saved.append(Character.toChars(ich));
+        }
 
         // Das Zeichen abliefern
         return ich;
     }
 
     // Ein Zeichen auf den Input zurück legen
-    private void unreadByte( int ich )
-    {
+    private void unreadByte(final int ich) {
         // Auf den unread-Stack
         //m_unread.append( ich );
         m_unread.append(Character.toChars(ich));
 
         // Aus den Savepoints entnehmen
-        if( m_nSaved > 0 ) {
+        if (m_nSaved > 0) {
             if (m_saved.length() > 0) {
                 m_saved.setLength(m_saved.length() - 1);
             }
@@ -238,8 +219,7 @@ public class SubstitutionProcessor {
     }
 
     // Savepoint setzen und identifizieren
-    private int takeSavepoint()
-    {
+    private int takeSavepoint() {
         // Savepoint ist der Füllstand des Savepoint-Feldes. Den Savepoint-
         // Zähler erhöhen. Die Inputfunktion zeichnet automatisch im
         // Savepoint-Feld auf, wenn der Zähler > 0 ist.
@@ -248,77 +228,77 @@ public class SubstitutionProcessor {
     }
 
     // Savepoint aufgeben
-    private void releaseSavepoint( int isp )
-    {
+    private void releaseSavepoint(final int isp) {
         // Die Eingabezeichen bis zum Index freigeben. Nur beim letzten Mal
         // wird der Puffer leer geräumt
 
-        if( --m_nSaved <= 0 )
-            m_saved.setLength( 0 );
+        if (--m_nSaved <= 0) {
+            m_saved.setLength(0);
+        }
     }
 
     // Auf Savepoint zurücksetzen
-    private void restoreSavepoint( int isp )
-    {
+    private void restoreSavepoint(final int isp) {
         // Die geretteten Eingabezeichen bis zum gegebenen Index werden in die
         // unread-Schnittstelle gesteckt und stehen daher als Input wieder zur
         // Verfügung.
-        for( int i = m_saved.length()-1; i >= isp; i-- )
-        {
-            int ich = m_saved.charAt(m_saved.length()-1);
+        for (int i = m_saved.length() - 1; i >= isp; i--) {
+            final int ich = m_saved.charAt(m_saved.length() - 1);
             m_saved.setLength(m_saved.length() - 1);
-            m_unread.append( Character.toChars(ich) );
+            m_unread.append(Character.toChars(ich));
         }
     }
 
     // Substitution durchführen. Erkannt ist {$, wobei der $ das nächste
 // Zeichen ist.
-    private int doSubstitution(Reader input) throws IOException {
+    private int doSubstitution(final Reader input) throws IOException {
         // Für den Fall, dass die Substitution nicht glückt, setzen wir einen
         // Savepoint
-        int savepoint = takeSavepoint();
+        final int savepoint = takeSavepoint();
 
         // Den $ wegnehmen
         int ich = getProcessedChar(input);
 
         // Den Key bis zur } oder EOF lesen. Wir lesen aus dem substituierten Ergebnis,
         // sodass rekursive Ersetzung geht: {${$abc}}
-        StringBuilder key = new StringBuilder();
-        while( (ich = getProcessedChar(input)) != -1 )
-        {
-            if( ich=='}' ) break;
+        final StringBuilder key = new StringBuilder();
+        while ((ich = getProcessedChar(input)) != -1) {
+            if (ich == '}') {
+                break;
+            }
             key.append(Character.toChars(ich));
         }
 
         // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
-        if( ich == -1 )
-            unreadByte( ich );
+        if (ich == -1) {
+            unreadByte(ich);
+        }
 
         // Mit dem Key suchen
-        String value = m_substmap.get(key.toString());
-        if( value != null )
-        {
+        final String value = m_substmap.get(key.toString());
+        if (value != null) {
             // Gefunden: Der Wert ersetzt das {$key} Konstrukt. Das kommt alles
             // in den unread-Puffer für prozessierte Texte
-            for( int i = value.length()-1; i > 0; --i )
+            for (int i = value.length() - 1; i > 0; --i) {
                 m_unread_prd.append(value.charAt(i));
+            }
 
-            if (value.length() > 1 && value.charAt(0) == '{' && value.charAt(1) == '$')
+            if (value.length() > 1 && value.charAt(0) == '{' && value.charAt(1) == '$') {
                 ich = doSubstitution(input);
-            else if(value.length() > 2 && value.charAt(0) == '<' && value.charAt(1) == 'x' && value.charAt(2) == 'i' )
+            } else if (value.length() > 2 && value.charAt(0) == '<' && value.charAt(1) == 'x' && value.charAt(2) == 'i') {
                 ich = doXinclude(input);
-            else if( value.length() > 0 )
+            } else if (value.length() > 0) {
                 ich = value.charAt(0);
-            else
-                // Diese Variable stellt den leeren String dar; wir müssen den nächsten
-                // Processed Char zurückbringen:
+            } else
+            // Diese Variable stellt den leeren String dar; wir müssen den nächsten
+            // Processed Char zurückbringen:
+            {
                 ich = getProcessedChar(input);
+            }
 
             // Erfolg: Savepoint auflösen
-            releaseSavepoint( savepoint );
-        }
-        else
-        {
+            releaseSavepoint(savepoint);
+        } else {
             // Nicht gefunden: der Substitutionspunkt wird durch Leerstring ersetzt.
             // Der Key wird vermerkt, damit er später geloggt werden kann.
             m_missingKeys.add(key.toString());
@@ -328,119 +308,125 @@ public class SubstitutionProcessor {
             ich = getProcessedChar(input);
 
             // Savepoint auflösen
-            releaseSavepoint( savepoint );
+            releaseSavepoint(savepoint);
         }
         return ich;
     }
 
     // {forall x list} Schleife durchführen. Erkannt wurde bereits die geschweifte
 // Klammer am Anfang.
-    private int doForAll(Reader input) throws IOException {
+    private int doForAll(final Reader input) throws IOException {
 
         int ich, i;
 
         // Wenn es gut gegangen ist, erkennen wir jetzt den Key und den Wert bis
         // zum }. Key und Wert werden aus dem substituierten Text geholt.
-        if( readOperation(input, "forall ") )
-        {
+        if (readOperation(input, "forall ")) {
             // Hole Key und Value des {forall key value}
-            StringBuilder[] args = {new StringBuilder(), new StringBuilder()};
+            final StringBuilder[] args = {new StringBuilder(), new StringBuilder()};
             int iarg = 0;
-            while( (ich = getProcessedChar(input)) != -1 )
-            {
-                if( ich == ' ' )
-                    if( iarg==0 )
-                    {
-                        if ( args[0].length() > 0 ) iarg = 1;
+            while ((ich = getProcessedChar(input)) != -1) {
+                if (ich == ' ') {
+                    if (iarg == 0) {
+                        if (args[0].length() > 0) {
+                            iarg = 1;
+                        }
                         continue;
                     }
-                if( ich == '}' ) break;
+                }
+                if (ich == '}') {
+                    break;
+                }
                 args[iarg].append(Character.toChars(ich));
             }
 
             // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
-            if( ich == -1 )
+            if (ich == -1) {
                 m_unread_prd.append(Character.toChars(ich));
+            }
 
             // { forall ...}  ist erkannt, einschließlich der schließenden Klammer.
             // Das zweite Argument ist als Liste zu interpretieren und auseinander
             // zu nehmen. Das erste ist der Key.
-            String key = args[0].toString();
+            final String key = args[0].toString();
             String valueList = args[1].toString();
             char dlm = ' ';
-            if( valueList.length() > 0 )
-            {
+            if (valueList.length() > 0) {
                 dlm = valueList.charAt(0);
-                valueList = valueList.substring( 0, valueList.lastIndexOf(dlm) + 1 );
+                valueList = valueList.substring(0, valueList.lastIndexOf(dlm) + 1);
             }
-            List<String> values = new ArrayList<>();
-            for( i = 0; i < valueList.length(); i++ )
-            {
-                if( valueList.charAt(i) == dlm )
-                    values.add( "" );
-                else
-                    values.set(values.size()-1, values.get(values.size()-1) + valueList.charAt(i));
+            final List<String> values = new ArrayList<>();
+            for (i = 0; i < valueList.length(); i++) {
+                if (valueList.charAt(i) == dlm) {
+                    values.add("");
+                } else {
+                    values.set(values.size() - 1, values.get(values.size() - 1) + valueList.charAt(i));
+                }
             }
-            if( values.size() > 0 && values.get(values.size()-1).length() == 0 )
-                values.remove( values.size()-1 );
+            if (values.size() > 0 && values.get(values.size() - 1).length() == 0) {
+                values.remove(values.size() - 1);
+            }
 
             // Den Zustand der Substitutionstabelle bezüglich des Keys festhalten
-            String value = m_substmap.get( key );
-            boolean keyWasSet = value != null;
+            final String value = m_substmap.get(key);
+            final boolean keyWasSet = value != null;
 
             // Den Inputzustand als Savepoint festhalten
-            int savepoint = takeSavepoint();
+            final int savepoint = takeSavepoint();
 
             // Die Ergebnisse festhalten
-            StringBuffer record = new StringBuffer();
+            final StringBuilder record = new StringBuilder();
 
             // Über die Werteliste laufen und jeden Wert mit seinem Key etablieren
             boolean isEmpty = false;
-            if( values.size()==0 )
-            {
+            if (values.size() == 0) {
                 isEmpty = true;
-                values.add( "" );
+                values.add("");
             }
-            for( int il = 0; il < values.size(); il++ )
-            {
+            for (final String value1 : values) {
                 // Key-Werte-Paar eintragen
-                m_substmap.put(key, values.get(il));
+                m_substmap.put(key, value1);
 
                 // Zurück auf den Savepoint
-                restoreSavepoint( savepoint );
+                restoreSavepoint(savepoint);
 
                 // Jetzt den verarbeiteten Input lesen, bis EOF oder {end} auftaucht
-                while( (ich = getProcessedChar(input)) != -1 )
-                {
-                    record.append( Character.toChars(ich) );
-                    if( record.toString().endsWith("{end}") ) {
+                while ((ich = getProcessedChar(input)) != -1) {
+                    record.append(Character.toChars(ich));
+                    if (record.toString().endsWith("{end}")) {
                         record.setLength(record.length() - 5);
                         break;
                     }
                 }
             }
-            if( isEmpty ) record.setLength(0);
+            if (isEmpty) {
+                record.setLength(0);
+            }
 
             // Den Savepoint abschaffen: qqq{forall x /{$xyz}/xxx/yyy/}-{$x}+{end}rrr
-            releaseSavepoint( savepoint );
+            releaseSavepoint(savepoint);
 
             // Den alten Zustand der Substitutionstabelle wiederherstellen
-            if( keyWasSet )
+            if (keyWasSet) {
                 m_substmap.put(key, value);
-            else
-                m_substmap.remove( key );
+            } else {
+                m_substmap.remove(key);
+            }
 
             // Alles, was wir gesammelt haben, in den prozessierten Input zurück
-            for( i = record.length()-1; i > 0; --i )
-                m_unread_prd.append( record.charAt(i) );
+            for (i = record.length() - 1; i > 0; --i) {
+                m_unread_prd.append(record.charAt(i));
+            }
 
             // Das erste Zeichen zurück
-            if( record.length() > 0 )
+            if (record.length() > 0) {
                 return record.charAt(0);
-            else
-                // Diese Anweisung stellt den leeren String dar; wir müssen den nächsten
-                // Processed Char zurückbringen:
+            } else
+            // Diese Anweisung stellt den leeren String dar; wir müssen den nächsten
+            // Processed Char zurückbringen:
+            {
                 return getProcessedChar(input);
+            }
         }
 
 
@@ -458,90 +444,86 @@ public class SubstitutionProcessor {
 // Innerhalb der if-Klammer werden alle Whitespaces zwischen if, Argumenten und ==
 // bzw. != ignoriert. Whitespaces in Argumenten werden aber berücksichtigt.
 // Beachte: Argumente dürfen kein == oder != enthalten
-    static String whites = "\r\n\t ";
+    private static final String whites = "\r\n\t ";
 
     // Unterscheiden: {if value1},  {if value1 == value2} oder {if value1 != value2}
-    enum CompType { none, equal, notEqual };
+    enum CompType {
+        none, equal, notEqual
+    }
 
-    private int doIf(Reader input) throws IOException {
+    private int doIf(final Reader input) throws IOException {
         int ich, i;
         // Wenn es gut gegangen ist, erkennen wir jetzt den Key und den Wert bis
         // zum }. Key und Wert werden aus dem substituierten Text geholt.
-        if( readOperation(input, "if") )
-        {
+        if (readOperation(input, "if")) {
             // Hole Values
-            String[] args = {"", ""};
+            final String[] args = {"", ""};
             int iarg = -1; // Index bzgl. args
             CompType compType = CompType.none;
 
-            while( (ich=getProcessedChar(input)) != -1 )
-            {
+            while ((ich = getProcessedChar(input)) != -1) {
                 // Beim ersten Whitespace schalten wir auf das erste Argument
                 // um, d.h. bis zum ersten Whitespace ignorieren wir alle Zeichen.
-                if( iarg == -1 && whites.indexOf(ich) > -1 )
-                {
+                if (iarg == -1 && whites.indexOf(ich) > -1) {
                     iarg = 0;
                     continue;
                 }
 
-                if( iarg==0 )
-                {
+                if (iarg == 0) {
                     // Erstes Argument
                     // Wir unterscheiden == und != am Ende des Arguments
-                    if( args[0].length() >= 2 && args[0].charAt(args[0].length()-1) == '=' )
-                    {
-                        if( args[0].charAt(args[0].length()-2) == '=' )
+                    if (args[0].length() >= 2 && args[0].charAt(args[0].length() - 1) == '=') {
+                        if (args[0].charAt(args[0].length() - 2) == '=') {
                             compType = CompType.equal;
-                        else if( args[0].charAt(args[0].length()-2) == '!' )
+                        } else if (args[0].charAt(args[0].length() - 2) == '!') {
                             compType = CompType.notEqual;
+                        }
                     }
 
-                    if( compType != CompType.none )
-                    {
+                    if (compType != CompType.none) {
                         // Vergleichs-Symbol gefunden: weiter mit zweitem Argument
                         iarg = 1;
                         // Vergleichssymbol löschen
-                        args[0] = args[0].substring(0, args[0].length()-2);
+                        args[0] = args[0].substring(0, args[0].length() - 2);
                     }
                 }
 
                 // Ende der if-Klammer
-                if( ich == '}' ) break;
+                if (ich == '}') {
+                    break;
+                }
 
                 // Argument lesen
-                if (iarg > -1)
+                if (iarg > -1) {
                     args[iarg] += Character.toChars(ich);
+                }
             }
 
             // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
-            if( ich == -1 )
-                m_unread_prd.append( Character.toChars(ich) );
+            if (ich == -1) {
+                m_unread_prd.append(Character.toChars(ich));
+            }
 
             // Die Ergebnisse festhalten
-            StringBuffer recordIf = new StringBuffer();
-            StringBuffer recordElse = new StringBuffer();
+            final StringBuilder recordIf = new StringBuilder();
+            final StringBuilder recordElse = new StringBuilder();
             boolean isElse = false;
 
             // Jetzt den verarbeiteten Input lesen, bis EOF oder {fi} auftaucht
-            while( (ich=getProcessedChar(input)) != -1 )
-            {
-                if (!isElse)
-                {
-                    recordIf.append( Character.toChars(ich) );
-                    if( recordIf.toString().endsWith("{fi}") ) {
-                        recordIf.setLength( recordIf.length() - 4 );
+            while ((ich = getProcessedChar(input)) != -1) {
+                if (!isElse) {
+                    recordIf.append(Character.toChars(ich));
+                    if (recordIf.toString().endsWith("{fi}")) {
+                        recordIf.setLength(recordIf.length() - 4);
                         break;
-                    }
-                    else if( recordIf.toString().endsWith("{else}") ) {
-                        recordIf.setLength( recordIf.length() - 6 );
+                    } else if (recordIf.toString().endsWith("{else}")) {
+                        recordIf.setLength(recordIf.length() - 6);
                         isElse = true;
                     }
-                }
-                else
-                {
-                    recordElse.append( Character.toChars(ich) );
-                    if( recordElse.toString().endsWith("{fi}") ) {
-                        recordElse.setLength( recordElse.length() - 4 );
+                } else {
+                    recordElse.append(Character.toChars(ich));
+                    if (recordElse.toString().endsWith("{fi}")) {
+                        recordElse.setLength(recordElse.length() - 4);
                         break;
                     }
                 }
@@ -554,8 +536,7 @@ public class SubstitutionProcessor {
             // Falls wir nur einen Operanden haben, unterstützen wir auch ein
             // not-exists: {if !value1}.
             boolean notExists = false;
-            if( iarg == 0 && args[0].length() > 0 && args[0].charAt(0) == '!' )
-            {
+            if (iarg == 0 && args[0].length() > 0 && args[0].charAt(0) == '!') {
                 notExists = true;
                 args[0] = args[0].substring(1).trim();
             }
@@ -565,39 +546,42 @@ public class SubstitutionProcessor {
             // Wir nehmen den if-Block wenn
             // - es zwei Operanden gibt und diese bei einem Stringvergleich identisch bzw. verschieden sind
             // - es nur einen (evtl. negierten) Operanden gibt und dieser weder nicht gesetzt, leer, "false" oder "0" ist
-            if( (args[1].length() > 0 && ((compType == CompType.equal) ? args[0].equals(args[1]) : !args[0].equals(args[1]))) ||
+            if ((args[1].length() > 0 && ((compType == CompType.equal) == args[0].equals(args[1]))) ||
                     (args[1].length() == 0 && !notExists && args[0].length() > 0 && !args[0].equals("false") && !args[0].equals("0")) ||
-                    (args[1].length() == 0 && notExists && (args[0].length() == 0 || args[0].equals("false") && args[0].equals("0"))) )
-            {
+                    (args[1].length() == 0 && notExists && (args[0].length() == 0 || args[0].equals("false") && args[0].equals("0")))) {
                 // if-Zweig
 
                 // Alles, was wir gesammelt haben, in den prozessierten Input zurück
-                for( i =recordIf.length()-1; i > 0; --i )
-                    m_unread_prd.append( recordIf.charAt(i) );
+                for (i = recordIf.length() - 1; i > 0; --i) {
+                    m_unread_prd.append(recordIf.charAt(i));
+                }
 
                 // Das erste Zeichen zurück
-                if( recordIf.length() > 0 )
+                if (recordIf.length() > 0) {
                     return recordIf.charAt(0);
-                else
-                    // Diese if-Anweisung stellt den leeren String dar; wir müssen den nächsten
-                    // Processed Char zurückbringen:
+                } else
+                // Diese if-Anweisung stellt den leeren String dar; wir müssen den nächsten
+                // Processed Char zurückbringen:
+                {
                     return getProcessedChar(input);
-            }
-            else
-            {
+                }
+            } else {
                 // else-Zweig
 
                 // Alles, was wir gesammelt haben in den prozessierten Input zurück
-                for( i= recordElse.length()-1; i > 0; --i )
-                    m_unread_prd.append( recordElse.charAt(i) );
+                for (i = recordElse.length() - 1; i > 0; --i) {
+                    m_unread_prd.append(recordElse.charAt(i));
+                }
 
                 // Das erste Zeichen zurück
-                if( recordElse.length() > 0 )
+                if (recordElse.length() > 0) {
                     return recordElse.charAt(0);
-                else
-                    // Diese if-Anweisung stellt den leeren String dar; wir müssen den nächsten
-                    // Processed Char zurückbringen:
+                } else
+                // Diese if-Anweisung stellt den leeren String dar; wir müssen den nächsten
+                // Processed Char zurückbringen:
+                {
                     return getProcessedChar(input);
+                }
             }
         }
 
@@ -608,66 +592,60 @@ public class SubstitutionProcessor {
 
     // Substitution durchführen. Erkannt ist <xi, wobei < das nächste
 // Zeichen ist.
-    private int doXinclude(Reader input) throws IOException {
+    private int doXinclude(final Reader input) throws IOException {
         // Für den Fall, dass die Substitution nicht glückt, setzen wir einen
         // Savepoint
-        int savepoint = takeSavepoint();
+        final int savepoint = takeSavepoint();
 
-        StringBuilder buffer = new StringBuilder("<");
+        final StringBuilder buffer = new StringBuilder("<");
         int ich;
         int i = 0;
-        String xi = "xi:include";
-        while( (ich=getProcessedChar(input)) != -1 )
-        {
+        final String xi = "xi:include";
+        while ((ich = getProcessedChar(input)) != -1) {
             buffer.append(Character.toChars(ich));
-            if( ich != xi.charAt(i++) )
-            {
+            if (ich != xi.charAt(i++)) {
                 restoreSavepoint(savepoint);
                 return '<';
             }
-            if( i == 10 ) break;
+            if (i == 10) {
+                break;
+            }
         }
 
         // xi:xinclude bis zum Ende des href oder > oder EOF lesen.
-        StringBuilder file = new StringBuilder();
-        while( (ich=getProcessedChar(input)) != -1 )
-        {
-            if (buffer.length() >= 6 && buffer.toString().substring(buffer.length()-6,6).equals("href=\""))
-            {
-                if (ich == '"')
-                {
+        final StringBuilder file = new StringBuilder();
+        while ((ich = getProcessedChar(input)) != -1) {
+            if (buffer.length() >= 6 && buffer.toString().substring(buffer.length() - 6, 6).equals("href=\"")) {
+                if (ich == '"') {
                     //unreadByte( ich );
                     break;
                 }
                 file.append(Character.toChars(ich));
 
-            }
-            else
+            } else {
                 buffer.append(Character.toChars(ich));
-            if( ich=='>' )
-            {
+            }
+            if (ich == '>') {
                 restoreSavepoint(savepoint);
                 return '<';
             }
         }
 
         // Falls wir EOD erreicht haben, dies auf alle Fälle zurück
-        if( ich == -1 )
-        {
+        if (ich == -1) {
             restoreSavepoint(savepoint);
             return '<';
         }
 
         // tmpfile bestimmen
         File tmpFile = m_xincludemap.get(file.toString());
-        if (tmpFile == null)
-        {
+        if (tmpFile == null) {
             tmpFile = File.createTempFile("xtraserver_", "_tmp");
             tmpFile.deleteOnExit();
             m_xincludemap.put(file.toString(), tmpFile);
         }
-        String xmlBase = "\" xml:base=\"" + tmpFile.getParent().replaceAll("\\\\", "/") + "\"";
-        String fileName = tmpFile.getName();
+        final String xmlBase = "\" xml:base=\"" + tmpFile.getParent().replaceAll("\\\\", "/") + "\"";
+        final String fileName = tmpFile.getName();
 
         m_unread_prd.append(xmlBase);
         m_unread_prd.append(fileName);
@@ -676,33 +654,34 @@ public class SubstitutionProcessor {
         ich = '<';
 
         // Erfolg: Savepoint auflösen
-        releaseSavepoint( savepoint );
+        releaseSavepoint(savepoint);
 
         return ich;
     }
 
-    private boolean readOperation(Reader input, String op) throws IOException {
-        StringBuffer unread = new StringBuffer();
+    private boolean readOperation(final Reader input, final String op) throws IOException {
+        final StringBuilder unread = new StringBuilder();
         // Erstmal das Operationswort erkennen
         int ich, i;
-        for( i=0; i < op.length(); i++ )
-        {
+        for (i = 0; i < op.length(); i++) {
             ich = readByte(input);
-            unread.append( Character.toChars(ich) );
-            if( ich != op.charAt(i) ) break;
+            unread.append(Character.toChars(ich));
+            if (ich != op.charAt(i)) {
+                break;
+            }
         }
 
         // Wenn es gut gegangen ist
-        if( i == op.length() )
+        if (i == op.length()) {
             return true;
+        }
 
         // Fehlerbehandlung: Alles, was wir nicht verstanden haben, einschließlich
         // der {, muss zurück
-        while( unread.length() > 0 )
-        {
-            ich = unread.charAt(unread.length()-1);
+        while (unread.length() > 0) {
+            ich = unread.charAt(unread.length() - 1);
             unread.setLength(unread.length() - 1);
-            unreadByte( ich );
+            unreadByte(ich);
         }
 
         return false;
@@ -711,7 +690,7 @@ public class SubstitutionProcessor {
 
     private void cleanup() {
         if (m_processXincludes) {
-            for (File tmpFile: m_xincludemap.values()) {
+            for (final File tmpFile : m_xincludemap.values()) {
                 tmpFile.delete();
             }
         }

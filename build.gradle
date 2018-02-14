@@ -61,7 +61,7 @@ xjcGenerate {
 }
 
 javadoc {
-    include 'de/interactive_instruments/xtraserver/config/util/api/*'
+    exclude 'de/interactive_instruments/xtraserver/config/schema/*'
     options.doclet = "com.google.doclava.Doclava"
     options.docletpath = configurations.doclava.files.asType(List)
     title = null

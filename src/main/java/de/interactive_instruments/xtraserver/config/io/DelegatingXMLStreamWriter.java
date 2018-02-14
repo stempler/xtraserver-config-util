@@ -18,6 +18,7 @@ package de.interactive_instruments.xtraserver.config.io;
 /**
  * @author zahnen
  */
+
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -25,31 +26,31 @@ import javax.xml.stream.XMLStreamWriter;
 abstract class DelegatingXMLStreamWriter implements XMLStreamWriter {
     private final XMLStreamWriter writer;
 
-    public DelegatingXMLStreamWriter(XMLStreamWriter writer) {
+    DelegatingXMLStreamWriter(final XMLStreamWriter writer) {
         this.writer = writer;
     }
 
-    public void writeStartElement(String localName) throws XMLStreamException {
+    public void writeStartElement(final String localName) throws XMLStreamException {
         this.writer.writeStartElement(localName);
     }
 
-    public void writeStartElement(String namespaceURI, String localName) throws XMLStreamException {
+    public void writeStartElement(final String namespaceURI, final String localName) throws XMLStreamException {
         this.writer.writeStartElement(namespaceURI, localName);
     }
 
-    public void writeStartElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+    public void writeStartElement(final String prefix, final String localName, final String namespaceURI) throws XMLStreamException {
         this.writer.writeStartElement(prefix, localName, namespaceURI);
     }
 
-    public void writeEmptyElement(String namespaceURI, String localName) throws XMLStreamException {
+    public void writeEmptyElement(final String namespaceURI, final String localName) throws XMLStreamException {
         this.writer.writeEmptyElement(namespaceURI, localName);
     }
 
-    public void writeEmptyElement(String prefix, String localName, String namespaceURI) throws XMLStreamException {
+    public void writeEmptyElement(final String prefix, final String localName, final String namespaceURI) throws XMLStreamException {
         this.writer.writeEmptyElement(prefix, localName, namespaceURI);
     }
 
-    public void writeEmptyElement(String localName) throws XMLStreamException {
+    public void writeEmptyElement(final String localName) throws XMLStreamException {
         this.writer.writeEmptyElement(localName);
     }
 
@@ -69,47 +70,47 @@ abstract class DelegatingXMLStreamWriter implements XMLStreamWriter {
         this.writer.flush();
     }
 
-    public void writeAttribute(String localName, String value) throws XMLStreamException {
+    public void writeAttribute(final String localName, final String value) throws XMLStreamException {
         this.writer.writeAttribute(localName, value);
     }
 
-    public void writeAttribute(String prefix, String namespaceURI, String localName, String value) throws XMLStreamException {
+    public void writeAttribute(final String prefix, final String namespaceURI, final String localName, final String value) throws XMLStreamException {
         this.writer.writeAttribute(prefix, namespaceURI, localName, value);
     }
 
-    public void writeAttribute(String namespaceURI, String localName, String value) throws XMLStreamException {
+    public void writeAttribute(final String namespaceURI, final String localName, final String value) throws XMLStreamException {
         this.writer.writeAttribute(namespaceURI, localName, value);
     }
 
-    public void writeNamespace(String prefix, String namespaceURI) throws XMLStreamException {
+    public void writeNamespace(final String prefix, final String namespaceURI) throws XMLStreamException {
         this.writer.writeNamespace(prefix, namespaceURI);
     }
 
-    public void writeDefaultNamespace(String namespaceURI) throws XMLStreamException {
+    public void writeDefaultNamespace(final String namespaceURI) throws XMLStreamException {
         this.writer.writeDefaultNamespace(namespaceURI);
     }
 
-    public void writeComment(String data) throws XMLStreamException {
+    public void writeComment(final String data) throws XMLStreamException {
         this.writer.writeComment(data);
     }
 
-    public void writeProcessingInstruction(String target) throws XMLStreamException {
+    public void writeProcessingInstruction(final String target) throws XMLStreamException {
         this.writer.writeProcessingInstruction(target);
     }
 
-    public void writeProcessingInstruction(String target, String data) throws XMLStreamException {
+    public void writeProcessingInstruction(final String target, final String data) throws XMLStreamException {
         this.writer.writeProcessingInstruction(target, data);
     }
 
-    public void writeCData(String data) throws XMLStreamException {
+    public void writeCData(final String data) throws XMLStreamException {
         this.writer.writeCData(data);
     }
 
-    public void writeDTD(String dtd) throws XMLStreamException {
+    public void writeDTD(final String dtd) throws XMLStreamException {
         this.writer.writeDTD(dtd);
     }
 
-    public void writeEntityRef(String name) throws XMLStreamException {
+    public void writeEntityRef(final String name) throws XMLStreamException {
         this.writer.writeEntityRef(name);
     }
 
@@ -117,35 +118,35 @@ abstract class DelegatingXMLStreamWriter implements XMLStreamWriter {
         this.writer.writeStartDocument();
     }
 
-    public void writeStartDocument(String version) throws XMLStreamException {
+    public void writeStartDocument(final String version) throws XMLStreamException {
         this.writer.writeStartDocument(version);
     }
 
-    public void writeStartDocument(String encoding, String version) throws XMLStreamException {
+    public void writeStartDocument(final String encoding, final String version) throws XMLStreamException {
         this.writer.writeStartDocument(encoding, version);
     }
 
-    public void writeCharacters(String text) throws XMLStreamException {
+    public void writeCharacters(final String text) throws XMLStreamException {
         this.writer.writeCharacters(text);
     }
 
-    public void writeCharacters(char[] text, int start, int len) throws XMLStreamException {
+    public void writeCharacters(final char[] text, final int start, final int len) throws XMLStreamException {
         this.writer.writeCharacters(text, start, len);
     }
 
-    public String getPrefix(String uri) throws XMLStreamException {
+    public String getPrefix(final String uri) throws XMLStreamException {
         return this.writer.getPrefix(uri);
     }
 
-    public void setPrefix(String prefix, String uri) throws XMLStreamException {
+    public void setPrefix(final String prefix, final String uri) throws XMLStreamException {
         this.writer.setPrefix(prefix, uri);
     }
 
-    public void setDefaultNamespace(String uri) throws XMLStreamException {
+    public void setDefaultNamespace(final String uri) throws XMLStreamException {
         this.writer.setDefaultNamespace(uri);
     }
 
-    public void setNamespaceContext(NamespaceContext context) throws XMLStreamException {
+    public void setNamespaceContext(final NamespaceContext context) throws XMLStreamException {
         this.writer.setNamespaceContext(context);
     }
 
@@ -153,7 +154,7 @@ abstract class DelegatingXMLStreamWriter implements XMLStreamWriter {
         return this.writer.getNamespaceContext();
     }
 
-    public Object getProperty(String name) throws IllegalArgumentException {
+    public Object getProperty(final String name) throws IllegalArgumentException {
         return this.writer.getProperty(name);
     }
 }

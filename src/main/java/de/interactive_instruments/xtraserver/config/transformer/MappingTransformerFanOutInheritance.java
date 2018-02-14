@@ -13,14 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util;
+package de.interactive_instruments.xtraserver.config.transformer;
 
 import com.google.common.collect.ImmutableList;
-import de.interactive_instruments.xtraserver.config.util.api.*;
+import de.interactive_instruments.xtraserver.config.api.*;
 import org.apache.ws.commons.schema.XmlSchemaComplexType;
 
 import javax.xml.namespace.QName;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -28,13 +31,13 @@ import java.util.stream.Collectors;
 /**
  * @author zahnen
  */
-public class MappingTransformerFanOutInheritance implements MappingTransformer {
+class MappingTransformerFanOutInheritance implements MappingTransformer {
 
     private final XtraServerMapping xtraServerMapping;
     private final ApplicationSchema applicationSchema;
     private final Map<QName, FeatureTypeMapping> transformedMappings;
 
-    public MappingTransformerFanOutInheritance(XtraServerMapping xtraServerMapping, ApplicationSchema applicationSchema) {
+    MappingTransformerFanOutInheritance(final XtraServerMapping xtraServerMapping, final ApplicationSchema applicationSchema) {
         this.xtraServerMapping = xtraServerMapping;
         this.applicationSchema = applicationSchema;
         this.transformedMappings = new LinkedHashMap<>();
@@ -54,8 +57,8 @@ public class MappingTransformerFanOutInheritance implements MappingTransformer {
 
     @Override
     public FeatureTypeMapping transform(final FeatureTypeMapping featureTypeMapping) {
-List<QName> bla = applicationSchema.getAllSuperTypeQualifiedNames(featureTypeMapping.getQualifiedName());
-bla.add(featureTypeMapping.getQualifiedName());
+        final List<QName> bla = applicationSchema.getAllSuperTypeQualifiedNames(featureTypeMapping.getQualifiedName());
+        bla.add(featureTypeMapping.getQualifiedName());
         //applicationSchema.getAllSuperTypeQualifiedNames(featureTypeMapping.getQualifiedName()).stream()
         bla.stream()
                 .filter(applicationSchema::hasElement)
@@ -75,7 +78,7 @@ bla.add(featureTypeMapping.getQualifiedName());
             final XmlSchemaComplexType superType = applicationSchema.getType(superTypeName);
 
             if (superType == null) {
-                boolean b = true;
+                final boolean b = true;
             }
 
             final FeatureTypeMappingBuilder parentMappingBuilder = Optional.ofNullable(transformedMappings.get(superTypeName))
@@ -136,10 +139,10 @@ bla.add(featureTypeMapping.getQualifiedName());
         };
     }
 
-    private Function<MappingTable, MappingTable> createTable(final FeatureTypeMapping parentFeatureTypeMapping, final XmlSchemaComplexType superType, FeatureTypeMapping featureTypeMapping) {
+    private Function<MappingTable, MappingTable> createTable(final FeatureTypeMapping parentFeatureTypeMapping, final XmlSchemaComplexType superType, final FeatureTypeMapping featureTypeMapping) {
         return mappingTable1 -> {
             if (featureTypeMapping.hasTable(mappingTable1.getName())) {
-                MappingTable mappingTable = featureTypeMapping.getTable(mappingTable1.getName()).get();
+                final MappingTable mappingTable = featureTypeMapping.getTable(mappingTable1.getName()).get();
 
                 // do not recurse, if joiningTable belongs to superType, all child joins, tables and values will as well
                 final List<MappingTable> transformedJoiningTables = mappingTable.getJoiningTables().stream()
@@ -169,7 +172,7 @@ bla.add(featureTypeMapping.getQualifiedName());
         };
     }
 
-    private FeatureTypeMappingBuilder createFeatureTypeMappingBuilder(QName qualifiedName, ImmutableList<MappingTable> primaryTables) {
+    private FeatureTypeMappingBuilder createFeatureTypeMappingBuilder(final QName qualifiedName, final ImmutableList<MappingTable> primaryTables) {
         final List<MappingTable> shallowCopyOfPrimaryTables = primaryTables.stream()
                 .map(mappingTable -> new MappingTableBuilder().copyOf(mappingTable).build())
                 .collect(Collectors.toList());

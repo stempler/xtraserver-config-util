@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util.api;
-
-import de.interactive_instruments.xtraserver.config.util.api.MappingValue.TYPE;
+package de.interactive_instruments.xtraserver.config.api;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
@@ -42,7 +40,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueDefault column() {
-        builder.type = TYPE.COLUMN;
+        builder.type = MappingValue.TYPE.COLUMN;
         return builder;
     }
 
@@ -52,7 +50,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueDefault expression() {
-        builder.type = TYPE.EXPRESSION;
+        builder.type = MappingValue.TYPE.EXPRESSION;
         return builder;
     }
 
@@ -62,7 +60,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueDefault constant() {
-        builder.type = TYPE.CONSTANT;
+        builder.type = MappingValue.TYPE.CONSTANT;
         return builder;
     }
 
@@ -72,7 +70,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueReference reference() {
-        builder.type = TYPE.REFERENCE;
+        builder.type = MappingValue.TYPE.REFERENCE;
         return builder;
     }
 
@@ -82,7 +80,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueDefault geometry() {
-        builder.type = TYPE.GEOMETRY;
+        builder.type = MappingValue.TYPE.GEOMETRY;
         return builder;
     }
 
@@ -92,7 +90,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueClassification classification() {
-        builder.type = TYPE.CLASSIFICATION;
+        builder.type = MappingValue.TYPE.CLASSIFICATION;
         return builder;
     }
 
@@ -102,7 +100,7 @@ public class MappingValueBuilder {
      * @return the builder
      */
     public ValueClassification nil() {
-        builder.type = TYPE.NIL;
+        builder.type = MappingValue.TYPE.NIL;
         return builder;
     }
 
@@ -260,7 +258,7 @@ public class MappingValueBuilder {
         private List<QName> qualifiedTargetPath;
         private String value;
         private String description;
-        private TYPE type;
+        private MappingValue.TYPE type;
         private final List<String> keys;
         private final List<String> values;
         private String referencedFeatureType;

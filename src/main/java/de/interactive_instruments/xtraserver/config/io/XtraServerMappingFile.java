@@ -13,11 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util.api;
+package de.interactive_instruments.xtraserver.config.io;
 
-import de.interactive_instruments.xtraserver.config.io.JaxbReader;
-import de.interactive_instruments.xtraserver.config.io.JaxbWriter;
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
+import de.interactive_instruments.xtraserver.config.api.XtraServerMapping;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -56,16 +54,6 @@ public class XtraServerMappingFile {
      * Reader for XtraServer mapping files
      */
     public interface Reader {
-        // TODO: move to MappingTransformerSchemaInfo and make package private, only provide uri
-
-        /**
-         * Set the GML application schema to be used
-         *
-         * @param applicationSchema the application schema
-         * @return the reader
-         */
-        Reader withSchema(final ApplicationSchema applicationSchema);
-
         /**
          * Reads the mapping file from the given input stream and generates a {@link XtraServerMapping}
          *
@@ -111,18 +99,11 @@ public class XtraServerMappingFile {
 
     private static class Builder implements Reader, Writer {
         private XtraServerMapping xtraServerMapping;
-        private ApplicationSchema applicationSchema;
         private boolean createArchiveWithAdditionalFiles;
 
         @Override
-        public Reader withSchema(final ApplicationSchema applicationSchema) {
-            this.applicationSchema = applicationSchema;
-            return this;
-        }
-
-        @Override
         public XtraServerMapping fromStream(final InputStream inputStream) throws JAXBException, IOException, SAXException {
-            return new JaxbReader(applicationSchema).readFromStream(inputStream);
+            return new JaxbReader().readFromStream(inputStream);
         }
 
         @Override

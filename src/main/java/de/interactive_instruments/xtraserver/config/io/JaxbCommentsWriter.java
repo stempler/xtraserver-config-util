@@ -26,39 +26,39 @@ import java.util.Date;
 /**
  * @author zahnen
  */
-public class JaxbCommentsWriter extends Marshaller.Listener {
+class JaxbCommentsWriter extends Marshaller.Listener {
 
     private final XMLStreamWriter xsw;
     private boolean headerWritten;
 
-    JaxbCommentsWriter(XMLStreamWriter xsw) {
+    JaxbCommentsWriter(final XMLStreamWriter xsw) {
         this.xsw = xsw;
     }
 
     @Override
-    public void beforeMarshal(Object source) {
+    public void beforeMarshal(final Object source) {
         try {
             try {
-                TableCommentDecorator table = ((TableCommentDecorator) source);
+                final TableCommentDecorator table = ((TableCommentDecorator) source);
 
                 if (table.hasComment()) {
                     xsw.writeComment(table.getComment());
                 }
-            } catch (ClassCastException e) {
+            } catch (final ClassCastException e) {
                 // ignore
             }
             try {
-                FeatureTypes featureTypes = ((FeatureTypes) source);
+                final FeatureTypes featureTypes = ((FeatureTypes) source);
 
                 // TODO: version, settings, warnings
                 if (!headerWritten) {
                     xsw.writeComment("\n  created by xtraserver-config-util - " + new Date().toString() + "\n");
                     this.headerWritten = true;
                 }
-            } catch (ClassCastException e) {
+            } catch (final ClassCastException e) {
                 // ignore
             }
-        } catch (XMLStreamException e) {
+        } catch (final XMLStreamException e) {
             // TODO: handle exception
         }
     }

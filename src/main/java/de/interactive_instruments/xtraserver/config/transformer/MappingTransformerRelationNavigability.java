@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util;
+package de.interactive_instruments.xtraserver.config.transformer;
 
 import com.google.common.collect.ImmutableMap;
-import de.interactive_instruments.xtraserver.config.util.api.*;
+import de.interactive_instruments.xtraserver.config.api.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -26,17 +26,19 @@ import java.util.stream.Stream;
 /**
  * @author zahnen
  */
-public class MappingTransformerRelationNavigability implements MappingTransformer {
+class MappingTransformerRelationNavigability implements MappingTransformer {
 
     private final XtraServerMapping xtraServerMapping;
     private final Map<String, List<String>> replaceAssociationTarget;
 
-    public MappingTransformerRelationNavigability(XtraServerMapping xtraServerMapping) {
+    MappingTransformerRelationNavigability(final XtraServerMapping xtraServerMapping) {
         this.xtraServerMapping = xtraServerMapping;
 
         this.replaceAssociationTarget = new ImmutableMap.Builder<String, List<String>>()
+                // alkis 1
                 //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AP_PTO"))
                 //.put("adv:AA_REO/adv:hatDirektUnten", Lists.newArrayList("adv:AP_PTO"))
+                // alkis 2
                 //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
                 //.put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
                 .build();
@@ -54,7 +56,7 @@ public class MappingTransformerRelationNavigability implements MappingTransforme
     }
 
     @Override
-    public FeatureTypeMapping transform(FeatureTypeMapping featureTypeMapping) {
+    public FeatureTypeMapping transform(final FeatureTypeMapping featureTypeMapping) {
         return null;
     }
 
@@ -98,7 +100,7 @@ public class MappingTransformerRelationNavigability implements MappingTransforme
         };
     }
 
-    private Function<MappingValueReference, List<MappingTable>> createMissingRelNavs(MappingTable mappingTable, final String featureTypeName) {
+    private Function<MappingValueReference, List<MappingTable>> createMissingRelNavs(final MappingTable mappingTable, final String featureTypeName) {
         return refValue -> {
 
             // TODO: can be multiple joins, join target should always match table target
@@ -132,7 +134,7 @@ public class MappingTransformerRelationNavigability implements MappingTransforme
 
         // special case reference without join, add not-null predicate for optimization
         if (isOneToOneRel) {
-            MappingTable mappingTable = new MappingTableBuilder()
+            final MappingTable mappingTable = new MappingTableBuilder()
                     .name(sourceTable)
                     .targetPath(refValue.getReferencedTarget())
                     .predicate("$T$." + sourceField + " IS NOT NULL")
@@ -144,7 +146,7 @@ public class MappingTransformerRelationNavigability implements MappingTransforme
 
         // find id mappings for referenced object, use as join targets
         //Map<MappingTable, MappingValue> refMappingIds = refMapping.getTableValuesForPath("@gml:id");
-        ImmutableMap.Builder<MappingTable, MappingValue> refMappingIds = new ImmutableMap.Builder<>();
+        final ImmutableMap.Builder<MappingTable, MappingValue> refMappingIds = new ImmutableMap.Builder<>();
 
         xtraServerMapping.getFeatureTypeMappingInheritanceChain(refMapping.getName()).stream()
                 .flatMap(featureTypeMapping -> featureTypeMapping.getTableValuesForPath("@gml:id").entrySet().stream())
@@ -153,15 +155,15 @@ public class MappingTransformerRelationNavigability implements MappingTransforme
 
 
         refMappingIds.build().forEach((targetTable, refMappingId) -> {
-            String targetField = refMappingId.getValueColumn().orElse(refMappingId.getValue());
+            final String targetField = refMappingId.getValueColumn().orElse(refMappingId.getValue());
 
             // TODO: add description: connection to ... for rel nav
-            MappingJoin mappingJoin = new MappingJoinBuilder()
+            final MappingJoin mappingJoin = new MappingJoinBuilder()
                     .targetPath(refValue.getReferencedTarget() + "/" + refValue.getReferencedFeatureType())
                     .joinCondition(new MappingJoinBuilder.ConditionBuilder().sourceTable(sourceTable).sourceField(sourceField).targetTable(targetTable.getName()).targetField(targetField).build())
                     .build();
 
-            MappingTable mappingTable = new MappingTableBuilder()
+            final MappingTable mappingTable = new MappingTableBuilder()
                     .shallowCopyOf(targetTable)
                     .targetPath(mappingJoin.getTargetPath())
                     .joinPath(mappingJoin)

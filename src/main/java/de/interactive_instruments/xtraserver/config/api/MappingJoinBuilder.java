@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.interactive_instruments.xtraserver.config.util.api;
+package de.interactive_instruments.xtraserver.config.api;
 
 import com.google.common.collect.ImmutableList;
 
@@ -123,7 +123,7 @@ public class MappingJoinBuilder {
     }
 
     /**
-     * Builder for {@link de.interactive_instruments.xtraserver.config.util.api.MappingJoin.Condition}
+     * Builder for {@link MappingJoin.Condition}
      */
     public static class ConditionBuilder {
         private String sourceTable;
@@ -182,9 +182,9 @@ public class MappingJoinBuilder {
         }
 
         /**
-         * Builds the {@link de.interactive_instruments.xtraserver.config.util.api.MappingJoin.Condition}, validates required fields
+         * Builds the {@link MappingJoin.Condition}, validates required fields
          *
-         * @return a new immutable {@link de.interactive_instruments.xtraserver.config.util.api.MappingJoin.Condition}
+         * @return a new immutable {@link MappingJoin.Condition}
          */
         public MappingJoin.Condition build() {
             return new MappingJoin.Condition(sourceTable, sourceField, targetTable, targetField);

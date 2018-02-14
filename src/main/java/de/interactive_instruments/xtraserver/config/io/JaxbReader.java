@@ -15,26 +15,23 @@
  */
 package de.interactive_instruments.xtraserver.config.io;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.io.Resources;
+import de.interactive_instruments.xtraserver.config.api.*;
 import de.interactive_instruments.xtraserver.config.schema.AdditionalMappings;
 import de.interactive_instruments.xtraserver.config.schema.FeatureType;
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
 import de.interactive_instruments.xtraserver.config.schema.MappingsSequenceType;
-import de.interactive_instruments.xtraserver.config.util.ApplicationSchema;
-import de.interactive_instruments.xtraserver.config.util.Namespaces;
-import de.interactive_instruments.xtraserver.config.util.api.*;
-import org.apache.ws.commons.schema.XmlSchemaComplexType;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.namespace.QName;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.*;
@@ -48,29 +45,18 @@ import java.util.stream.Stream;
 /**
  * Helper methods for JAXB unmarshalling
  */
-public class JaxbReader {
+class JaxbReader {
 
-    final static String MAPPING_SCHEMA = "/XtraServer_Mapping.xsd";
-    final static QName GML_ABSTRACT_FEATURE = new QName("http://www.opengis.net/gml/3.2", "AbstractFeature");
+    static final String MAPPING_SCHEMA = "/XtraServer_Mapping.xsd";
 
-    private final ApplicationSchema applicationSchema;
-    private final Namespaces namespaces;
-    private XmlSchemaComplexType currentSchemaType;
-    private String currentFeatureTypeDescription;
-
-    public JaxbReader(ApplicationSchema applicationSchema) {
-        this.applicationSchema = applicationSchema;
-        this.namespaces = applicationSchema.getNamespaces();
-    }
-
-    public XtraServerMapping readFromStream(final InputStream inputStream) throws IOException, JAXBException, SAXException {
+    XtraServerMapping readFromStream(final InputStream inputStream) throws IOException, JAXBException, SAXException {
         final FeatureTypes featureTypes = unmarshal(inputStream);
 
         final Stream<Optional<FeatureTypeMapping>> featureTypeMappings = readFeatureTypeMappings(featureTypes);
 
         final Stream<Optional<FeatureTypeMapping>> abstractFeatureTypeMappings = readAdditionalMappings(featureTypes);
 
-        List<FeatureTypeMapping> featureTypeMappingList = Stream
+        final List<FeatureTypeMapping> featureTypeMappingList = Stream
                 .concat(featureTypeMappings, abstractFeatureTypeMappings)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -81,49 +67,36 @@ public class JaxbReader {
                 .build();
     }
 
-    private Stream<Optional<FeatureTypeMapping>> readFeatureTypeMappings(FeatureTypes featureTypes) {
+    private Stream<Optional<FeatureTypeMapping>> readFeatureTypeMappings(final FeatureTypes featureTypes) {
         return featureTypes.getFeatureTypeOrAdditionalMappings().stream()
                 .filter(FeatureType.class::isInstance)
                 .map(FeatureType.class::cast)
-                .filter(featureType -> applicationSchema.hasElement(featureType.getName()))
                 .peek(featureType -> System.out.println("\nFT: " + featureType.getName()))
                 .map(createFeatureTypeMapping());
     }
 
-    private Stream<Optional<FeatureTypeMapping>> readAdditionalMappings(FeatureTypes featureTypes) {
+    private Stream<Optional<FeatureTypeMapping>> readAdditionalMappings(final FeatureTypes featureTypes) {
         return featureTypes.getFeatureTypeOrAdditionalMappings().stream()
                 .filter(AdditionalMappings.class::isInstance)
                 .map(AdditionalMappings.class::cast)
-                .filter(additionalMapping -> applicationSchema.hasElement(additionalMapping.getRootElementName()))
                 .peek(additionalMapping -> System.out.println("\nAFT: " + additionalMapping.getRootElementName()))
                 .map(createAbstractFeatureTypeMapping());
     }
 
     private Function<FeatureType, Optional<FeatureTypeMapping>> createFeatureTypeMapping() {
-        return featureType -> createFeatureTypeMapping(featureType.getName(), namespaces.getQualifiedName(featureType.getName()), false, extractMappings(featureType));
+        return featureType -> createFeatureTypeMapping(featureType.getName(), false, extractMappings(featureType));
     }
 
     private Function<AdditionalMappings, Optional<FeatureTypeMapping>> createAbstractFeatureTypeMapping() {
-        return additionalMapping -> createFeatureTypeMapping(additionalMapping.getRootElementName(), namespaces.getQualifiedName(additionalMapping.getRootElementName()), true, additionalMapping.getMappings());
+        return additionalMapping -> createFeatureTypeMapping(additionalMapping.getRootElementName(), true, additionalMapping.getMappings());
     }
 
-    private Optional<FeatureTypeMapping> createFeatureTypeMapping(final String name, final QName qualifiedName, final boolean isAbstract, MappingsSequenceType mappings) {
-        this.currentSchemaType = applicationSchema.getType(qualifiedName);
-        this.currentFeatureTypeDescription = qualifiedName.getLocalPart();
+    private Optional<FeatureTypeMapping> createFeatureTypeMapping(final String name, final boolean isAbstract, final MappingsSequenceType mappings) {
+        final List<MappingJoin> joins = createJoinPaths(mappings);
 
-        // TODO: is already ignored in filter above
-        if (currentSchemaType == null) {
-            System.out.println("FeatureType '" + name + "' not found in application schema, skipping");
-            return Optional.empty();
-        }
+        final Map<String, Collection<MappingValue>> valuePool = createValuePool(mappings);
 
-        //final List<MappingTable> mappingTables = createTables(mappings);
-
-        List<MappingJoin> joins = createJoinPaths(mappings);
-
-        Map<String, Collection<MappingValue>> valuePool = createValuePool(mappings);
-
-        List<MappingTableBuilder.MappingTableDraft> tableDrafts = Stream.concat(createPrimaryTableDrafts(mappings), createJoinedTableDrafts(mappings, joins))
+        final List<MappingTableBuilder.MappingTableDraft> tableDrafts = Stream.concat(createPrimaryTableDrafts(mappings), createJoinedTableDrafts(mappings, joins))
                 .sorted(longestTargetPathFirst())
                 .map(addValues(valuePool))
                 //.map(addJoinPaths(joins))
@@ -133,18 +106,15 @@ public class JaxbReader {
 
         return Optional.of(new FeatureTypeMappingBuilder()
                 .name(name)
-                .qualifiedName(qualifiedName)
-                .superTypeName(applicationSchema.getSuperTypeName(qualifiedName).orElse(null))
-                .isAbstract(isAbstract || qualifiedName.equals(GML_ABSTRACT_FEATURE))
                 .primaryTables(mappingTables)
                 .build());
     }
 
     private Comparator<MappingTable> longestTargetPathFirst() {
-        return Comparator.<MappingTable>comparingInt(mappingTable -> mappingTable.getQualifiedTargetPath().size()).reversed();
+        return Comparator.<MappingTable>comparingInt(mappingTable -> Splitter.on('/').omitEmptyStrings().splitToList(mappingTable.getTargetPath()).size()).reversed();
     }
 
-    private Stream<MappingTableBuilder.MappingTableDraft> createPrimaryTableDrafts(MappingsSequenceType mappings) {
+    private Stream<MappingTableBuilder.MappingTableDraft> createPrimaryTableDrafts(final MappingsSequenceType mappings) {
         return mappings.getTableOrJoinOrAssociationTarget().stream()
                 .filter(MappingsSequenceType.Table.class::isInstance)
                 .map(MappingsSequenceType.Table.class::cast)
@@ -153,7 +123,7 @@ public class JaxbReader {
                 .map(table -> createTableDraft(table.getTable_Name(), table.getTarget(), table.getOid_Col(), true, false));
     }
 
-    private Stream<MappingTableBuilder.MappingTableDraft> createJoinedTableDrafts(MappingsSequenceType mappings, List<MappingJoin> mappingJoins) {
+    private Stream<MappingTableBuilder.MappingTableDraft> createJoinedTableDrafts(final MappingsSequenceType mappings, final List<MappingJoin> mappingJoins) {
         return mappingJoins.stream()
                 .map(createJoinedTableDraft(mappings))
                 .filter(Optional::isPresent)
@@ -162,7 +132,7 @@ public class JaxbReader {
 
     }
 
-    private Function<MappingJoin, Optional<MappingTableBuilder.MappingTableDraft>> createJoinedTableDraft(MappingsSequenceType mappings) {
+    private Function<MappingJoin, Optional<MappingTableBuilder.MappingTableDraft>> createJoinedTableDraft(final MappingsSequenceType mappings) {
         return join -> mappings.getTableOrJoinOrAssociationTarget().stream()
                 .filter(MappingsSequenceType.Table.class::isInstance)
                 .map(MappingsSequenceType.Table.class::cast)
@@ -172,7 +142,7 @@ public class JaxbReader {
                 .findFirst();
     }
 
-    private List<MappingJoin> createJoinPaths(MappingsSequenceType mappings) {
+    private List<MappingJoin> createJoinPaths(final MappingsSequenceType mappings) {
         return mappings.getTableOrJoinOrAssociationTarget().stream()
                 .filter(MappingsSequenceType.Join.class::isInstance)
                 .map(MappingsSequenceType.Join.class::cast)
@@ -190,7 +160,7 @@ public class JaxbReader {
             name1 = name1.substring(0, name1.indexOf("["));
         }
 
-        String target1 = target == null ? "" : target;
+        final String target1 = target == null ? "" : target;
         // table definition from value mapping, shorten target to first path element
         // why ???
         /*if (isFromValue) {
@@ -204,19 +174,15 @@ public class JaxbReader {
             oidCol1 = oidCol1.substring(0, oidCol1.indexOf(":=SEQUENCE"));
         }
 
-        List<QName> targetPathElements = !target1.isEmpty() ? applicationSchema.getNamespaces().getQualifiedPathElements(target1) : ImmutableList.of();
-
         return new MappingTableBuilder()
                 .name(name1)
                 .primaryKey(oidCol1)
                 .targetPath(target1)
-                .qualifiedTargetPath(targetPathElements)
-                .description(primary ? currentFeatureTypeDescription : target1.split(":")[1])
                 .buildDraft();
     }
 
-    private Map<String, Collection<MappingValue>> createValuePool(MappingsSequenceType mappings) {
-        ImmutableListMultimap.Builder<String, MappingValue> valuePool = ImmutableListMultimap.builder();
+    private Map<String, Collection<MappingValue>> createValuePool(final MappingsSequenceType mappings) {
+        final ImmutableListMultimap.Builder<String, MappingValue> valuePool = ImmutableListMultimap.builder();
 
         mappings.getTableOrJoinOrAssociationTarget().stream()
                 .filter(MappingsSequenceType.Table.class::isInstance)
@@ -228,7 +194,7 @@ public class JaxbReader {
         return ArrayListMultimap.create(valuePool.build()).asMap();
     }
 
-    private Function<MappingTableBuilder.MappingTableDraft, MappingTableBuilder.MappingTableDraft> addValues(Map<String, Collection<MappingValue>> valuePool) {
+    private Function<MappingTableBuilder.MappingTableDraft, MappingTableBuilder.MappingTableDraft> addValues(final Map<String, Collection<MappingValue>> valuePool) {
         return tableDraft -> {
             List<MappingValue> mappingValues = ImmutableList.of();
             if (valuePool.get(tableDraft.getName()) != null) {
@@ -254,9 +220,9 @@ public class JaxbReader {
         };
     }
 
-    private Function<MappingTableBuilder.MappingTableDraft, MappingTableBuilder.MappingTableDraft> addJoinPaths(List<MappingJoin> joins, String sourceTable) {
+    private Function<MappingTableBuilder.MappingTableDraft, MappingTableBuilder.MappingTableDraft> addJoinPaths(final List<MappingJoin> joins, final String sourceTable) {
         return tableDraft -> {
-            List<MappingJoin> mappingJoins = joins.stream()
+            final List<MappingJoin> mappingJoins = joins.stream()
                     .filter(join -> join.getTargetTable().equals(tableDraft.getName())
                             && join.getTargetPath().equals(tableDraft.getTargetPath())
                             && join.getSourceTable().equals(sourceTable))
@@ -269,7 +235,7 @@ public class JaxbReader {
         };
     }
 
-    private Function<MappingTableBuilder.MappingTableDraft, MappingTable> addJoiningTablesAndBuild(List<MappingTableBuilder.MappingTableDraft> tables, List<MappingJoin> joins) {
+    private Function<MappingTableBuilder.MappingTableDraft, MappingTable> addJoiningTablesAndBuild(final List<MappingTableBuilder.MappingTableDraft> tables, final List<MappingJoin> joins) {
         return tableDraft -> new MappingTableBuilder()
                 .copyOf(tableDraft)
                 .joiningTables(tables.stream()
@@ -279,7 +245,7 @@ public class JaxbReader {
                 .build();
     }
 
-    private List<MappingTable> nestAndBuildTableDrafts(List<MappingTableBuilder.MappingTableDraft> tables, List<MappingJoin> joins) {
+    private List<MappingTable> nestAndBuildTableDrafts(final List<MappingTableBuilder.MappingTableDraft> tables, final List<MappingJoin> joins) {
 
         return tables.stream()
                 .filter(MappingTable::isPrimary)
@@ -287,7 +253,7 @@ public class JaxbReader {
                 .collect(Collectors.toList());
     }
 
-    private Predicate<MappingTable> isJoining(MappingTable mappingTable) {
+    private Predicate<MappingTable> isJoining(final MappingTable mappingTable) {
         return joiningTable -> !joiningTable.getJoinPaths().isEmpty()
                 && joiningTable.getJoinPaths().iterator().next().getSourceTable().equals(mappingTable.getName())
                 && joiningTable.getTargetPath().startsWith(mappingTable.getTargetPath());
@@ -300,14 +266,14 @@ public class JaxbReader {
                 .build();
     }
 
-    private List<MappingJoin.Condition> parseJoinPath(String path) {
-        List<MappingJoin.Condition> pathTables = new ArrayList<>();
+    private List<MappingJoin.Condition> parseJoinPath(final String path) {
+        final List<MappingJoin.Condition> pathTables = new ArrayList<>();
 
-        String pathElems[] = path.split("::|/");
+        final String[] pathElems = path.split("::|/");
 
         int i = pathElems.length - 1;
         while (i > 0) {
-            String props[] = pathElems[i - 1].split(":");
+            final String[] props = pathElems[i - 1].split(":");
 
             String sourceTableName = pathElems[i];
             if (sourceTableName.contains("[")) {
@@ -316,7 +282,7 @@ public class JaxbReader {
                 }
                 sourceTableName = sourceTableName.substring(0, sourceTableName.indexOf("["));
             }
-            String sourceField = props[1].substring(0, props[1].length() - 1);
+            final String sourceField = props[1].substring(0, props[1].length() - 1);
             String targetTableName = pathElems[i - 2];
             if (targetTableName.contains("[")) {
                 if (targetTableName.substring(targetTableName.indexOf("[")).equals("[1=2]")) {
@@ -324,7 +290,7 @@ public class JaxbReader {
                 }
                 targetTableName = targetTableName.substring(0, targetTableName.indexOf("["));
             }
-            String targetField = props[0].substring(4);
+            final String targetField = props[0].substring(4);
             //System.out.println("JOIN PREDICATE " + sourceTableName + " " + targetTableName);
 
             /*MappingTable sourceTable = ftm.getTable(sourceTableName)
@@ -356,7 +322,7 @@ public class JaxbReader {
             if (value.getDb_Codes() != null && !value.getDb_Codes().isEmpty()
                     && value.getSchema_Codes() != null && !value.getSchema_Codes().isEmpty()) {
 
-                MappingValueBuilder.ValueClassification classificationBuilder;
+                final MappingValueBuilder.ValueClassification classificationBuilder;
 
                 if (value.getMapping_Mode() != null && value.getMapping_Mode().equals("nil")) {
                     classificationBuilder = new MappingValueBuilder().nil();
@@ -364,8 +330,8 @@ public class JaxbReader {
                     classificationBuilder = new MappingValueBuilder().classification();
                 }
 
-                String[] keys = value.getDb_Codes().split(" ");
-                String[] values = value.getSchema_Codes().split(" ");
+                final String[] keys = value.getDb_Codes().split(" ");
+                final String[] values = value.getSchema_Codes().split(" ");
 
                 for (int i = 0; i < Math.min(keys.length, values.length); i++) {
                     classificationBuilder.keyValue(keys[i], values[i]);
@@ -373,9 +339,9 @@ public class JaxbReader {
 
                 builder = classificationBuilder;
             } else if (value.getTarget() != null && value.getTarget().endsWith("/@xlink:href")) {
-                String parentTarget = value.getTarget().substring(0, value.getTarget().lastIndexOf("/@xlink:href"));
+                final String parentTarget = value.getTarget().substring(0, value.getTarget().lastIndexOf("/@xlink:href"));
 
-                Optional<MappingsSequenceType.AssociationTarget> associationTarget = mappings.getTableOrJoinOrAssociationTarget().stream()
+                final Optional<MappingsSequenceType.AssociationTarget> associationTarget = mappings.getTableOrJoinOrAssociationTarget().stream()
                         .filter(MappingsSequenceType.AssociationTarget.class::isInstance)
                         .map(MappingsSequenceType.AssociationTarget.class::cast)
                         .filter(associationTarget1 -> associationTarget1.getTarget() != null && associationTarget1.getTarget().equals(parentTarget))
@@ -393,34 +359,17 @@ public class JaxbReader {
                 builder = new MappingValueBuilder().constant();
             }
 
-            List<QName> targetPathElements = value.getTarget() != null ? applicationSchema.getNamespaces().getQualifiedPathElements(value.getTarget()) : ImmutableList.of();
-
             if (builder == null) {
-                if (!targetPathElements.isEmpty() && currentSchemaType != null && applicationSchema.isGeometry(currentSchemaType, targetPathElements.get(0))) {
-                    builder = new MappingValueBuilder().geometry();
-                } else {
-                    builder = new MappingValueBuilder().column();
-                }
-            }
-
-            if (!targetPathElements.isEmpty()) {
-                builder = builder.description(targetPathElements.get(0).getLocalPart());
+                builder = new MappingValueBuilder().column();
             }
 
             return Maps.immutableEntry(value.getTable_Name(), builder
                     .targetPath(value.getTarget())
-                    .qualifiedTargetPath(targetPathElements)
+                    // TODO: to builder
                     .value(value.getValue() == null ? "" : value.getValue())
                     .build());
         };
     }
-
-
-
-
-
-
-
 
 
     private Predicate<MappingsSequenceType.Table> isPrimaryTable() {
@@ -490,7 +439,7 @@ public class JaxbReader {
         };
     }
 
-    private MappingsSequenceType extractMappings(FeatureType featureType) {
+    private MappingsSequenceType extractMappings(final FeatureType featureType) {
         MappingsSequenceType mappings = null;
 
         if (featureType.getPGISFeatureTypeImpl() != null) {
@@ -504,15 +453,15 @@ public class JaxbReader {
         return mappings;
     }
 
-    private FeatureTypes unmarshal(InputStream inputStream) throws JAXBException, IOException, SAXException {
-        SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-        Schema schema = schemaFactory.newSchema(Resources.getResource(JaxbReader.class, MAPPING_SCHEMA));
-        JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
+    private FeatureTypes unmarshal(final InputStream inputStream) throws JAXBException, IOException, SAXException {
+        final SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        final Schema schema = schemaFactory.newSchema(Resources.getResource(JaxbReader.class, MAPPING_SCHEMA));
+        final JAXBContext jaxbContext = JAXBContext.newInstance(FeatureTypes.class.getPackage().getName());
 
-        PipedInputStream in = new PipedInputStream();
-        PipedOutputStream out = new PipedOutputStream(in);
+        final PipedInputStream in = new PipedInputStream();
+        final PipedOutputStream out = new PipedOutputStream(in);
 
-        SubstitutionProcessor substitutionProcessor = new SubstitutionProcessor();
+        final SubstitutionProcessor substitutionProcessor = new SubstitutionProcessor();
         //substitutionProcessor.addParameter("xpathAliasPattern.AX_Flurstueck.15", "foo");
         //substitutionProcessor.addParameter("xpathAliasReplacement.AX_Flurstueck.15", "bar");
         new Thread(
@@ -525,7 +474,7 @@ public class JaxbReader {
                 }
         ).start();
 
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        final Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
         unmarshaller.setSchema(schema);
 
         return FeatureTypes.class.cast(unmarshaller.unmarshal(in));
