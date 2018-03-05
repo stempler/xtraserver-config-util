@@ -16,7 +16,6 @@
 package de.interactive_instruments.xtraserver.config.transformer;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import de.interactive_instruments.xtraserver.config.api.*;
 
 import java.util.*;
@@ -40,8 +39,8 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
                 //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AP_PTO"))
                 //.put("adv:AA_REO/adv:hatDirektUnten", Lists.newArrayList("adv:AP_PTO"))
                 // alkis 2
-                .put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
-                .put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
+                //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
+                //.put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
                 .build();
     }
 
