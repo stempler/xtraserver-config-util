@@ -28,6 +28,7 @@ import java.util.List;
 public class MappingJoinBuilder {
     private String targetPath;
     private final List<MappingJoin.Condition> joinConditions;
+    private String description;
 
     /**
      * Create new builder
@@ -36,6 +37,7 @@ public class MappingJoinBuilder {
         this.joinConditions = new ArrayList<>();
     }
 
+    // TODO: remove
     /**
      * Set the target path (required)
      *
@@ -74,6 +76,17 @@ public class MappingJoinBuilder {
     }
 
     /**
+     * Set the description
+     *
+     * @param description description
+     * @return the builder
+     */
+    public MappingJoinBuilder description(final String description) {
+        this.description = description;
+        return this;
+    }
+
+    /**
      * Copy targetPath and joinConditions from given {@link MappingJoin}
      *
      * @param mappingJoin the copy source
@@ -82,6 +95,7 @@ public class MappingJoinBuilder {
     public MappingJoinBuilder copyOf(MappingJoin mappingJoin) {
         this.targetPath = mappingJoin.getTargetPath();
         this.joinConditions.addAll(mappingJoin.getJoinConditions());
+        this.description = mappingJoin.getDescription();
 
         return this;
     }
@@ -92,7 +106,7 @@ public class MappingJoinBuilder {
      * @return a new immutable {@link MappingJoin}
      */
     public MappingJoin build() {
-        final MappingJoin mappingJoin = new MappingJoin(targetPath, ImmutableList.copyOf(joinConditions));
+        final MappingJoin mappingJoin = new MappingJoin(targetPath, ImmutableList.copyOf(joinConditions), description);
 
         if (mappingJoin.getTargetPath() == null || mappingJoin.getTargetPath().isEmpty()) {
             throw new IllegalStateException("Join has no target path");

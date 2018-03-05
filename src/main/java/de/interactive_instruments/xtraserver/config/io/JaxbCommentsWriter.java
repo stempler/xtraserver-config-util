@@ -16,7 +16,8 @@
 package de.interactive_instruments.xtraserver.config.io;
 
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
-import de.interactive_instruments.xtraserver.config.schema.TableCommentDecorator;
+import de.interactive_instruments.xtraserver.config.schema.FeatureTypesWithComment;
+import de.interactive_instruments.xtraserver.config.schema.TableWithComment;
 
 import javax.xml.bind.Marshaller;
 import javax.xml.stream.XMLStreamException;
@@ -30,6 +31,7 @@ class JaxbCommentsWriter extends Marshaller.Listener {
 
     private final XMLStreamWriter xsw;
     private boolean headerWritten;
+    private String lastComment = "";
 
     JaxbCommentsWriter(final XMLStreamWriter xsw) {
         this.xsw = xsw;
@@ -39,20 +41,21 @@ class JaxbCommentsWriter extends Marshaller.Listener {
     public void beforeMarshal(final Object source) {
         try {
             try {
-                final TableCommentDecorator table = ((TableCommentDecorator) source);
+                final TableWithComment table = ((TableWithComment) source);
 
-                if (table.hasComment()) {
+                if (table.hasComment() && !table.getComment().equals(lastComment)) {
                     xsw.writeComment(table.getComment());
+                    lastComment = table.getComment();
                 }
             } catch (final ClassCastException e) {
                 // ignore
             }
             try {
-                final FeatureTypes featureTypes = ((FeatureTypes) source);
+                final FeatureTypesWithComment featureTypes = ((FeatureTypesWithComment) source);
 
                 // TODO: version, settings, warnings
-                if (!headerWritten) {
-                    xsw.writeComment("\n  created by xtraserver-config-util - " + new Date().toString() + "\n");
+                if (!headerWritten && featureTypes.hasComment()) {
+                    xsw.writeComment(featureTypes.getComment());
                     this.headerWritten = true;
                 }
             } catch (final ClassCastException e) {

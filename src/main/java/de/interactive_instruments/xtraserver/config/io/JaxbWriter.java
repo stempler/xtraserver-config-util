@@ -32,6 +32,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,7 +56,12 @@ class JaxbWriter {
     }
 
     void writeToStream(final OutputStream outputStream, final boolean createArchiveWithAdditionalFiles) throws IOException, JAXBException, SAXException, XMLStreamException {
-        final FeatureTypes featureTypes = objectFactory.createFeatureTypes();
+        final FeatureTypesWithComment featureTypes = new FeatureTypesWithComment();
+        String comment = "\n  created by xtraserver-config-util - " + new Date().toString() + "\n";
+        if (xtraServerMapping.getDescription() != null) {
+            comment +=  xtraServerMapping.getDescription();
+        }
+        featureTypes.setComment(comment);
 
         featureTypes.getFeatureTypeOrAdditionalMappings().addAll(createFeatureTypes());
         featureTypes.getFeatureTypeOrAdditionalMappings().addAll(createAdditionalMappings());
@@ -132,7 +138,7 @@ class JaxbWriter {
 
     private void createTableMapping(final MappingsSequenceType mappingsSequenceType, final MappingTable mappingTable) {
         if (!mappingTable.isJoined() || !mappingTable.getValues().isEmpty()) {
-            final TableCommentDecorator table = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
+            final TableWithComment table = new TableWithComment();//objectFactory.createMappingsSequenceTypeTable();
             table.setTable_Name(mappingTable.getName());
             if (mappingTable.getPredicate() != null && !mappingTable.getPredicate().isEmpty()) {
                 table.setTable_Name(mappingTable.getName() + "[" + mappingTable.getPredicate() + "]");
@@ -142,9 +148,9 @@ class JaxbWriter {
                 /*if (((MappingTableImpl) mappingTable).isReference()) {
                     table.setComment(mappingTable.getTargetPath().split(":")[1]);
                 } else*/
-            if (mappingTable.isPrimary() && mappingTable.getDescription() != null /*&& !xtraServerMapping.hasFeatureType(featureTypeMapping.getName())*/) {
+            if (mappingTable.isPrimary() && mappingTable.getDescription() != null) {
                 table.setComment("# " + mappingTable.getDescription() + " #");
-            } else if (!mappingTable.isPrimary() && mappingTable.getDescription() != null) {
+            } else if (!mappingTable.isPrimary()) {
                 table.setComment(mappingTable.getDescription());
             }
             mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(table);
@@ -152,18 +158,18 @@ class JaxbWriter {
 
         mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
                 mappingTable.getJoinPaths().stream().map(mappingJoin -> {
-                    MappingsSequenceType.Join join = objectFactory.createMappingsSequenceTypeJoin();
+                    JoinWithComment join = new JoinWithComment();
                     join.setAxis("parent");
-                    join.setTarget(mappingJoin.getTargetPath());
+                    join.setTarget(mappingTable.getTargetPath());
                     join.setJoin_Path(buildJoinPath(mappingJoin.getJoinConditions()));
+                    join.setComment(mappingJoin.getDescription());
                     return join;
                 }).collect(Collectors.toList())
         );
 
-        final String[] lastProperty = {""};
-        mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
-                mappingTable.getValues().stream().map(mappingValue -> {
-                    TableCommentDecorator value = new TableCommentDecorator();//objectFactory.createMappingsSequenceTypeTable();
+        //mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
+                mappingTable.getValues().forEach(mappingValue -> {
+                    TableWithComment value = new TableWithComment();//objectFactory.createMappingsSequenceTypeTable();
                     value.setTable_Name(mappingTable.getName());
                     value.setTarget(mappingValue.getTargetPath());
                     if (mappingValue.getValue() != null && !mappingValue.getValue().equals("")) {
@@ -177,15 +183,22 @@ class JaxbWriter {
                         value.setDb_Codes(Joiner.on(' ').join(((MappingValueClassification) mappingValue).getKeys()));
                         value.setSchema_Codes(Joiner.on(' ').join(((MappingValueClassification) mappingValue).getValues()));
                     }
-                    if (!mappingValue.isReference() && mappingValue.getDescription() != null && !lastProperty[0].equals(mappingValue.getDescription())) {
-                        value.setComment(mappingValue.getDescription());
-                        lastProperty[0] = mappingValue.getDescription();
-                    }
-                    return value;
-                }).collect(Collectors.toList())
-        );
 
-        mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
+                    value.setComment(mappingValue.getDescription());
+                    //return value;
+                    mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(value);
+
+                    if (mappingValue.isReference()) {
+                        final MappingsSequenceType.AssociationTarget associationTarget = objectFactory.createMappingsSequenceTypeAssociationTarget();
+                        associationTarget.setObject_Ref(((MappingValueReference) mappingValue).getReferencedFeatureType());
+                        associationTarget.setTarget(((MappingValueReference) mappingValue).getReferencedTarget());
+                        mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(associationTarget);
+                    }
+
+                });//.collect(Collectors.toList())
+        //);
+
+        /*mappingsSequenceType.getTableOrJoinOrAssociationTarget().addAll(
                 mappingTable.getValues().stream()
                         .filter(MappingValue::isReference)
                         .map(mappingValue -> {
@@ -194,7 +207,7 @@ class JaxbWriter {
                             associationTarget.setTarget(((MappingValueReference) mappingValue).getReferencedTarget());
                             return associationTarget;
                         }).collect(Collectors.toList())
-        );
+        );*/
 
 
         mappingTable.getJoiningTables().forEach(joiningTable -> createTableMapping(mappingsSequenceType, joiningTable));

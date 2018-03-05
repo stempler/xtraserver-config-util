@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 
 import javax.xml.namespace.QName;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -151,17 +152,17 @@ public class FeatureTypeMappingBuilder {
     }
 
     private void validate(final FeatureTypeMapping featureTypeMapping) {
-        if (featureTypeMapping.getName() == null || featureTypeMapping.getName().isEmpty()) {
-            throw new IllegalStateException("FeatureTypeMapping has no name");
+        if ((featureTypeMapping.getName() == null || featureTypeMapping.getName().isEmpty())
+                && featureTypeMapping.getQualifiedName() == null) {
+            throw new IllegalStateException("FeatureTypeMapping has no name or qualified name");
         }
-        /*if (featureTypeMapping.getQualifiedName() == null) {
-            throw new IllegalStateException("FeatureTypeMapping has no qualified name");
-        }*/
 
         if (featureTypeMapping.getPrimaryTables().isEmpty()) {
             throw new IllegalStateException("FeatureTypeMapping has no primary tables");
         }
 
-        // TODO: no drafts in primary tables
+        if (featureTypeMapping.getPrimaryTables().stream().anyMatch(MappingTableBuilder.MappingTableDraft.class::isInstance)) {
+            throw new IllegalStateException("Primary tables contain MappingTableDraft");
+        }
     }
 }

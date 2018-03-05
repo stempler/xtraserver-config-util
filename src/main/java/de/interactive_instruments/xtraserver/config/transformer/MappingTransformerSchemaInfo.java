@@ -15,11 +15,13 @@
  */
 package de.interactive_instruments.xtraserver.config.transformer;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import de.interactive_instruments.xtraserver.config.api.*;
 
 import javax.xml.namespace.QName;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -43,6 +45,7 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
     @Override
     protected XtraServerMappingBuilder transformXtraServerMapping(final Context context, final List<FeatureTypeMapping> transformedFeatureTypeMappings) {
         final XtraServerMapping xtraServerMapping = context.xtraServerMapping;
+
         final List<FeatureTypeMapping> filteredFeatureTypeMappings = transformedFeatureTypeMappings.stream()
                 .filter(existsInSchema())
                 .collect(Collectors.toList());
@@ -55,7 +58,10 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
     @Override
     protected FeatureTypeMappingBuilder transformFeatureTypeMapping(final Context context, final List<MappingTable> transformedMappingTables) {
         final FeatureTypeMapping featureTypeMapping = context.featureTypeMapping;
-        final QName qualifiedName = namespaces.getQualifiedName(featureTypeMapping.getName());
+
+        // either name or qualifiedName is set, derive the other
+        final String name = Strings.isNullOrEmpty(featureTypeMapping.getName()) ? namespaces.getPrefixedName(featureTypeMapping.getQualifiedName()) : featureTypeMapping.getName();
+        final QName qualifiedName = Objects.isNull(featureTypeMapping.getQualifiedName()) ? namespaces.getQualifiedName(featureTypeMapping.getName()) : featureTypeMapping.getQualifiedName();
 
         final List<MappingTable> descriptionMappingTables = transformedMappingTables.stream()
                 .map(addDescription(qualifiedName))
@@ -63,6 +69,7 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
 
         return new FeatureTypeMappingBuilder()
                 .shallowCopyOf(featureTypeMapping)
+                .name(name)
                 .qualifiedName(qualifiedName)
                 // TODO qname
                 .superTypeName(applicationSchema.getSuperTypeName(qualifiedName).orElse(null))
@@ -73,11 +80,15 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
     @Override
     protected MappingTableBuilder transformMappingTable(final Context context, final List<MappingTable> transformedMappingTables, final List<MappingJoin> transformedMappingJoins, final List<MappingValue> transformedMappingValues) {
         final MappingTable mappingTable = context.mappingTable;
-        final List<QName> targetPathElements = !mappingTable.getTargetPath().isEmpty() ? namespaces.getQualifiedPathElements(mappingTable.getTargetPath()) : ImmutableList.of();
+
+        // either targetPath or qualifiedTargetPath is set, derive the other
+        final String targetPath = Strings.isNullOrEmpty(mappingTable.getTargetPath()) && !mappingTable.getQualifiedTargetPath().isEmpty() ? namespaces.getPrefixedPath(mappingTable.getQualifiedTargetPath()) : mappingTable.getTargetPath();
+        final List<QName> targetPathElements = !Strings.isNullOrEmpty(mappingTable.getTargetPath()) ? namespaces.getQualifiedPathElements(mappingTable.getTargetPath()) : mappingTable.getQualifiedTargetPath();
         final String description = !targetPathElements.isEmpty() ? targetPathElements.get(0).getLocalPart() : "";
 
         return new MappingTableBuilder()
                 .shallowCopyOf(mappingTable)
+                .targetPath(targetPath)
                 .qualifiedTargetPath(targetPathElements)
                 .description(description)
                 .values(transformedMappingValues)
@@ -88,21 +99,25 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
     @Override
     protected MappingValueBuilder.ValueDefault transformMappingValue(final Context context) {
         final MappingValue mappingValue = context.mappingValue;
-        final List<QName> targetPathElements = mappingValue.getTargetPath() != null ? namespaces.getQualifiedPathElements(mappingValue.getTargetPath()) : ImmutableList.of();
+
+        // either targetPath or qualifiedTargetPath is set, derive the other
+        final String targetPath = Strings.isNullOrEmpty(mappingValue.getTargetPath()) ? namespaces.getPrefixedPath(mappingValue.getQualifiedTargetPath()) : mappingValue.getTargetPath();
+        final List<QName> targetPathElements = !Strings.isNullOrEmpty(mappingValue.getTargetPath()) ? namespaces.getQualifiedPathElements(mappingValue.getTargetPath()) : mappingValue.getQualifiedTargetPath();
         final String description = !targetPathElements.isEmpty() ? targetPathElements.get(0).getLocalPart() : "";
 
         if (isGeometry(context, targetPathElements)) {
             return new MappingValueBuilder()
                     .geometry()
-                    .targetPath(mappingValue.getTargetPath())
-                    .value(mappingValue.getValue())
+                    .targetPath(targetPath)
                     .qualifiedTargetPath(targetPathElements)
+                    .value(mappingValue.getValue())
                     .description(description);
 
         }
 
         return new MappingValueBuilder()
                 .copyOf(mappingValue)
+                .targetPath(targetPath)
                 .qualifiedTargetPath(targetPathElements)
                 .description(description);
     }
@@ -119,7 +134,9 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
     }
 
     private boolean isGeometry(final Context context, final List<QName> targetPathElements) {
-        final QName qualifiedFeatureTypeName = namespaces.getQualifiedName(context.featureTypeMapping.getName());
+        final QName qualifiedFeatureTypeName = Strings.isNullOrEmpty(context.featureTypeMapping.getName())
+                ? context.featureTypeMapping.getQualifiedName()
+                : namespaces.getQualifiedName(context.featureTypeMapping.getName());
 
         return context.mappingValue.isColumn() && !targetPathElements.isEmpty()
                 && applicationSchema.isGeometry(qualifiedFeatureTypeName, targetPathElements.get(0));

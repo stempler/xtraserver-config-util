@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -54,7 +54,7 @@ public class MappingTableBuilder {
      * @param name table name
      * @return the builder
      */
-    public MappingTableBuilder name(String name) {
+    public MappingTableBuilder name(final String name) {
         this.name = name;
         return this;
     }
@@ -65,7 +65,7 @@ public class MappingTableBuilder {
      * @param primaryKey primary key
      * @return the builder
      */
-    public MappingTableBuilder primaryKey(String primaryKey) {
+    public MappingTableBuilder primaryKey(final String primaryKey) {
         this.primaryKey = primaryKey;
         return this;
     }
@@ -76,7 +76,7 @@ public class MappingTableBuilder {
      * @param targetPath target path
      * @return the builder
      */
-    public MappingTableBuilder targetPath(String targetPath) {
+    public MappingTableBuilder targetPath(final String targetPath) {
         this.targetPath = targetPath;
         return this;
     }
@@ -87,7 +87,7 @@ public class MappingTableBuilder {
      * @param qualifiedTargetPath list of qualified path elements
      * @return the builder
      */
-    public MappingTableBuilder qualifiedTargetPath(List<QName> qualifiedTargetPath) {
+    public MappingTableBuilder qualifiedTargetPath(final List<QName> qualifiedTargetPath) {
         this.qualifiedTargetPath = qualifiedTargetPath;
         return this;
     }
@@ -98,7 +98,7 @@ public class MappingTableBuilder {
      * @param description description
      * @return the builder
      */
-    public MappingTableBuilder description(String description) {
+    public MappingTableBuilder description(final String description) {
         this.description = description;
         return this;
     }
@@ -109,7 +109,7 @@ public class MappingTableBuilder {
      * @param predicate predicate
      * @return the builder
      */
-    public MappingTableBuilder predicate(String predicate) {
+    public MappingTableBuilder predicate(final String predicate) {
         this.predicate = predicate;
         return this;
     }
@@ -121,7 +121,7 @@ public class MappingTableBuilder {
      * @param mappingValue the value mapping
      * @return the builder
      */
-    public MappingTableBuilder value(MappingValue mappingValue) {
+    public MappingTableBuilder value(final MappingValue mappingValue) {
         this.values.add(mappingValue);
         return this;
     }
@@ -133,7 +133,7 @@ public class MappingTableBuilder {
      * @param mappingValues the value mappings
      * @return the builder
      */
-    public MappingTableBuilder values(Collection<MappingValue> mappingValues) {
+    public MappingTableBuilder values(final Collection<MappingValue> mappingValues) {
         this.values.addAll(mappingValues);
         return this;
     }
@@ -145,7 +145,7 @@ public class MappingTableBuilder {
      * @param mappingTable the joining table
      * @return the builder
      */
-    public MappingTableBuilder joiningTable(MappingTable mappingTable) {
+    public MappingTableBuilder joiningTable(final MappingTable mappingTable) {
         this.joiningTables.add(mappingTable);
         return this;
     }
@@ -157,7 +157,7 @@ public class MappingTableBuilder {
      * @param mappingTables the joining tables
      * @return the builder
      */
-    public MappingTableBuilder joiningTables(Collection<MappingTable> mappingTables) {
+    public MappingTableBuilder joiningTables(final Collection<MappingTable> mappingTables) {
         this.joiningTables.addAll(mappingTables);
         return this;
     }
@@ -169,7 +169,7 @@ public class MappingTableBuilder {
      * @param mappingJoin the join path
      * @return the builder
      */
-    public MappingTableBuilder joinPath(MappingJoin mappingJoin) {
+    public MappingTableBuilder joinPath(final MappingJoin mappingJoin) {
         this.joinPaths.add(mappingJoin);
         return this;
     }
@@ -181,7 +181,7 @@ public class MappingTableBuilder {
      * @param mappingJoins the join paths
      * @return the builder
      */
-    public MappingTableBuilder joinPaths(Collection<MappingJoin> mappingJoins) {
+    public MappingTableBuilder joinPaths(final Collection<MappingJoin> mappingJoins) {
         this.joinPaths.addAll(mappingJoins);
         return this;
     }
@@ -195,7 +195,7 @@ public class MappingTableBuilder {
 
         autoComplete();
 
-        final MappingTable mappingTable = new MappingTable(name, primaryKey, targetPath, qualifiedTargetPath, description, predicate, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
+        final MappingTable mappingTable = new MappingTable(name, primaryKey, targetPath, ImmutableList.copyOf(qualifiedTargetPath), description, predicate, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
 
         validate(mappingTable);
 
@@ -208,7 +208,7 @@ public class MappingTableBuilder {
      * @param mappingTable the copy source
      * @return the builder
      */
-    public MappingTableBuilder shallowCopyOf(MappingTable mappingTable) {
+    public MappingTableBuilder shallowCopyOf(final MappingTable mappingTable) {
         this.name = mappingTable.getName();
         this.primaryKey = mappingTable.getPrimaryKey();
         this.targetPath = mappingTable.getTargetPath();
@@ -225,13 +225,12 @@ public class MappingTableBuilder {
      * @param mappingTable the copy source
      * @return the builder
      */
-    public MappingTableBuilder copyOf(MappingTable mappingTable) {
+    public MappingTableBuilder copyOf(final MappingTable mappingTable) {
         shallowCopyOf(mappingTable);
 
-        mappingTable.getJoinPaths().forEach(mappingJoin -> this.joinPaths.add(new MappingJoinBuilder().copyOf(mappingJoin).build()));
-        mappingTable.getJoiningTables().forEach(joiningTable -> this.joiningTables.add(new MappingTableBuilder().copyOf(joiningTable).build()));
-        //TODO
-        mappingTable.getValues().forEach(mappingValue -> this.values.add(mappingValue));
+        this.joinPaths.addAll(mappingTable.getJoinPaths());
+        this.joiningTables.addAll(mappingTable.getJoiningTables());
+        this.values.addAll(mappingTable.getValues());
 
         return this;
     }
@@ -242,7 +241,9 @@ public class MappingTableBuilder {
      * @return a new immutable {@link MappingTableDraft}
      */
     public MappingTableDraft buildDraft() {
-        return new MappingTableDraft(name, primaryKey, targetPath, qualifiedTargetPath, description, predicate, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
+        autoComplete();
+
+        return new MappingTableDraft(name, primaryKey, targetPath, ImmutableList.copyOf(qualifiedTargetPath), description, predicate, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
     }
 
     /**
@@ -252,7 +253,7 @@ public class MappingTableBuilder {
      * @see MappingTable
      */
     public static class MappingTableDraft extends MappingTable {
-        MappingTableDraft(String name, String primaryKey, String targetPath, List<QName> qualifiedTargetPath, String description, String predicate, List<MappingTable> joiningTables, List<MappingValue> values, List<MappingJoin> joinPaths) {
+        MappingTableDraft(final String name, final String primaryKey, final String targetPath, final List<QName> qualifiedTargetPath, final String description, final String predicate, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
             super(name, primaryKey, targetPath, qualifiedTargetPath, description, predicate, joiningTables, values, joinPaths);
         }
     }
@@ -260,6 +261,9 @@ public class MappingTableBuilder {
     private void autoComplete() {
         if (targetPath == null) {
             this.targetPath = "";
+        }
+        if (qualifiedTargetPath == null) {
+            this.qualifiedTargetPath = new ArrayList<>();
         }
 
         // if join has target, overwrite table target (for table definitions parsed from value mappings)
@@ -284,6 +288,10 @@ public class MappingTableBuilder {
             throw new IllegalStateException("Invalid table. Valid configurations are primary (no targetPath + no joinPaths), joined (targetPath + at least one joinPath) and predicate (targetPath + predicate).");
         }
 
+        if (mappingTable.getJoiningTables().stream().anyMatch(MappingTableBuilder.MappingTableDraft.class::isInstance)) {
+            throw new IllegalStateException("Joining tables contain MappingTableDraft");
+        }
+
         if (mappingTable.getJoiningTables().stream().flatMap(joiningTable -> joiningTable.getJoinPaths().stream())
                 .anyMatch(mappingJoin -> !mappingJoin.getSourceTable().equals(mappingTable.getName()))) {
             throw new IllegalStateException("Join source table of joining table does not match");
@@ -293,7 +301,5 @@ public class MappingTableBuilder {
                 .anyMatch(mappingJoin -> !mappingJoin.getTargetTable().equals(mappingTable.getName()))) {
             throw new IllegalStateException("Join target table does not match");
         }
-
-        // TODO: no drafts in joining tables
     }
 }

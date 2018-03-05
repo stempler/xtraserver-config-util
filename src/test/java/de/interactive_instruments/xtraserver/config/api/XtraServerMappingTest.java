@@ -180,12 +180,12 @@ public class XtraServerMappingTest {
         assertThat(actual, isSimilarTo(expected).ignoreComments().ignoreWhitespace().withNodeMatcher(new DefaultNodeMatcher(mappingElementSelector)));
     }*/
 
-    //@Test
+    @Test
     public void testLocalImportExport() throws JAXBException, IOException, SAXException, XMLStreamException {
         //final StreamSource schemaSource = new StreamSource(new FileInputStream(""), "/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema");
         final URI localApplicationSchema = new File("/home/zahnen/development/XSProjects/AAA-Suite/schema/NAS/6.0/schema/AAA-Fachschema_XtraServer.xsd").toURI();
-        final String inputFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/1/includes/XtraSrvConfig_Mapping.inc.xml";
-        final String outputFile = "/home/zahnen/Downloads/alkis-mapping.xml";
+        final String inputFile = "/home/zahnen/development/XSProjects/AAA-Suite/config/alkis/sf/includes/2/includes/XtraSrvConfig_Mapping.inc.xml";
+        final String outputFile = "/home/zahnen/Downloads/alkis-mapping2.xml";
         //XtraServerMapping xtraServerMappingImport = XtraServerMapping.createFromStream(new FileInputStream(inputFile), localApplicationSchema);
         final XtraServerMapping xtraServerMappingImport = XtraServerMappingFile.read()
                 .fromStream(new FileInputStream(inputFile));
@@ -212,8 +212,8 @@ public class XtraServerMappingTest {
         System.out.println(outputStream.toString());
 
         final Source expected = Input.fromStream(new FileInputStream(inputFile)).build();
-        final Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
-        //Source actual = Input.fromStream(new FileInputStream(outputFile)).build();
+        //final Source actual = Input.fromByteArray(outputStream.toByteArray()).build();
+        Source actual = Input.fromStream(new FileInputStream(outputFile)).build();
 
         final List<String> ignoreAttributes = ImmutableList.of(
                 "FTCode",
@@ -280,11 +280,11 @@ public class XtraServerMappingTest {
                             return false;
                         } else if (node.getLocalName().equals("Table") && node.getAttributes() != null && node.getAttributes().getNamedItem("mapped_geometry") != null && node.getAttributes().getNamedItem("mapped_geometry").getNodeValue().equals("true")) {
                             return false;
-                        }/* else if ((node.getLocalName().equals("Table") || node.getLocalName().equals("Join") || node.getLocalName().equals("AssociationTarget"))
+                        } else if ((node.getLocalName().equals("Table") || node.getLocalName().equals("Join") || node.getLocalName().equals("AssociationTarget"))
                                 && node.getAttributes() != null && node.getAttributes().getNamedItem("target") != null
                                 && targetsNotSupportedInHaleForAlkis.keySet().stream().anyMatch(node.getAttributes().getNamedItem("target").getNodeValue()::startsWith)) {
                             return false;
-                        }*/ else if (node.getLocalName().equals("Join")
+                        } else if (node.getLocalName().equals("Join")
                                 && node.getAttributes() != null && node.getAttributes().getNamedItem("join_path") != null
                                 && node.getAttributes().getNamedItem("join_path").getNodeValue().contains("[1=2]/ref")) {
                             return false;

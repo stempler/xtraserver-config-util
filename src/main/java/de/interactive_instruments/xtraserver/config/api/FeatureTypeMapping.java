@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -37,7 +37,7 @@ public class FeatureTypeMapping {
     private final boolean isAbstract;
     private final ImmutableSet<MappingTable> tables;
 
-    FeatureTypeMapping(final String name, final QName qualifiedName, String superTypeName, final boolean isAbstract, final List<MappingTable> tables) {
+    FeatureTypeMapping(final String name, final QName qualifiedName, final String superTypeName, final boolean isAbstract, final List<MappingTable> tables) {
         this.name = name;
         this.qualifiedName = qualifiedName;
         this.superTypeName = superTypeName;
@@ -68,7 +68,7 @@ public class FeatureTypeMapping {
      *
      * @return the prefixed super type name
      */
-    Optional<String> getSuperTypeName() {
+    public Optional<String> getSuperTypeName() {
         return Optional.ofNullable(superTypeName);
     }
 
@@ -106,7 +106,7 @@ public class FeatureTypeMapping {
      * @param name the table name
      * @return true if exists
      */
-    public boolean hasTable(String name) {
+    public boolean hasTable(final String name) {
         return getTableOptional(name).isPresent();
     }
 
@@ -116,7 +116,7 @@ public class FeatureTypeMapping {
      * @param name the table name
      * @return the {@link MappingTable}, if exists
      */
-    public Optional<MappingTable> getTable(String name) {
+    public Optional<MappingTable> getTable(final String name) {
         return getTableOptional(name);
     }
 
@@ -127,7 +127,7 @@ public class FeatureTypeMapping {
      */
     public Optional<MappingValue> getGeometry() {
         return tables.stream()
-                .flatMap(MappingTable::getAllValues)
+                .flatMap(MappingTable::getAllValuesStream)
                 .filter(MappingValue::isGeometry)
                 .findFirst();
     }
@@ -139,7 +139,7 @@ public class FeatureTypeMapping {
      * @return a map of found {@link MappingTable}s and {@link MappingValue}s
      */
     public ImmutableMap<MappingTable, MappingValue> getTableValuesForPath(final String targetPath) {
-        ImmutableMap.Builder<MappingTable, MappingValue> map = ImmutableMap.builder();
+        final ImmutableMap.Builder<MappingTable, MappingValue> map = ImmutableMap.builder();
 
         tables.stream()
                 .filter(table -> table.hasValueForPath(targetPath))
@@ -148,17 +148,21 @@ public class FeatureTypeMapping {
         return map.build();
     }
 
-    private Optional<MappingTable> getTableOptional(String tableName) {
+    private Optional<MappingTable> getTableOptional(final String tableName) {
         return tables.stream()
                 .filter(table -> tableName.equals(table.getName()))
                 .findFirst();
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        FeatureTypeMapping that = (FeatureTypeMapping) o;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final FeatureTypeMapping that = (FeatureTypeMapping) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(qualifiedName, that.qualifiedName) &&
                 Objects.equals(tables, that.tables);
@@ -174,7 +178,6 @@ public class FeatureTypeMapping {
     public String toString() {
         return "\nFeatureTypeMappingImpl{" +
                 "\nname='" + name + '\'' +
-                "\n, qualifiedTypeName=" + qualifiedName +
                 "\n, tables=" + tables +
                 "\n}";
     }

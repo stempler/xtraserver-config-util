@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,12 +24,14 @@ import java.util.Objects;
  * @author zahnen
  */
 public class MappingJoin {
-    private String targetPath;
+    private final String targetPath;
     private final List<Condition> joinConditions;
+    private final String description;
 
-    MappingJoin(String targetPath, List<Condition> joinConditions) {
+    MappingJoin(final String targetPath, final List<Condition> joinConditions, String description) {
         this.targetPath = targetPath;
         this.joinConditions = joinConditions;
+        this.description = description;
     }
 
     /**
@@ -76,11 +78,24 @@ public class MappingJoin {
         return joinConditions.get(joinConditions.size() - 1).getTargetTable();
     }
 
+    /**
+     * Returns the description
+     *
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MappingJoin that = (MappingJoin) o;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final MappingJoin that = (MappingJoin) o;
         return Objects.equals(targetPath, that.targetPath) &&
                 Objects.equals(joinConditions, that.joinConditions);
     }
@@ -93,9 +108,9 @@ public class MappingJoin {
 
     @Override
     public String toString() {
-        StringBuilder repr = new StringBuilder();
+        final StringBuilder repr = new StringBuilder();
         int i = 0;
-        for (Condition cndtn : joinConditions) {
+        for (final Condition cndtn : joinConditions) {
             repr.append(cndtn.toString());
             if (++i < joinConditions.size()) {
                 repr.append(" && ");
@@ -113,7 +128,7 @@ public class MappingJoin {
         private final String targetTable;
         private final String targetField;
 
-        Condition(String sourceTable, String sourceField, String targetTable, String targetField) {
+        Condition(final String sourceTable, final String sourceField, final String targetTable, final String targetField) {
             this.sourceTable = sourceTable;
             this.sourceField = sourceField;
             this.targetTable = targetTable;
@@ -162,10 +177,14 @@ public class MappingJoin {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Condition condition = (Condition) o;
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final Condition condition = (Condition) o;
             return Objects.equals(sourceTable, condition.sourceTable) &&
                     Objects.equals(sourceField, condition.sourceField) &&
                     Objects.equals(targetTable, condition.targetTable) &&

@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+// TODO: description, set from hale and from transformer
 /**
  * Collection of mappings for feature types from a common GML application schema
  *
@@ -30,9 +30,11 @@ import java.util.stream.Collectors;
 public class XtraServerMapping {
     private final Map<String, FeatureTypeMapping> featureTypeMappings;
     // TODO: add description with targetNamespace and version from applicationSchema
+    private final String description;
 
-    XtraServerMapping(final Map<String, FeatureTypeMapping> featureTypeMappings) {
+    XtraServerMapping(final Map<String, FeatureTypeMapping> featureTypeMappings, String description) {
         this.featureTypeMappings = featureTypeMappings;
+        this.description = description;
     }
 
     /**
@@ -50,7 +52,7 @@ public class XtraServerMapping {
      * @param excludeAbstract if true exclude abstract FeatureTypes
      * @return the list of mappings
      */
-    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappings(boolean excludeAbstract) {
+    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappings(final boolean excludeAbstract) {
         return featureTypeMappings.values().stream()
                 .filter(featureTypeMapping -> !excludeAbstract || !featureTypeMapping.isAbstract())
                 // TODO: can be replaced with ImmutableList.toImmutableList() starting with guava 21
@@ -72,7 +74,7 @@ public class XtraServerMapping {
      * @param excludeAbstract if true exclude abstract FeatureTypes
      * @return the list of prefixed feature type names
      */
-    public ImmutableList<String> getFeatureTypeNames(boolean excludeAbstract) {
+    public ImmutableList<String> getFeatureTypeNames(final boolean excludeAbstract) {
         return featureTypeMappings.values().stream()
                 .filter(featureTypeMapping -> !excludeAbstract || !featureTypeMapping.isAbstract())
                 .map(FeatureTypeMapping::getName)
@@ -86,7 +88,7 @@ public class XtraServerMapping {
      * @param featureTypeName the prefixed feature type name
      * @return true if exists
      */
-    public boolean hasFeatureType(String featureTypeName) {
+    public boolean hasFeatureType(final String featureTypeName) {
         return featureTypeMappings.containsKey(featureTypeName);
     }
 
@@ -96,7 +98,7 @@ public class XtraServerMapping {
      * @param featureTypeName the prefixed feature type name
      * @return the mapping
      */
-    public Optional<FeatureTypeMapping> getFeatureTypeMapping(String featureTypeName) {
+    public Optional<FeatureTypeMapping> getFeatureTypeMapping(final String featureTypeName) {
         return Optional.ofNullable(featureTypeMappings.get(featureTypeName));
     }
 
@@ -107,8 +109,8 @@ public class XtraServerMapping {
      * @param featureTypeName the prefixed feature type name
      * @return the list of mappings
      */
-    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappingInheritanceChain(String featureTypeName) {
-        ImmutableList.Builder<FeatureTypeMapping> inheritanceChain = new ImmutableList.Builder<>();
+    public ImmutableList<FeatureTypeMapping> getFeatureTypeMappingInheritanceChain(final String featureTypeName) {
+        final ImmutableList.Builder<FeatureTypeMapping> inheritanceChain = new ImmutableList.Builder<>();
 
         FeatureTypeMapping featureTypeMapping = featureTypeMappings.get(featureTypeName);
         while (featureTypeMapping != null) {
@@ -121,11 +123,24 @@ public class XtraServerMapping {
         return inheritanceChain.build().reverse();
     }
 
+    /**
+     * Returns the description
+     *
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        XtraServerMapping that = (XtraServerMapping) o;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final XtraServerMapping that = (XtraServerMapping) o;
         return Objects.equals(featureTypeMappings, that.featureTypeMappings);
     }
 

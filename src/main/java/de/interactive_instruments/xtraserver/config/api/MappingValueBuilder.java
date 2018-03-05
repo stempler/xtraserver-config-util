@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -110,7 +110,7 @@ public class MappingValueBuilder {
      * @param mappingValue the copy source
      * @return the builder
      */
-    public ValueDefault shallowCopyOf(MappingValue mappingValue) {
+    public ValueDefault shallowCopyOf(final MappingValue mappingValue) {
         builder.targetPath = mappingValue.getTargetPath();
         builder.qualifiedTargetPath = mappingValue.getQualifiedTargetPath();
         builder.value = mappingValue.getValue();
@@ -130,7 +130,7 @@ public class MappingValueBuilder {
      * @param mappingValue the copy source
      * @return the builder
      */
-    public ValueDefault copyOf(MappingValue mappingValue) {
+    public ValueDefault copyOf(final MappingValue mappingValue) {
         shallowCopyOf(mappingValue);
 
         if (mappingValue.isClassification() || mappingValue.isNil()) {
@@ -147,7 +147,7 @@ public class MappingValueBuilder {
      * @param mappingValueClassification the copy source
      * @return the builder
      */
-    public ValueClassification copyOf(MappingValueClassification mappingValueClassification) {
+    public ValueClassification copyOf(final MappingValueClassification mappingValueClassification) {
         return (ValueClassification) copyOf((MappingValue) mappingValueClassification);
     }
 
@@ -157,7 +157,7 @@ public class MappingValueBuilder {
      * @param mappingValueClassification the copy source
      * @return the builder
      */
-    public ValueClassification shallowCopyOf(MappingValueClassification mappingValueClassification) {
+    public ValueClassification shallowCopyOf(final MappingValueClassification mappingValueClassification) {
         return (ValueClassification) shallowCopyOf((MappingValue) mappingValueClassification);
     }
 
@@ -167,7 +167,7 @@ public class MappingValueBuilder {
      * @param mappingValueReference the copy source
      * @return the builder
      */
-    public ValueReference copyOf(MappingValueReference mappingValueReference) {
+    public ValueReference copyOf(final MappingValueReference mappingValueReference) {
         return (ValueReference) copyOf((MappingValue) mappingValueReference);
     }
 
@@ -177,7 +177,7 @@ public class MappingValueBuilder {
      * @param mappingValueReference the copy source
      * @return the builder
      */
-    public ValueReference shallowCopyOf(MappingValueReference mappingValueReference) {
+    public ValueReference shallowCopyOf(final MappingValueReference mappingValueReference) {
         return (ValueReference) shallowCopyOf((MappingValue) mappingValueReference);
     }
 
@@ -242,7 +242,7 @@ public class MappingValueBuilder {
     /**
      * Builder for {@link MappingValueReference}s of type reference
      */
-    public interface ValueReference extends ValueDefault {
+    public interface ValueReference {
         /**
          * Set the referenced feature type name
          *
@@ -269,38 +269,38 @@ public class MappingValueBuilder {
         }
 
         @Override
-        public ValueDefault targetPath(String targetPath) {
+        public ValueDefault targetPath(final String targetPath) {
             this.targetPath = targetPath;
             return this;
         }
 
         @Override
-        public ValueDefault qualifiedTargetPath(List<QName> qualifiedTargetPath) {
+        public ValueDefault qualifiedTargetPath(final List<QName> qualifiedTargetPath) {
             this.qualifiedTargetPath = qualifiedTargetPath;
             return this;
         }
 
         @Override
-        public ValueDefault value(String value) {
+        public ValueDefault value(final String value) {
             this.value = value;
             return this;
         }
 
         @Override
-        public ValueDefault description(String description) {
+        public ValueDefault description(final String description) {
             this.description = description;
             return this;
         }
 
         @Override
-        public ValueClassification keyValue(String key, String value) {
+        public ValueClassification keyValue(final String key, final String value) {
             this.keys.add(key);
             this.values.add(value);
             return this;
         }
 
         @Override
-        public ValueDefault referencedFeatureType(String referencedFeatureType) {
+        public ValueDefault referencedFeatureType(final String referencedFeatureType) {
             this.referencedFeatureType = referencedFeatureType;
             return this;
         }
@@ -334,26 +334,10 @@ public class MappingValueBuilder {
         }
 
         private void validate(final MappingValue mappingValue) {
-            /* TODO if (mappingTable.getName() == null || mappingTable.getName().isEmpty()) {
-                throw new IllegalStateException("Table has no name");
+            if ((targetPath == null || targetPath.isEmpty())
+                    && (qualifiedTargetPath == null || qualifiedTargetPath.isEmpty())) {
+                throw new IllegalStateException("Value has no targetPath or qualifiedTargetPath");
             }
-            if (!mappingTable.isPredicate() && (mappingTable.getPrimaryKey() == null || mappingTable.getPrimaryKey().isEmpty())) {
-                throw new IllegalStateException("Table has no primary key");
-            }
-
-            if (!mappingTable.isPrimary() && !mappingTable.isJoined() && !mappingTable.isPredicate()) {
-                throw new  IllegalStateException("Invalid table. Valid configurations are primary (no targetPath + no joinPaths), joined (targetPath + at least one joinPath) and predicate (targetPath + predicate).");
-            }
-
-            if (mappingTable.getJoiningTables().stream().flatMap(joiningTable -> joiningTable.getJoinPaths().stream())
-                    .anyMatch(mappingJoin -> !mappingJoin.getSourceTable().equals(mappingTable.getName()))) {
-                throw new IllegalStateException("Join source table of joining table does not match");
-            }
-
-            if (mappingTable.getJoinPaths().stream()
-                    .anyMatch(mappingJoin -> !mappingJoin.getTargetTable().equals(mappingTable.getName()))) {
-                throw new IllegalStateException("Join target table does not match");
-            }*/
         }
 
     }

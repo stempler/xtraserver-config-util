@@ -16,8 +16,8 @@
 package de.interactive_instruments.xtraserver.config.transformer;
 
 import de.interactive_instruments.xtraserver.config.api.XtraServerMapping;
+import de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder;
 
-import java.io.IOException;
 import java.net.URI;
 
 /**
@@ -30,13 +30,15 @@ public class XtraServerMappingTransformer {
 
     private final XtraServerMapping xtraServerMapping;
     private final ApplicationSchema applicationSchema;
+    private final URI applicationSchemaUri;
     private final boolean flattenInheritance;
     private final boolean fanOutInheritance;
     private final boolean ensureRelationNavigability;
 
-    private XtraServerMappingTransformer(final XtraServerMapping xtraServerMapping, final ApplicationSchema applicationSchema, final boolean flattenInheritance, final boolean fanOutInheritance, final boolean ensureRelationNavigability) {
+    private XtraServerMappingTransformer(final XtraServerMapping xtraServerMapping, final URI applicationSchemaUri, final boolean flattenInheritance, final boolean fanOutInheritance, final boolean ensureRelationNavigability) {
         this.xtraServerMapping = xtraServerMapping;
-        this.applicationSchema = applicationSchema;
+        this.applicationSchemaUri = applicationSchemaUri;
+        this.applicationSchema = new ApplicationSchema(applicationSchemaUri);
         this.flattenInheritance = flattenInheritance;
         this.fanOutInheritance = fanOutInheritance;
         this.ensureRelationNavigability = ensureRelationNavigability;
@@ -54,20 +56,27 @@ public class XtraServerMappingTransformer {
 
     private XtraServerMapping transform() {
         XtraServerMapping transformedXtraServerMapping = xtraServerMapping;
-
-        // TODO: validate: schema not null
+        String description = xtraServerMapping.getDescription() + "\n  Transformations:\n    - applySchemaInfo (" + applicationSchemaUri.toString() + ")\n";
 
         transformedXtraServerMapping = new MappingTransformerSchemaInfo(transformedXtraServerMapping, applicationSchema).transform();
 
         if (flattenInheritance) {
             transformedXtraServerMapping = new MappingTransformerFlattenInheritance(transformedXtraServerMapping).transform();
+            description += "    - flattenInheritance\n";
         }
         if (fanOutInheritance) {
             transformedXtraServerMapping = new MappingTransformerFanOutInheritance(transformedXtraServerMapping, applicationSchema).transform();
+            description += "    - fanOutInheritance\n";
         }
         if (ensureRelationNavigability) {
             transformedXtraServerMapping = new MappingTransformerRelationNavigability(transformedXtraServerMapping).transform();
+            description += "    - ensureRelationNavigability\n";
         }
+
+        transformedXtraServerMapping = new XtraServerMappingBuilder()
+                .copyOf(transformedXtraServerMapping)
+                .description(description)
+                .build();
 
 
         return transformedXtraServerMapping;
@@ -123,7 +132,7 @@ public class XtraServerMappingTransformer {
          *
          * @return the transformed {@link XtraServerMapping}
          */
-        XtraServerMapping transform() throws IOException;
+        XtraServerMapping transform();
     }
 
     private static class Builder implements SchemaInfo, Transform {
@@ -162,8 +171,8 @@ public class XtraServerMappingTransformer {
         }
 
         @Override
-        public XtraServerMapping transform() throws IOException {
-            return new XtraServerMappingTransformer(xtraServerMapping, new ApplicationSchema(applicationSchemaUri), flattenInheritance, fanOutInheritance, ensureRelationNavigability)
+        public XtraServerMapping transform() {
+            return new XtraServerMappingTransformer(xtraServerMapping, applicationSchemaUri, flattenInheritance, fanOutInheritance, ensureRelationNavigability)
                     .transform();
         }
     }

@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,6 +15,7 @@
  */
 package de.interactive_instruments.xtraserver.config.api;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.LinkedHashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
  */
 public class XtraServerMappingBuilder {
     private final Map<String, FeatureTypeMapping> featureTypeMappings;
+    private String description;
 
     /**
      * Create new builder
@@ -43,8 +45,9 @@ public class XtraServerMappingBuilder {
      * @param featureTypeMapping the feature type mapping
      * @return the builder
      */
-    public XtraServerMappingBuilder featureTypeMapping(FeatureTypeMapping featureTypeMapping) {
-        this.featureTypeMappings.put(featureTypeMapping.getName(), featureTypeMapping);
+    public XtraServerMappingBuilder featureTypeMapping(final FeatureTypeMapping featureTypeMapping) {
+        final String name = Strings.isNullOrEmpty(featureTypeMapping.getName()) ? featureTypeMapping.getQualifiedName().toString() : featureTypeMapping.getName();
+        this.featureTypeMappings.put(name, featureTypeMapping);
         return this;
     }
 
@@ -55,8 +58,19 @@ public class XtraServerMappingBuilder {
      * @param featureTypeMappings the feature type mappings
      * @return the builder
      */
-    public XtraServerMappingBuilder featureTypeMappings(List<FeatureTypeMapping> featureTypeMappings) {
+    public XtraServerMappingBuilder featureTypeMappings(final List<FeatureTypeMapping> featureTypeMappings) {
         featureTypeMappings.forEach(this::featureTypeMapping);
+        return this;
+    }
+
+    /**
+     * Set the description
+     *
+     * @param description description
+     * @return the builder
+     */
+    public XtraServerMappingBuilder description(final String description) {
+        this.description = description;
         return this;
     }
 
@@ -66,8 +80,9 @@ public class XtraServerMappingBuilder {
      * @param xtraServerMapping the copy source
      * @return the builder
      */
-    public XtraServerMappingBuilder copyOf(XtraServerMapping xtraServerMapping) {
+    public XtraServerMappingBuilder copyOf(final XtraServerMapping xtraServerMapping) {
         xtraServerMapping.getFeatureTypeMappings().forEach(this::featureTypeMapping);
+        this.description = xtraServerMapping.getDescription();
         return this;
     }
 
@@ -77,7 +92,7 @@ public class XtraServerMappingBuilder {
      * @return a new immutable {@link XtraServerMapping}
      */
     public XtraServerMapping build() {
-        final XtraServerMapping xtraServerMapping = new XtraServerMapping(ImmutableMap.copyOf(featureTypeMappings));
+        final XtraServerMapping xtraServerMapping = new XtraServerMapping(ImmutableMap.copyOf(featureTypeMappings), description);
 
         validate(xtraServerMapping);
 

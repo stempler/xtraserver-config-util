@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -38,7 +38,7 @@ class MappingTransformerFlattenInheritance implements MappingTransformer {
     public XtraServerMapping transform() {
 
         final List<FeatureTypeMapping> transformedFeatureTypeMappings = xtraServerMapping.getFeatureTypeMappings().stream()
-                .filter(isNotAbstract())
+                .filter(hasNoChildren())
                 .map(transformFeatureType())
                 .collect(Collectors.toList());
 
@@ -50,6 +50,11 @@ class MappingTransformerFlattenInheritance implements MappingTransformer {
     private Predicate<FeatureTypeMapping> isNotAbstract() {
         return featureTypeMapping -> !featureTypeMapping.isAbstract()
                 && !featureTypeMapping.getQualifiedName().equals(new QName("http://www.opengis.net/gml/3.2", "AbstractFeature"));
+    }
+
+    private Predicate<FeatureTypeMapping> hasNoChildren() {
+        return featureTypeMapping -> xtraServerMapping.getFeatureTypeMappings().stream()
+                .noneMatch(featureTypeMapping1 -> featureTypeMapping1.getSuperTypeName().isPresent() && featureTypeMapping.getName().equals(featureTypeMapping1.getSuperTypeName().get()));
     }
 
     @Override

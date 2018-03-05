@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -41,7 +41,7 @@ public class MappingTable {
     private final ImmutableSet<MappingValue> values;
     private final ImmutableSet<MappingJoin> joinPaths;
 
-    MappingTable(final String name, final String primaryKey, final String targetPath, List<QName> qualifiedTargetPath, final String description, final String predicate, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
+    MappingTable(final String name, final String primaryKey, final String targetPath, final List<QName> qualifiedTargetPath, final String description, final String predicate, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
         this.name = name;
         this.primaryKey = primaryKey;
         this.targetPath = targetPath;
@@ -140,7 +140,9 @@ public class MappingTable {
      * @return true if primary
      */
     public boolean isPrimary() {
-        return (targetPath == null || targetPath.isEmpty()) && joinPaths.isEmpty();
+        return (targetPath == null || targetPath.isEmpty())
+                && (qualifiedTargetPath == null || qualifiedTargetPath.isEmpty())
+                && joinPaths.isEmpty();
     }
 
     /**
@@ -149,7 +151,9 @@ public class MappingTable {
      * @return true if joined
      */
     public boolean isJoined() {
-        return targetPath != null && !targetPath.isEmpty() && !joinPaths.isEmpty();
+        return ((targetPath != null && !targetPath.isEmpty())
+                || ( qualifiedTargetPath != null &&!qualifiedTargetPath.isEmpty()))
+                && !joinPaths.isEmpty();
     }
 
     /**
@@ -158,7 +162,9 @@ public class MappingTable {
      * @return true if predicate
      */
     public boolean isPredicate() {
-        return targetPath != null && !targetPath.isEmpty() && predicate != null && !predicate.isEmpty();
+        return ((targetPath != null && !targetPath.isEmpty())
+                || ( qualifiedTargetPath != null &&!qualifiedTargetPath.isEmpty()))
+                && predicate != null && !predicate.isEmpty();
     }
 
     /**
@@ -179,7 +185,7 @@ public class MappingTable {
      * @return a map of found {@link MappingTable}s and {@link MappingValue}s
      */
     public ImmutableMap<MappingTable, MappingValue> getTableValuesForPath(final String targetPath) {
-        ImmutableMap.Builder<MappingTable, MappingValue> map = ImmutableMap.builder();
+        final ImmutableMap.Builder<MappingTable, MappingValue> map = ImmutableMap.builder();
 
         // TODO: shallow copy with nested value instead of this ??? or just return tables and get values with additional function?
         values.stream()
@@ -194,18 +200,39 @@ public class MappingTable {
         return map.build();
     }
 
-    Stream<MappingValue> getAllValues() {
+    /**
+     * Returns all values from this table and all nested joined tables
+     *
+     * @return the value stream
+     */
+    public Stream<MappingValue> getAllValuesStream() {
         final Stream<MappingValue> joinedValues = joiningTables.stream()
                 .flatMap(mappingTable -> mappingTable.getValues().stream());
 
         return Stream.concat(values.stream(), joinedValues);
     }
 
+    /**
+     * Returns all joined tables from this table and all nested joined tables
+     *
+     * @return the table stream
+     */
+    public Stream<MappingTable> getAllJoiningTablesStream() {
+        final Stream<MappingTable> nestedJoiningTables = joiningTables.stream()
+                .flatMap(mappingTable -> mappingTable.getJoiningTables().stream());
+
+        return Stream.concat(joiningTables.stream(), nestedJoiningTables);
+    }
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        MappingTable that = (MappingTable) o;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final MappingTable that = (MappingTable) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(primaryKey, that.primaryKey) &&
                 Objects.equals(targetPath, that.targetPath) &&

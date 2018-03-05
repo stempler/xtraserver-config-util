@@ -15,13 +15,16 @@
  */
 package de.interactive_instruments.xtraserver.config.transformer;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +42,9 @@ class Namespaces {
     Namespaces(final Map<String, String> namespaceUriToPrefixMapping) {
         this.namespaces = HashBiMap.create();
 
+        // required for xsi:nil, normally not defined in app schema
+        namespaces.put("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
         namespaceUriToPrefixMapping.forEach((key, value) -> {
             // containsValue() check required as bimap does not handle putIfAbsent for values
             if (key != null && !key.isEmpty() && !this.namespaces.containsValue(key)) {
@@ -49,29 +55,42 @@ class Namespaces {
     }
 
     public QName getQualifiedName(final String prefixedName) {
-        final String[] name = prefixedName.replaceAll("@", "").split(":");
+        final String[] name = prefixedName.split(":");
 
-        if (name.length == 2 && namespaces.get(name[0]) != null) {
-            return new QName(namespaces.get(name[0]), name[1], name[0]);
+        String namespacePrefix = name.length == 2 ? name[0] : "";
+        String localName = name.length == 2 ? name[1] : prefixedName;
+
+        if (namespacePrefix.startsWith("@")) {
+            namespacePrefix = namespacePrefix.substring(1);
+            localName = "@" + localName;
+        }
+
+        if (name.length == 2 && namespaces.get(namespacePrefix) != null) {
+            return new QName(namespaces.get(namespacePrefix), localName, namespacePrefix);
         } else if (name.length == 1) {
-            return new QName(name[0]);
+            return new QName(localName);
         }
 
         return null;
     }
 
     public String getPrefixedName(final QName qualifiedName) {
+        String attributePrefix = "";
+        String namespacePrefix = "";
+        String localName = qualifiedName.getLocalPart();
+
+        if (localName.startsWith("@")) {
+            attributePrefix = "@";
+            localName = localName.substring(1);
+        }
         if (namespaces.inverse().get(qualifiedName.getNamespaceURI()) != null) {
-            return namespaces.inverse().get(qualifiedName.getNamespaceURI()) + ":" + qualifiedName.getLocalPart();
+            namespacePrefix = namespaces.inverse().get(qualifiedName.getNamespaceURI()) + ":";
         }
-        if ("".equals(qualifiedName.getNamespaceURI())) {
-            if (!"".equals(qualifiedName.getPrefix())) {
-                return qualifiedName.getPrefix() + ":" + qualifiedName.getLocalPart();
-            }
-            return qualifiedName.getLocalPart();
-        } else {
-            return qualifiedName.getNamespaceURI() + ":" + qualifiedName.getLocalPart();
+        else if (Strings.isNullOrEmpty(qualifiedName.getNamespaceURI()) && !Strings.isNullOrEmpty(qualifiedName.getPrefix())) {
+            namespacePrefix = qualifiedName.getPrefix() + ":";
         }
+
+        return attributePrefix + namespacePrefix + localName;
     }
 
     public List<QName> getQualifiedPathElements(final String prefixedPath) {
@@ -81,5 +100,11 @@ class Namespaces {
                 .stream()
                 .map(this::getQualifiedName)
                 .collect(Collectors.toList());
+    }
+
+    public String getPrefixedPath(final List<QName> qualifiedPathElements) {
+        return qualifiedPathElements.stream()
+                .map(this::getPrefixedName)
+                .collect(Collectors.joining("/"));
     }
 }

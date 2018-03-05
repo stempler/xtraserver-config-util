@@ -23,6 +23,7 @@ import javax.xml.namespace.QName;
 import javax.xml.transform.stream.StreamSource;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.*;
@@ -36,7 +37,7 @@ class ApplicationSchema {
     private final XmlSchema xmlSchema;
     private final Namespaces namespaces;
 
-    ApplicationSchema(final URI inputUri) throws IOException {
+    ApplicationSchema(final URI inputUri) {
         this(toStreamSource(inputUri));
     }
 
@@ -50,12 +51,18 @@ class ApplicationSchema {
         this.namespaces = new Namespaces(namespaceUriToPrefixMap);
     }
 
-    private static StreamSource toStreamSource(final URI uri) throws IOException {
+    private static StreamSource toStreamSource(final URI uri) {
         if ("file".equalsIgnoreCase(uri.getScheme())) {
             final File file = new File(uri.isAbsolute() ? uri : Paths.get(uri).toUri());
             return new StreamSource(file);
         }
-        return new StreamSource(uri.toURL().openStream());
+        final InputStream inputStream;
+        try {
+            inputStream = uri.toURL().openStream();
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Invalid URI: " + uri.toString());
+        }
+        return new StreamSource(inputStream);
     }
 
     private static void addNamespaces(final NamespacePrefixList nsc, final Map<String, String> namespaceUriToPrefixMap) {
@@ -125,7 +132,6 @@ class ApplicationSchema {
                 .collect(Collectors.toList());
     }
 
-    // TODO
     public boolean isGeometry(final QName qualifiedTypeName, final QName propertyName) {
         final XmlSchemaComplexType type = getType(qualifiedTypeName);
         final XmlSchemaElement element = getProperty(type, propertyName);
@@ -165,17 +171,22 @@ class ApplicationSchema {
                         }
                     }
                 }
-            } else if (type.getName().endsWith("AbstractGMLType") && propertyName.getLocalPart().equals("identifier") && propertyName.getNamespaceURI().equals(type.getQName().getNamespaceURI())) {
+            }
+
+            if (type.getName().endsWith("AbstractGMLType") && propertyName.getLocalPart().equals("identifier") && propertyName.getNamespaceURI().equals(type.getQName().getNamespaceURI())) {
                 return true;
             }
 
-            // check if property is contained in the attributes of the type
-            final Iterator j = type.getAttributes().getIterator();
-            while (j.hasNext()) {
-                final XmlSchemaAttribute attribute = (XmlSchemaAttribute) j.next();
-                if (attribute.getQName() != null && attribute.getQName().equals(propertyName)
-                        || attribute.getRefName() != null && attribute.getRefName().equals(propertyName)) {
-                    return true;
+            if (propertyName.getLocalPart().startsWith("@")) {
+                // check if property is contained in the attributes of the type
+                final QName attributeName = new QName(propertyName.getNamespaceURI(), propertyName.getLocalPart().substring(1));
+                final Iterator j = type.getAttributes().getIterator();
+                while (j.hasNext()) {
+                    final XmlSchemaAttribute attribute = (XmlSchemaAttribute) j.next();
+                    if (attribute.getQName() != null && attribute.getQName().equals(attributeName)
+                            || attribute.getRefName() != null && attribute.getRefName().equals(attributeName)) {
+                        return true;
+                    }
                 }
             }
 

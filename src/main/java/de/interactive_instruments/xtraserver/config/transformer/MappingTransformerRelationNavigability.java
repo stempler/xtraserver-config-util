@@ -16,6 +16,7 @@
 package de.interactive_instruments.xtraserver.config.transformer;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import de.interactive_instruments.xtraserver.config.api.*;
 
 import java.util.*;
@@ -39,8 +40,8 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
                 //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AP_PTO"))
                 //.put("adv:AA_REO/adv:hatDirektUnten", Lists.newArrayList("adv:AP_PTO"))
                 // alkis 2
-                //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
-                //.put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
+                .put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
+                .put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
                 .build();
     }
 
@@ -105,7 +106,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
 
             // TODO: can be multiple joins, join target should always match table target
             final Optional<MappingJoin> refJoin = mappingTable.getJoinPaths().stream()
-                    .filter(mappingJoin -> mappingJoin.getTargetPath().equals(refValue.getReferencedTarget()))
+                    .filter(mappingJoin -> mappingTable.getTargetPath().equals(refValue.getReferencedTarget()))
                     .findFirst();
 
             final Stream<Optional<FeatureTypeMapping>> refMappingStream;
@@ -138,7 +139,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
                     .name(sourceTable)
                     .targetPath(refValue.getReferencedTarget())
                     .predicate("$T$." + sourceField + " IS NOT NULL")
-                    .description("navrel")
+                    .description("relation navigability")
                     .build();
 
             missingRelNavs.add(mappingTable);
@@ -161,6 +162,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
             final MappingJoin mappingJoin = new MappingJoinBuilder()
                     .targetPath(refValue.getReferencedTarget() + "/" + refValue.getReferencedFeatureType())
                     .joinCondition(new MappingJoinBuilder.ConditionBuilder().sourceTable(sourceTable).sourceField(sourceField).targetTable(targetTable.getName()).targetField(targetField).build())
+                    .description("relation navigability - connection to " + refValue.getReferencedFeatureType())
                     .build();
 
             final MappingTable mappingTable = new MappingTableBuilder()

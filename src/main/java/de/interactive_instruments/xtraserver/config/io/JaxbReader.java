@@ -241,6 +241,7 @@ class JaxbReader {
                 .joiningTables(tables.stream()
                         .map(addJoinPaths(joins, tableDraft.getName()))
                         .filter(isJoining(tableDraft))
+                        .map(tableDraft2 -> new MappingTableBuilder().copyOf(tableDraft2).build())
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -355,12 +356,14 @@ class JaxbReader {
             } else if ((value.getValue() != null && value.getValue().contains("$T$."))
                     || (value.getValue_Type() != null && value.getValue_Type().equals("expression"))) {
                 builder = new MappingValueBuilder().expression();
-            } else if (value.getValue_Type() != null && value.getValue_Type().equals("constant")) {
-                builder = new MappingValueBuilder().constant();
             }
 
             if (builder == null) {
-                builder = new MappingValueBuilder().column();
+                if (value.getValue_Type() != null && value.getValue_Type().equals("constant")) {
+                    builder = new MappingValueBuilder().constant();
+                } else {
+                    builder = new MappingValueBuilder().column();
+                }
             }
 
             return Maps.immutableEntry(value.getTable_Name(), builder
