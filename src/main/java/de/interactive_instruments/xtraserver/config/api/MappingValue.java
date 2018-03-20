@@ -15,6 +15,8 @@
  */
 package de.interactive_instruments.xtraserver.config.api;
 
+import com.google.common.collect.ImmutableList;
+
 import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Objects;
@@ -47,8 +49,8 @@ public class MappingValue {
      *
      * @return the column name
      */
-    public Optional<String> getValueColumn() {
-        return Optional.of(value);
+    public List<String> getValueColumns() {
+        return isConstant() ? ImmutableList.of() : ImmutableList.of(value);
     }
 
     /**

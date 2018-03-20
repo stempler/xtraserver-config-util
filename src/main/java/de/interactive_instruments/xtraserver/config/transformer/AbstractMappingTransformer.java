@@ -56,6 +56,7 @@ class AbstractMappingTransformer implements MappingTransformer {
     protected XtraServerMappingBuilder transformXtraServerMapping(final Context context, final List<FeatureTypeMapping> transformedFeatureTypeMappings) {
         return new XtraServerMappingBuilder()
                 //.shallowCopyOf(xtraServerMapping)
+                .virtualTables(xtraServerMapping.getVirtualTables())
                 .featureTypeMappings(transformedFeatureTypeMappings);
     }
 

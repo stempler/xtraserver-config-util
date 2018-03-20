@@ -48,6 +48,9 @@ class AdditionalFilesWriter {
         zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_StoredQueriesToCache.inc.xml"));
         Resources.asByteSource(Resources.getResource(JaxbWriter.class, "/XtraSrvConfig_StoredQueriesToCache.inc.xml")).copyTo(zipStream);
 
+        zipStream.putNextEntry(new ZipEntry("XtraSrvConfig_VirtualTables.inc.xml"));
+        createVirtualTablesFile(zipStream, xtraServerMapping);
+
     }
 
     private void createFeatureTypesFile(final OutputStream outputStream, final XtraServerMapping xtraServerMapping) throws IOException {
@@ -155,4 +158,27 @@ class AdditionalFilesWriter {
         writer.append("</InitialStoredQueries>\n");
         writer.flush();
     }
+
+    private void createVirtualTablesFile(final OutputStream outputStream, final XtraServerMapping xtraServerMapping) throws IOException {
+        final OutputStreamWriter writer = new OutputStreamWriter(outputStream);
+
+        writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<VirtualTables xmlns=\"http://www.interactive-instruments.de/namespaces/XtraServer\">\n");
+
+        xtraServerMapping.getVirtualTables().forEach(virtualTable -> {
+
+                try {
+                    writer.append("\t<VirtualTable name=\"");
+                    writer.append(virtualTable.getName());
+                    writer.append("\" query=\"");
+                    writer.append(virtualTable.getQuery());
+                    writer.append("\"/>\n");
+                } catch (final IOException e) {
+                    // ignore
+                }
+        });
+
+        writer.append("</VirtualTables>\n");
+        writer.flush();
+    }
+
 }

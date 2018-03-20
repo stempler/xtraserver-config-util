@@ -16,6 +16,7 @@
 package de.interactive_instruments.xtraserver.config.transformer;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import de.interactive_instruments.xtraserver.config.api.*;
 
 import java.util.*;
@@ -39,8 +40,8 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
                 //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AP_PTO"))
                 //.put("adv:AA_REO/adv:hatDirektUnten", Lists.newArrayList("adv:AP_PTO"))
                 // alkis 2
-                //.put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
-                //.put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
+                .put("adv:AA_REO/adv:istAbgeleitetAus", Lists.newArrayList("adv:AX_Hafenbecken"))
+                .put("adv:AA_Objekt/adv:istTeilVon", Lists.newArrayList("adv:AX_Verwaltungsgemeinschaft", "adv:AX_Grenzpunkt"))
                 .build();
     }
 
@@ -51,6 +52,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
                 .collect(Collectors.toList());
 
         return new XtraServerMappingBuilder()
+                .virtualTables(xtraServerMapping.getVirtualTables())
                 .featureTypeMappings(transformedFeatureTypeMappings)
                 .build();
     }
@@ -130,7 +132,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
 
         final List<MappingTable> missingRelNavs = new ArrayList<>();
 
-        final String sourceField = refValue.getValueColumn().orElse(refValue.getValue());
+        final String sourceField = refValue.getValueColumns().isEmpty() ? refValue.getValue() : refValue.getValueColumns().get(0);
 
         // special case reference without join, add not-null predicate for optimization
         if (isOneToOneRel) {
@@ -155,7 +157,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
 
 
         refMappingIds.build().forEach((targetTable, refMappingId) -> {
-            final String targetField = refMappingId.getValueColumn().orElse(refMappingId.getValue());
+            final String targetField = refMappingId.getValueColumns().isEmpty() ? refMappingId.getValue() : refMappingId.getValueColumns().get(0);
 
             // TODO: add description: connection to ... for rel nav
             final MappingJoin mappingJoin = new MappingJoinBuilder()

@@ -43,6 +43,7 @@ class MappingTransformerFlattenInheritance implements MappingTransformer {
                 .collect(Collectors.toList());
 
         return new XtraServerMappingBuilder()
+                .virtualTables(xtraServerMapping.getVirtualTables())
                 .featureTypeMappings(transformedFeatureTypeMappings)
                 .build();
     }

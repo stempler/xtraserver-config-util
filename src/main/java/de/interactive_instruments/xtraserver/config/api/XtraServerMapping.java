@@ -29,11 +29,13 @@ import java.util.stream.Collectors;
  */
 public class XtraServerMapping {
     private final Map<String, FeatureTypeMapping> featureTypeMappings;
+    private final Map<String, VirtualTable> virtualTables;
     // TODO: add description with targetNamespace and version from applicationSchema
     private final String description;
 
-    XtraServerMapping(final Map<String, FeatureTypeMapping> featureTypeMappings, String description) {
+    XtraServerMapping(final Map<String, FeatureTypeMapping> featureTypeMappings, Map<String, VirtualTable> virtualTables, String description) {
         this.featureTypeMappings = featureTypeMappings;
+        this.virtualTables = virtualTables;
         this.description = description;
     }
 
@@ -121,6 +123,15 @@ public class XtraServerMapping {
         }
 
         return inheritanceChain.build().reverse();
+    }
+
+    /**
+     * Get the list of virtual tables
+     *
+     * @return the list of virtual tables
+     */
+    public ImmutableList<VirtualTable> getVirtualTables() {
+        return ImmutableList.copyOf(virtualTables.values());
     }
 
     /**

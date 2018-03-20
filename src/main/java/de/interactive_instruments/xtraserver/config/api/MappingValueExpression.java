@@ -15,9 +15,10 @@
  */
 package de.interactive_instruments.xtraserver.config.api;
 
+import com.google.common.collect.ImmutableList;
+
 import javax.xml.namespace.QName;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,16 +35,17 @@ public class MappingValueExpression extends MappingValue {
     }
 
     /**
-     * @see MappingValue#getValueColumn()
+     * @see MappingValue#getValueColumns()
      */
     @Override
-    public Optional<String> getValueColumn() {
+    public List<String> getValueColumns() {
         final Matcher matcher = Pattern.compile("\\$T\\$\\.(?<column>[\\S]+)").matcher(getValue());
 
-        if (matcher.find()) {
-            return Optional.ofNullable(matcher.group("column"));
+        ImmutableList.Builder<String> columns = ImmutableList.builder();
+        while (matcher.find()) {
+            columns.add(matcher.group("column"));
         }
 
-        return Optional.empty();
+        return columns.build();
     }
 }

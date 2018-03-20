@@ -51,6 +51,7 @@ class MappingTransformerFanOutInheritance implements MappingTransformer {
         mergeAbstractGMLintoAbstractFeature();
 
         return new XtraServerMappingBuilder()
+                .virtualTables(xtraServerMapping.getVirtualTables())
                 .featureTypeMappings(ImmutableList.copyOf(transformedMappings.values()))
                 .build();
     }

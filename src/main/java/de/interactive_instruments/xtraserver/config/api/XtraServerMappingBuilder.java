@@ -29,6 +29,7 @@ import java.util.Map;
  */
 public class XtraServerMappingBuilder {
     private final Map<String, FeatureTypeMapping> featureTypeMappings;
+    private final Map<String, VirtualTable> virtualTables;
     private String description;
 
     /**
@@ -36,6 +37,7 @@ public class XtraServerMappingBuilder {
      */
     public XtraServerMappingBuilder() {
         this.featureTypeMappings = new LinkedHashMap<>();
+        virtualTables = new LinkedHashMap<>();
     }
 
     /**
@@ -64,6 +66,31 @@ public class XtraServerMappingBuilder {
     }
 
     /**
+     * Add a virtual table (optional).
+     * Virtual tables can be created with {@link VirtualTableBuilder}
+     *
+     * @param virtualTable the virtual table
+     * @return the builder
+     */
+    public XtraServerMappingBuilder virtualTable(final VirtualTable virtualTable) {
+        final String name = virtualTable.getName();
+        this.virtualTables.put(name, virtualTable);
+        return this;
+    }
+
+    /**
+     * Add a list of virtual tables (optional).
+     * Virtual tables can be created with {@link VirtualTableBuilder}
+     *
+     * @param virtualTables the virtual tables
+     * @return the builder
+     */
+    public XtraServerMappingBuilder virtualTables(final List<VirtualTable> virtualTables) {
+        virtualTables.forEach(this::virtualTable);
+        return this;
+    }
+
+    /**
      * Set the description
      *
      * @param description description
@@ -82,6 +109,7 @@ public class XtraServerMappingBuilder {
      */
     public XtraServerMappingBuilder copyOf(final XtraServerMapping xtraServerMapping) {
         xtraServerMapping.getFeatureTypeMappings().forEach(this::featureTypeMapping);
+        xtraServerMapping.getVirtualTables().forEach(this::virtualTable);
         this.description = xtraServerMapping.getDescription();
         return this;
     }
@@ -92,7 +120,7 @@ public class XtraServerMappingBuilder {
      * @return a new immutable {@link XtraServerMapping}
      */
     public XtraServerMapping build() {
-        final XtraServerMapping xtraServerMapping = new XtraServerMapping(ImmutableMap.copyOf(featureTypeMappings), description);
+        final XtraServerMapping xtraServerMapping = new XtraServerMapping(ImmutableMap.copyOf(featureTypeMappings), ImmutableMap.copyOf(virtualTables), description);
 
         validate(xtraServerMapping);
 

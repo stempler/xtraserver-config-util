@@ -62,10 +62,12 @@ public class XtraServerMappingTransformer {
 
         if (flattenInheritance) {
             transformedXtraServerMapping = new MappingTransformerFlattenInheritance(transformedXtraServerMapping).transform();
+            transformedXtraServerMapping = new MappingTransformerSchemaInfo(transformedXtraServerMapping, applicationSchema).transform();
             description += "    - flattenInheritance\n";
         }
         if (fanOutInheritance) {
             transformedXtraServerMapping = new MappingTransformerFanOutInheritance(transformedXtraServerMapping, applicationSchema).transform();
+            transformedXtraServerMapping = new MappingTransformerSchemaInfo(transformedXtraServerMapping, applicationSchema).transform();
             description += "    - fanOutInheritance\n";
         }
         if (ensureRelationNavigability) {
@@ -77,7 +79,6 @@ public class XtraServerMappingTransformer {
                 .copyOf(transformedXtraServerMapping)
                 .description(description)
                 .build();
-
 
         return transformedXtraServerMapping;
     }

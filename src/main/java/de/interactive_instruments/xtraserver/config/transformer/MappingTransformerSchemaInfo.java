@@ -52,6 +52,7 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
 
         return new XtraServerMappingBuilder()
                 //.shallowCopyOf(xtraServerMapping)
+                .virtualTables(xtraServerMapping.getVirtualTables())
                 .featureTypeMappings(filteredFeatureTypeMappings);
     }
 
