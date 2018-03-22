@@ -315,7 +315,8 @@ public class MappingValueBuilder {
                     mappingValue = new MappingValueExpression(targetPath, qualifiedTargetPath, value, description, type);
                     break;
                 case REFERENCE:
-                    mappingValue = new MappingValueReference(targetPath, qualifiedTargetPath, value, description, type, referencedFeatureType);
+                    final String val = value.startsWith("'#") ? "'" + value.substring(2) : value;
+                    mappingValue = new MappingValueReference(targetPath, qualifiedTargetPath, val, description, type, referencedFeatureType);
                     break;
                 case CLASSIFICATION:
                 case NIL:

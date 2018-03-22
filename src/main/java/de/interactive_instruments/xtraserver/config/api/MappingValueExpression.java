@@ -39,7 +39,7 @@ public class MappingValueExpression extends MappingValue {
      */
     @Override
     public List<String> getValueColumns() {
-        final Matcher matcher = Pattern.compile("\\$T\\$\\.(?<column>[\\S]+)").matcher(getValue());
+        final Matcher matcher = Pattern.compile("\\$T\\$\\.(?<column>[a-zA-Z0-9_]+)").matcher(getValue());
 
         ImmutableList.Builder<String> columns = ImmutableList.builder();
         while (matcher.find()) {
