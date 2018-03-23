@@ -17,6 +17,7 @@ package de.interactive_instruments.xtraserver.config.io;
 
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypes;
 import de.interactive_instruments.xtraserver.config.schema.FeatureTypesWithComment;
+import de.interactive_instruments.xtraserver.config.schema.JoinWithComment;
 import de.interactive_instruments.xtraserver.config.schema.TableWithComment;
 
 import javax.xml.bind.Marshaller;
@@ -46,6 +47,16 @@ class JaxbCommentsWriter extends Marshaller.Listener {
                 if (table.hasComment() && !table.getComment().equals(lastComment)) {
                     xsw.writeComment(table.getComment());
                     lastComment = table.getComment();
+                }
+            } catch (final ClassCastException e) {
+                // ignore
+            }
+            try {
+                final JoinWithComment join = ((JoinWithComment) source);
+
+                if (join.hasComment() && !join.getComment().equals(lastComment)) {
+                    xsw.writeComment(join.getComment());
+                    lastComment = join.getComment();
                 }
             } catch (final ClassCastException e) {
                 // ignore

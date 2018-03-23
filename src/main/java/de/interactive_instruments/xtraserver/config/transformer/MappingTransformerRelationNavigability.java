@@ -132,14 +132,15 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
 
         final List<MappingTable> missingRelNavs = new ArrayList<>();
 
-        final String sourceField = refValue.getValueColumns().isEmpty() ? refValue.getValue() : refValue.getValueColumns().get(0);
+        final String sourceField = createJoinKey(refValue);
 
+        // TODO: what is this good for
         // special case reference without join, add not-null predicate for optimization
         if (isOneToOneRel) {
             final MappingTable mappingTable = new MappingTableBuilder()
                     .name(sourceTable)
                     .targetPath(refValue.getReferencedTarget())
-                    .predicate("$T$." + sourceField + " IS NOT NULL")
+                    .predicate(sourceField + " IS NOT NULL")
                     .description("relation navigability")
                     .build();
 
@@ -157,10 +158,9 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
 
 
         refMappingIds.build().forEach((targetTable, refMappingId) -> {
-            final String targetField = refMappingId.getValueColumns().isEmpty() ? refMappingId.getValue() : refMappingId.getValueColumns().get(0);
+            final String targetField = createJoinKey(refMappingId);
 
-            // TODO: add description: connection to ... for rel nav
-            final MappingJoin mappingJoin = new MappingJoinBuilder()
+            cfinal MappingJoin mappingJoin = new MappingJoinBuilder()
                     .targetPath(refValue.getReferencedTarget() + "/" + refValue.getReferencedFeatureType())
                     .joinCondition(new MappingJoinBuilder.ConditionBuilder().sourceTable(sourceTable).sourceField(sourceField).targetTable(targetTable.getName()).targetField(targetField).build())
                     .description("relation navigability - connection to " + refValue.getReferencedFeatureType())
@@ -178,5 +178,17 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
 
         return missingRelNavs;
 
+    }
+
+    private String createJoinKey(final MappingValue mappingValue) {
+        String key = mappingValue.getValue();
+
+        if (!mappingValue.getValueColumns().isEmpty()) {
+            key = mappingValue.getValueColumns().stream()
+                                      .map(col -> "$T$." + col)
+                                      .collect(Collectors.joining(" || "));
+        }
+
+        return key;
     }
 }
