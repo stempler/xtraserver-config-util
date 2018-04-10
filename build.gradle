@@ -18,7 +18,8 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'org.unbroken-dome.xjc'
 apply plugin: "license"
 
-version = '0.9.0.' + new Date().format("yyyyMMddHHmmss")
+version = '1.0.0'
+//version += '.' + new Date().format("yyyyMMddHHmmss")
 group = 'de.interactive_instruments'
 
 repositories {
