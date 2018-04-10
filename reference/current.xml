@@ -1,0 +1,2105 @@
+<api>
+<package name="de.interactive_instruments.xtraserver.config.api"
+>
+<class name="FeatureTypeMapping"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getGeometry"
+ return="java.util.Optional&lt;de.interactive_instruments.xtraserver.config.api.MappingValue&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getName"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getPrimaryTableNames"
+ return="java.util.List&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getPrimaryTables"
+ return="com.google.common.collect.ImmutableList&lt;de.interactive_instruments.xtraserver.config.api.MappingTable&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getQualifiedName"
+ return="javax.xml.namespace.QName"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSuperTypeName"
+ return="java.util.Optional&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTable"
+ return="java.util.Optional&lt;de.interactive_instruments.xtraserver.config.api.MappingTable&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="getTableValuesForPath"
+ return="com.google.common.collect.ImmutableMap&lt;de.interactive_instruments.xtraserver.config.api.MappingTable, de.interactive_instruments.xtraserver.config.api.MappingValue&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetPath" type="java.lang.String">
+</parameter>
+</method>
+<method name="hasTable"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="isAbstract"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="FeatureTypeMappingBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="FeatureTypeMappingBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeMapping" type="de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping">
+</parameter>
+</method>
+<method name="isAbstract"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="isAbstract" type="boolean">
+</parameter>
+</method>
+<method name="name"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="primaryTable"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="primaryTable" type="de.interactive_instruments.xtraserver.config.api.MappingTable">
+</parameter>
+</method>
+<method name="primaryTables"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="primaryTables" type="java.util.List&lt;de.interactive_instruments.xtraserver.config.api.MappingTable&gt;">
+</parameter>
+</method>
+<method name="qualifiedName"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="qualifiedName" type="javax.xml.namespace.QName">
+</parameter>
+</method>
+<method name="shallowCopyOf"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeMapping" type="de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping">
+</parameter>
+</method>
+<method name="superTypeName"
+ return="de.interactive_instruments.xtraserver.config.api.FeatureTypeMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="superTypeName" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="MappingJoin"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getDescription"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getJoinConditions"
+ return="java.util.List&lt;de.interactive_instruments.xtraserver.config.api.MappingJoin.Condition&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSourceTable"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTargetPath"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTargetTable"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="MappingJoin.Condition"
+ extends="java.lang.Object"
+ abstract="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getSourceField"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSourceTable"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTargetField"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTargetTable"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="MappingJoinBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="MappingJoinBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoin"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingJoin" type="de.interactive_instruments.xtraserver.config.api.MappingJoin">
+</parameter>
+</method>
+<method name="description"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="description" type="java.lang.String">
+</parameter>
+</method>
+<method name="joinCondition"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="joinCondition" type="de.interactive_instruments.xtraserver.config.api.MappingJoin.Condition">
+</parameter>
+</method>
+<method name="joinConditions"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="joinConditions" type="java.util.List&lt;de.interactive_instruments.xtraserver.config.api.MappingJoin.Condition&gt;">
+</parameter>
+</method>
+<method name="targetPath"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetPath" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="MappingJoinBuilder.ConditionBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="ConditionBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder.ConditionBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoin.Condition"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="sourceField"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder.ConditionBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="sourceField" type="java.lang.String">
+</parameter>
+</method>
+<method name="sourceTable"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder.ConditionBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="sourceTable" type="java.lang.String">
+</parameter>
+</method>
+<method name="targetField"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder.ConditionBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetField" type="java.lang.String">
+</parameter>
+</method>
+<method name="targetTable"
+ return="de.interactive_instruments.xtraserver.config.api.MappingJoinBuilder.ConditionBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetTable" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="MappingTable"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getAllJoiningTablesStream"
+ return="java.util.stream.Stream&lt;de.interactive_instruments.xtraserver.config.api.MappingTable&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getAllValuesStream"
+ return="java.util.stream.Stream&lt;de.interactive_instruments.xtraserver.config.api.MappingValue&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getDescription"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getJoinPaths"
+ return="com.google.common.collect.ImmutableSet&lt;de.interactive_instruments.xtraserver.config.api.MappingJoin&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getJoiningTables"
+ return="com.google.common.collect.ImmutableSet&lt;de.interactive_instruments.xtraserver.config.api.MappingTable&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getName"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getPredicate"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getPrimaryKey"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getQualifiedTargetPath"
+ return="java.util.List&lt;javax.xml.namespace.QName&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSelectIds"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTableValuesForPath"
+ return="com.google.common.collect.ImmutableMap&lt;de.interactive_instruments.xtraserver.config.api.MappingTable, de.interactive_instruments.xtraserver.config.api.MappingValue&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetPath" type="java.lang.String">
+</parameter>
+</method>
+<method name="getTargetPath"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getValues"
+ return="com.google.common.collect.ImmutableSet&lt;de.interactive_instruments.xtraserver.config.api.MappingValue&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="hasValueForPath"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetPath" type="java.lang.String">
+</parameter>
+</method>
+<method name="isForEachSelectId"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isJoined"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isPredicate"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isPrimary"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="MappingTableBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="MappingTableBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTable"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="buildDraft"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder.MappingTableDraft"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingTable" type="de.interactive_instruments.xtraserver.config.api.MappingTable">
+</parameter>
+</method>
+<method name="description"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="description" type="java.lang.String">
+</parameter>
+</method>
+<method name="joinPath"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingJoin" type="de.interactive_instruments.xtraserver.config.api.MappingJoin">
+</parameter>
+</method>
+<method name="joinPaths"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingJoins" type="java.util.Collection&lt;de.interactive_instruments.xtraserver.config.api.MappingJoin&gt;">
+</parameter>
+</method>
+<method name="joiningTable"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingTable" type="de.interactive_instruments.xtraserver.config.api.MappingTable">
+</parameter>
+</method>
+<method name="joiningTables"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingTables" type="java.util.Collection&lt;de.interactive_instruments.xtraserver.config.api.MappingTable&gt;">
+</parameter>
+</method>
+<method name="name"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="predicate"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="predicate" type="java.lang.String">
+</parameter>
+</method>
+<method name="primaryKey"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="primaryKey" type="java.lang.String">
+</parameter>
+</method>
+<method name="qualifiedTargetPath"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="qualifiedTargetPath" type="java.util.List&lt;javax.xml.namespace.QName&gt;">
+</parameter>
+</method>
+<method name="selectIds"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="selectIds" type="java.lang.String">
+</parameter>
+</method>
+<method name="shallowCopyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingTable" type="de.interactive_instruments.xtraserver.config.api.MappingTable">
+</parameter>
+</method>
+<method name="targetPath"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetPath" type="java.lang.String">
+</parameter>
+</method>
+<method name="value"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValue" type="de.interactive_instruments.xtraserver.config.api.MappingValue">
+</parameter>
+</method>
+<method name="values"
+ return="de.interactive_instruments.xtraserver.config.api.MappingTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValues" type="java.util.Collection&lt;de.interactive_instruments.xtraserver.config.api.MappingValue&gt;">
+</parameter>
+</method>
+</class>
+<class name="MappingTableBuilder.MappingTableDraft"
+ extends="de.interactive_instruments.xtraserver.config.api.MappingTable"
+ abstract="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="MappingValue"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getDescription"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getQualifiedTargetPath"
+ return="java.util.List&lt;javax.xml.namespace.QName&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getSelectId"
+ return="java.lang.Integer"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getTargetPath"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getValue"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getValueColumns"
+ return="java.util.List&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isClassification"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isColumn"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isConstant"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isExpression"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isGeometry"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isNil"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="isReference"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="MappingValueBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="MappingValueBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="classification"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueClassification"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="column"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="constant"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValue" type="de.interactive_instruments.xtraserver.config.api.MappingValue">
+</parameter>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueClassification"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValueClassification" type="de.interactive_instruments.xtraserver.config.api.MappingValueClassification">
+</parameter>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueReference"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValueReference" type="de.interactive_instruments.xtraserver.config.api.MappingValueReference">
+</parameter>
+</method>
+<method name="expression"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="geometry"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="nil"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueClassification"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="reference"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueReference"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="shallowCopyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValue" type="de.interactive_instruments.xtraserver.config.api.MappingValue">
+</parameter>
+</method>
+<method name="shallowCopyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueClassification"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValueClassification" type="de.interactive_instruments.xtraserver.config.api.MappingValueClassification">
+</parameter>
+</method>
+<method name="shallowCopyOf"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueReference"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingValueReference" type="de.interactive_instruments.xtraserver.config.api.MappingValueReference">
+</parameter>
+</method>
+</class>
+<interface name="MappingValueBuilder.ValueClassification"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<implements name="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault">
+</implements>
+<method name="keyValue"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueClassification"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="key" type="java.lang.String">
+</parameter>
+<parameter name="value" type="java.lang.String">
+</parameter>
+</method>
+</interface>
+<interface name="MappingValueBuilder.ValueDefault"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValue"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="description"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="description" type="java.lang.String">
+</parameter>
+</method>
+<method name="qualifiedTargetPath"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="qualifiedTargetPath" type="java.util.List&lt;javax.xml.namespace.QName&gt;">
+</parameter>
+</method>
+<method name="selectId"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="selectId" type="java.lang.Integer">
+</parameter>
+</method>
+<method name="targetPath"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="targetPath" type="java.lang.String">
+</parameter>
+</method>
+<method name="value"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="value" type="java.lang.String">
+</parameter>
+</method>
+</interface>
+<interface name="MappingValueBuilder.ValueReference"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="referencedFeatureType"
+ return="de.interactive_instruments.xtraserver.config.api.MappingValueBuilder.ValueDefault"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="referencedFeatureType" type="java.lang.String">
+</parameter>
+</method>
+</interface>
+<class name="MappingValueClassification"
+ extends="de.interactive_instruments.xtraserver.config.api.MappingValue"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getKeys"
+ return="java.util.List&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getValues"
+ return="java.util.List&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="MappingValueExpression"
+ extends="de.interactive_instruments.xtraserver.config.api.MappingValue"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="MappingValueReference"
+ extends="de.interactive_instruments.xtraserver.config.api.MappingValueExpression"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getReferencedFeatureType"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getReferencedTarget"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="VirtualTable"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="VirtualTable"
+ type="de.interactive_instruments.xtraserver.config.api.VirtualTable"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+<parameter name="query" type="java.lang.String">
+</parameter>
+</constructor>
+<method name="getName"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getQuery"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<class name="VirtualTableBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="VirtualTableBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.VirtualTableBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.VirtualTable"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="name"
+ return="de.interactive_instruments.xtraserver.config.api.VirtualTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="name" type="java.lang.String">
+</parameter>
+</method>
+<method name="originalTable"
+ return="de.interactive_instruments.xtraserver.config.api.VirtualTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="mappingTable" type="de.interactive_instruments.xtraserver.config.api.MappingTable">
+</parameter>
+</method>
+<method name="query"
+ return="de.interactive_instruments.xtraserver.config.api.VirtualTableBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="query" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="XtraServerMapping"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="getDescription"
+ return="java.lang.String"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getFeatureTypeMapping"
+ return="java.util.Optional&lt;de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeName" type="java.lang.String">
+</parameter>
+</method>
+<method name="getFeatureTypeMappingInheritanceChain"
+ return="com.google.common.collect.ImmutableList&lt;de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeName" type="java.lang.String">
+</parameter>
+</method>
+<method name="getFeatureTypeMappings"
+ return="com.google.common.collect.ImmutableList&lt;de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getFeatureTypeMappings"
+ return="com.google.common.collect.ImmutableList&lt;de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="excludeAbstract" type="boolean">
+</parameter>
+</method>
+<method name="getFeatureTypeNames"
+ return="com.google.common.collect.ImmutableList&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="getFeatureTypeNames"
+ return="com.google.common.collect.ImmutableList&lt;java.lang.String&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="excludeAbstract" type="boolean">
+</parameter>
+</method>
+<method name="getVirtualTables"
+ return="com.google.common.collect.ImmutableList&lt;de.interactive_instruments.xtraserver.config.api.VirtualTable&gt;"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="hasFeatureType"
+ return="boolean"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeName" type="java.lang.String">
+</parameter>
+</method>
+</class>
+<class name="XtraServerMappingBuilder"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="XtraServerMappingBuilder"
+ type="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="build"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMapping"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="copyOf"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="xtraServerMapping" type="de.interactive_instruments.xtraserver.config.api.XtraServerMapping">
+</parameter>
+</method>
+<method name="description"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="description" type="java.lang.String">
+</parameter>
+</method>
+<method name="featureTypeMapping"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeMapping" type="de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping">
+</parameter>
+</method>
+<method name="featureTypeMappings"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="featureTypeMappings" type="java.util.List&lt;de.interactive_instruments.xtraserver.config.api.FeatureTypeMapping&gt;">
+</parameter>
+</method>
+<method name="virtualTable"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="virtualTable" type="de.interactive_instruments.xtraserver.config.api.VirtualTable">
+</parameter>
+</method>
+<method name="virtualTables"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMappingBuilder"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="virtualTables" type="java.util.List&lt;de.interactive_instruments.xtraserver.config.api.VirtualTable&gt;">
+</parameter>
+</method>
+</class>
+</package>
+<package name="de.interactive_instruments.xtraserver.config.io"
+>
+<class name="XtraServerMappingFile"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<constructor name="XtraServerMappingFile"
+ type="de.interactive_instruments.xtraserver.config.io.XtraServerMappingFile"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</constructor>
+<method name="read"
+ return="de.interactive_instruments.xtraserver.config.io.XtraServerMappingFile.Reader"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="write"
+ return="de.interactive_instruments.xtraserver.config.io.XtraServerMappingFile.Writer"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</class>
+<interface name="XtraServerMappingFile.Reader"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="fromStream"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMapping"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="inputStream" type="java.io.InputStream">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+<exception name="JAXBException" type="javax.xml.bind.JAXBException">
+</exception>
+<exception name="SAXException" type="org.xml.sax.SAXException">
+</exception>
+</method>
+</interface>
+<interface name="XtraServerMappingFile.Writer"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="createArchiveWithAdditionalFiles"
+ return="de.interactive_instruments.xtraserver.config.io.XtraServerMappingFile.Writer"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="mapping"
+ return="de.interactive_instruments.xtraserver.config.io.XtraServerMappingFile.Writer"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="xtraServerMapping" type="de.interactive_instruments.xtraserver.config.api.XtraServerMapping">
+</parameter>
+</method>
+<method name="toStream"
+ return="void"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="outputStream" type="java.io.OutputStream">
+</parameter>
+<exception name="IOException" type="java.io.IOException">
+</exception>
+<exception name="JAXBException" type="javax.xml.bind.JAXBException">
+</exception>
+<exception name="SAXException" type="org.xml.sax.SAXException">
+</exception>
+<exception name="XMLStreamException" type="javax.xml.stream.XMLStreamException">
+</exception>
+</method>
+</interface>
+</package>
+<package name="de.interactive_instruments.xtraserver.config.transformer"
+>
+<class name="MappingTransformerMultiplicity"
+ extends="de.interactive_instruments.xtraserver.config.transformer.AbstractMappingTransformer"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</class>
+<class name="XtraServerMappingTransformer"
+ extends="java.lang.Object"
+ abstract="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="forMapping"
+ return="de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer.SchemaInfo"
+ abstract="false"
+ native="false"
+ synchronized="false"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="xtraServerMapping" type="de.interactive_instruments.xtraserver.config.api.XtraServerMapping">
+</parameter>
+</method>
+</class>
+<interface name="XtraServerMappingTransformer.SchemaInfo"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="applySchemaInfo"
+ return="de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer.Transform"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<parameter name="applicationSchemaUri" type="java.net.URI">
+</parameter>
+</method>
+</interface>
+<interface name="XtraServerMappingTransformer.Transform"
+ abstract="true"
+ static="true"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+<method name="ensureRelationNavigability"
+ return="de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer.Transform"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="fanOutInheritance"
+ return="de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer.Transform"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="fixMultiplicity"
+ return="de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer.Transform"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="flattenInheritance"
+ return="de.interactive_instruments.xtraserver.config.transformer.XtraServerMappingTransformer.Transform"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+<method name="transform"
+ return="de.interactive_instruments.xtraserver.config.api.XtraServerMapping"
+ abstract="true"
+ native="false"
+ synchronized="false"
+ static="false"
+ final="false"
+ deprecated="not deprecated"
+ visibility="public"
+>
+</method>
+</interface>
+</package>
+</api>
