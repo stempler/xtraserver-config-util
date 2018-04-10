@@ -29,8 +29,8 @@ public class MappingValueClassification extends MappingValue {
     private final List<String> keys;
     private final List<String> values;
 
-    MappingValueClassification(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final MappingValue.TYPE type, final List<String> keys, final List<String> values) {
-        super(targetPath, qualifiedTargetPath, value, description, type);
+    MappingValueClassification(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final MappingValue.TYPE type, final Integer selectId, final List<String> keys, final List<String> values) {
+        super(targetPath, qualifiedTargetPath, value, description, type, selectId);
         this.keys = keys;
         this.values = values;
     }

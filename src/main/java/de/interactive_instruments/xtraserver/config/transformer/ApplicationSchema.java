@@ -1,12 +1,12 @@
 /**
  * Copyright 2018 interactive instruments GmbH
- *
+ * <p>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,19 +46,22 @@ class ApplicationSchema {
         this.xmlSchema = schemaCol.read(streamSource, new ValidationEventHandler());
 
         final Map<String, String> namespaceUriToPrefixMap = new HashMap<>();
-        Arrays.stream(schemaCol.getXmlSchemas()).forEach(s -> addNamespaces(s.getNamespaceContext(), namespaceUriToPrefixMap));
+        Arrays.stream(schemaCol.getXmlSchemas())
+              .forEach(s -> addNamespaces(s.getNamespaceContext(), namespaceUriToPrefixMap));
         addNamespaces(this.xmlSchema.getNamespaceContext(), namespaceUriToPrefixMap);
         this.namespaces = new Namespaces(namespaceUriToPrefixMap);
     }
 
     private static StreamSource toStreamSource(final URI uri) {
         if ("file".equalsIgnoreCase(uri.getScheme())) {
-            final File file = new File(uri.isAbsolute() ? uri : Paths.get(uri).toUri());
+            final File file = new File(uri.isAbsolute() ? uri : Paths.get(uri)
+                                                                     .toUri());
             return new StreamSource(file);
         }
         final InputStream inputStream;
         try {
-            inputStream = uri.toURL().openStream();
+            inputStream = uri.toURL()
+                             .openStream();
         } catch (IOException e) {
             throw new IllegalArgumentException("Invalid URI: " + uri.toString());
         }
@@ -102,6 +105,13 @@ class ApplicationSchema {
         return null;
     }
 
+    public XmlSchemaElement getElement(final QName qualifiedTypeName) {
+        if (qualifiedTypeName != null) {
+            return xmlSchema.getElementByName(qualifiedTypeName);
+        }
+        return null;
+    }
+
     public boolean hasElement(final QName qualifiedName) {
         return getType(qualifiedName) != null;
     }
@@ -128,14 +138,15 @@ class ApplicationSchema {
 
     public List<QName> getAllSuperTypeQualifiedNames(final QName featureTypeName) {
         return getAllSuperTypeNames(featureTypeName).stream()
-                .map(namespaces::getQualifiedName)
-                .collect(Collectors.toList());
+                                                    .map(namespaces::getQualifiedName)
+                                                    .collect(Collectors.toList());
     }
 
-    public boolean isGeometry(final QName qualifiedTypeName, final QName propertyName) {
+    public boolean isGeometry(final QName qualifiedTypeName, final List<QName> propertyPath) {
         final XmlSchemaComplexType type = getType(qualifiedTypeName);
-        final XmlSchemaElement element = getProperty(type, propertyName);
-        if (element != null && element.getSchemaType() != null && element.getSchemaType().getQName() != null) {
+        final XmlSchemaElement element = getProperty(type, propertyPath);
+        if (element != null && element.getSchemaType() != null && element.getSchemaType()
+                                                                         .getQName() != null) {
             return ImmutableList.of("GeometryPropertyType",
                     "GeometricPrimitivePropertyType",
                     "PointPropertyType",
@@ -148,10 +159,29 @@ class ApplicationSchema {
                     "MultiSurfacePropertyType",
                     "PolygonPropertyType",
                     "MultiPolygonPropertyType")
-                    .contains(element.getSchemaType().getQName().getLocalPart());
+                                .contains(element.getSchemaType()
+                                                 .getQName()
+                                                 .getLocalPart());
         }
 
         return false;
+    }
+
+    public boolean isMultiple(final QName qualifiedTypeName, final List<QName> propertyPath) {
+        final XmlSchemaComplexType type = getType(qualifiedTypeName);
+        final XmlSchemaElement element = getProperty(type, propertyPath);
+
+        return element != null && element.getMaxOccurs() > 1;
+    }
+
+    public List<QName> getLastMultiplePropertyPath(final QName qualifiedTypeName, final List<QName> propertyPath) {
+        for (int i = propertyPath.size(); i >= 0; i--) {
+            if (isMultiple(qualifiedTypeName, propertyPath.subList(0, i))) {
+                return ImmutableList.copyOf(propertyPath.subList(0, i));
+            }
+        }
+
+        return ImmutableList.of();
     }
 
     public boolean hasProperty(final XmlSchemaComplexType type, final QName propertyName) {
@@ -163,28 +193,39 @@ class ApplicationSchema {
                 if (content != null && content instanceof XmlSchemaComplexContentExtension) {
                     final XmlSchemaComplexContentExtension ext = (XmlSchemaComplexContentExtension) content;
                     final XmlSchemaSequence sequence = (XmlSchemaSequence) ext.getParticle();
-                    final Iterator i = sequence.getItems().getIterator();
+                    final Iterator i = sequence.getItems()
+                                               .getIterator();
                     while (i.hasNext()) {
                         final XmlSchemaElement element = (XmlSchemaElement) i.next();
-                        if (element.getQName() != null && element.getQName().equals(propertyName)) {
+                        if (element.getQName() != null && element.getQName()
+                                                                 .equals(propertyName)) {
                             return true;
                         }
                     }
                 }
             }
 
-            if (type.getName().endsWith("AbstractGMLType") && propertyName.getLocalPart().equals("identifier") && propertyName.getNamespaceURI().equals(type.getQName().getNamespaceURI())) {
+            if (type.getName()
+                    .endsWith("AbstractGMLType") && propertyName.getLocalPart()
+                                                                .equals("identifier") && propertyName.getNamespaceURI()
+                                                                                                     .equals(type.getQName()
+                                                                                                                 .getNamespaceURI())) {
                 return true;
             }
 
-            if (propertyName.getLocalPart().startsWith("@")) {
+            if (propertyName.getLocalPart()
+                            .startsWith("@")) {
                 // check if property is contained in the attributes of the type
-                final QName attributeName = new QName(propertyName.getNamespaceURI(), propertyName.getLocalPart().substring(1));
-                final Iterator j = type.getAttributes().getIterator();
+                final QName attributeName = new QName(propertyName.getNamespaceURI(), propertyName.getLocalPart()
+                                                                                                  .substring(1));
+                final Iterator j = type.getAttributes()
+                                       .getIterator();
                 while (j.hasNext()) {
                     final XmlSchemaAttribute attribute = (XmlSchemaAttribute) j.next();
-                    if (attribute.getQName() != null && attribute.getQName().equals(attributeName)
-                            || attribute.getRefName() != null && attribute.getRefName().equals(attributeName)) {
+                    if (attribute.getQName() != null && attribute.getQName()
+                                                                 .equals(attributeName)
+                            || attribute.getRefName() != null && attribute.getRefName()
+                                                                          .equals(attributeName)) {
                         return true;
                     }
                 }
@@ -205,23 +246,54 @@ class ApplicationSchema {
 
         try {
             // check if property is contained in the element sequence of the type
+            XmlSchemaSequence sequence = null;
             final XmlSchemaContentModel model = type.getContentModel();
             if (model != null) {
                 final XmlSchemaContent content = model.getContent();
                 if (content != null && content instanceof XmlSchemaComplexContentExtension) {
                     final XmlSchemaComplexContentExtension ext = (XmlSchemaComplexContentExtension) content;
-                    final XmlSchemaSequence sequence = (XmlSchemaSequence) ext.getParticle();
-                    final Iterator i = sequence.getItems().getIterator();
-                    while (i.hasNext()) {
-                        final XmlSchemaElement element = (XmlSchemaElement) i.next();
-                        if (element.getQName() != null && element.getQName().equals(propertyName)) {
-                            return element;
-                        }
+                    sequence = (XmlSchemaSequence) ext.getParticle();
+                }
+            } else {
+                sequence = (XmlSchemaSequence) type.getParticle();
+            }
+
+            if (sequence != null) {
+                final Iterator i = sequence.getItems().getIterator();
+                while (i.hasNext()) {
+                    final XmlSchemaElement element = (XmlSchemaElement) i.next();
+                    if (element.getQName() != null && element.getQName().equals(propertyName)) {
+                        return element;
+                    }
+                    if (element.getRefName() != null && element.getRefName().equals(propertyName)) {
+                        return getElement(propertyName);
                     }
                 }
             }
 
         } catch (final ClassCastException e) {
+            // ignore
+        }
+
+        return null;
+    }
+
+    private XmlSchemaElement getProperty(final XmlSchemaComplexType type, final List<QName> path) {
+        if (type == null || path == null) {
+            return null;
+        }
+
+        try {
+            XmlSchemaComplexType typ = type;
+            XmlSchemaElement property = null;
+            for (int i = 0; i < path.size(); i++) {
+                property = getProperty(typ, path.get(i));
+                typ = (XmlSchemaComplexType) property.getSchemaType();
+            }
+
+            return property;
+
+        } catch (final ClassCastException | NullPointerException e) {
             // ignore
         }
 

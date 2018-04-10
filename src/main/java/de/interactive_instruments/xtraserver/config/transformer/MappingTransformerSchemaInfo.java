@@ -85,7 +85,7 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
         // either targetPath or qualifiedTargetPath is set, derive the other
         final String targetPath = Strings.isNullOrEmpty(mappingTable.getTargetPath()) && !mappingTable.getQualifiedTargetPath().isEmpty() ? namespaces.getPrefixedPath(mappingTable.getQualifiedTargetPath()) : mappingTable.getTargetPath();
         final List<QName> targetPathElements = !Strings.isNullOrEmpty(mappingTable.getTargetPath()) ? namespaces.getQualifiedPathElements(mappingTable.getTargetPath()) : mappingTable.getQualifiedTargetPath();
-        final String description = !targetPathElements.isEmpty() ? targetPathElements.get(0).getLocalPart() : "";
+        final String description = Strings.isNullOrEmpty(mappingTable.getDescription()) ? (!targetPathElements.isEmpty() ? targetPathElements.get(0).getLocalPart() : "") : mappingTable.getDescription();
 
         return new MappingTableBuilder()
                 .shallowCopyOf(mappingTable)
@@ -140,6 +140,6 @@ class MappingTransformerSchemaInfo extends AbstractMappingTransformer implements
                 : namespaces.getQualifiedName(context.featureTypeMapping.getName());
 
         return context.mappingValue.isColumn() && !targetPathElements.isEmpty()
-                && applicationSchema.isGeometry(qualifiedFeatureTypeName, targetPathElements.get(0));
+                && applicationSchema.isGeometry(qualifiedFeatureTypeName, targetPathElements);
     }
 }

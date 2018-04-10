@@ -36,18 +36,20 @@ public class MappingTable {
     private final List<QName> qualifiedTargetPath;
     private final String description;
     private final String predicate;
+    private final String selectIds;
 
     private final ImmutableSet<MappingTable> joiningTables;
     private final ImmutableSet<MappingValue> values;
     private final ImmutableSet<MappingJoin> joinPaths;
 
-    MappingTable(final String name, final String primaryKey, final String targetPath, final List<QName> qualifiedTargetPath, final String description, final String predicate, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
+    MappingTable(final String name, final String primaryKey, final String targetPath, final List<QName> qualifiedTargetPath, final String description, final String predicate, String selectIds, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
         this.name = name;
         this.primaryKey = primaryKey;
         this.targetPath = targetPath;
         this.qualifiedTargetPath = qualifiedTargetPath;
         this.description = description;
         this.predicate = predicate;
+        this.selectIds = selectIds;
         this.joiningTables = ImmutableSet.copyOf(joiningTables);
         this.values = ImmutableSet.copyOf(values);
         this.joinPaths = ImmutableSet.copyOf(joinPaths);
@@ -105,6 +107,15 @@ public class MappingTable {
      */
     public String getPredicate() {
         return predicate;
+    }
+
+    /**
+     * Returns the select_ids
+     *
+     * @return the select_ids
+     */
+    public String getSelectIds() {
+        return selectIds;
     }
 
     /**
@@ -168,6 +179,17 @@ public class MappingTable {
     }
 
     /**
+     * Is this a table for_each_select_id mapping?
+     *
+     * @return true if predicate
+     */
+    public boolean isForEachSelectId() {
+        return ((targetPath != null && !targetPath.isEmpty())
+                || ( qualifiedTargetPath != null &&!qualifiedTargetPath.isEmpty()))
+                && selectIds != null && !selectIds.isEmpty();
+    }
+
+    /**
      * Does a value mapping exist for the given target path?
      *
      * @param targetPath the target path
@@ -225,18 +247,17 @@ public class MappingTable {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        final MappingTable that = (MappingTable) o;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MappingTable that = (MappingTable) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(primaryKey, that.primaryKey) &&
                 Objects.equals(targetPath, that.targetPath) &&
+                Objects.equals(qualifiedTargetPath, that.qualifiedTargetPath) &&
                 Objects.equals(description, that.description) &&
+                Objects.equals(predicate, that.predicate) &&
+                Objects.equals(selectIds, that.selectIds) &&
                 Objects.equals(joiningTables, that.joiningTables) &&
                 Objects.equals(values, that.values) &&
                 Objects.equals(joinPaths, that.joinPaths);
@@ -245,7 +266,7 @@ public class MappingTable {
     @Override
     public int hashCode() {
 
-        return Objects.hash(name, primaryKey, targetPath, description, joiningTables, values, joinPaths);
+        return Objects.hash(name, primaryKey, targetPath, qualifiedTargetPath, description, predicate, selectIds, joiningTables, values, joinPaths);
     }
 
     @Override
@@ -254,7 +275,10 @@ public class MappingTable {
                 "name='" + name + '\'' +
                 ", primaryKey='" + primaryKey + '\'' +
                 ", targetPath='" + targetPath + '\'' +
+                ", qualifiedTargetPath=" + qualifiedTargetPath +
                 ", description='" + description + '\'' +
+                ", predicate='" + predicate + '\'' +
+                ", selectIds='" + selectIds + '\'' +
                 ", joiningTables=" + joiningTables +
                 ", values=" + values +
                 ", joinPaths=" + joinPaths +

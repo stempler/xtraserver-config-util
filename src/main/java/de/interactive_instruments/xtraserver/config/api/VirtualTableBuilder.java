@@ -69,6 +69,7 @@ public class VirtualTableBuilder {
             query += joinPaths.stream()
                               .flatMap(mappingJoin -> mappingJoin.getJoinConditions().stream())
                               .map(condition -> "INNER JOIN " + condition.getTargetTable() + " ON " + condition.getTargetTable() + "." + condition.getTargetField() + " = " + condition.getSourceTable() + "." + condition.getSourceField() + " ")
+                              .distinct()
                               .collect(Collectors.joining());
         }
 

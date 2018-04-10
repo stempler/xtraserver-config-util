@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import javax.xml.namespace.QName;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Represents a value mapping for a mapping target path
@@ -35,13 +34,15 @@ public class MappingValue {
     private final String value;
     private final String description;
     private final TYPE type;
+    private final Integer selectId;
 
-    MappingValue(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type) {
+    MappingValue(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type, Integer selectId) {
         this.targetPath = targetPath;
         this.qualifiedTargetPath = qualifiedTargetPath;
         this.value = value;
         this.description = description;
         this.type = type;
+        this.selectId = selectId;
     }
 
     /**
@@ -87,6 +88,10 @@ public class MappingValue {
      */
     public String getDescription() {
         return description;
+    }
+
+    public Integer getSelectId() {
+        return selectId;
     }
 
     TYPE getType() {

@@ -141,7 +141,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
                     .name(sourceTable)
                     .targetPath(refValue.getReferencedTarget())
                     .predicate(sourceField + " IS NOT NULL")
-                    .description("relation navigability")
+                    .description("relation navigability - connection to " + refValue.getReferencedFeatureType())
                     .build();
 
             missingRelNavs.add(mappingTable);
@@ -160,7 +160,7 @@ class MappingTransformerRelationNavigability implements MappingTransformer {
         refMappingIds.build().forEach((targetTable, refMappingId) -> {
             final String targetField = createJoinKey(refMappingId);
 
-            cfinal MappingJoin mappingJoin = new MappingJoinBuilder()
+            final MappingJoin mappingJoin = new MappingJoinBuilder()
                     .targetPath(refValue.getReferencedTarget() + "/" + refValue.getReferencedFeatureType())
                     .joinCondition(new MappingJoinBuilder.ConditionBuilder().sourceTable(sourceTable).sourceField(sourceField).targetTable(targetTable.getName()).targetField(targetField).build())
                     .description("relation navigability - connection to " + refValue.getReferencedFeatureType())

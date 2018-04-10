@@ -115,6 +115,7 @@ public class MappingValueBuilder {
         builder.qualifiedTargetPath = mappingValue.getQualifiedTargetPath();
         builder.value = mappingValue.getValue();
         builder.description = mappingValue.getDescription();
+        builder.selectId = mappingValue.getSelectId();
         builder.type = mappingValue.getType();
 
         if (mappingValue.isReference()) {
@@ -218,6 +219,14 @@ public class MappingValueBuilder {
         ValueDefault description(String description);
 
         /**
+         * Set the select_id
+         *
+         * @param selectId select_id
+         * @return the builder
+         */
+        ValueDefault selectId(Integer selectId);
+
+        /**
          * Builds the {@link MappingValue}, validates required fields
          *
          * @return a new immutable {@link MappingValue}
@@ -259,6 +268,7 @@ public class MappingValueBuilder {
         private String value;
         private String description;
         private MappingValue.TYPE type;
+        private Integer selectId;
         private final List<String> keys;
         private final List<String> values;
         private String referencedFeatureType;
@@ -293,6 +303,13 @@ public class MappingValueBuilder {
         }
 
         @Override
+        public ValueDefault selectId(Integer selectId) {
+            this.selectId = selectId;
+            return this;
+        }
+
+
+        @Override
         public ValueClassification keyValue(final String key, final String value) {
             this.keys.add(key);
             this.values.add(value);
@@ -312,21 +329,21 @@ public class MappingValueBuilder {
             switch (type) {
 
                 case EXPRESSION:
-                    mappingValue = new MappingValueExpression(targetPath, qualifiedTargetPath, value, description, type);
+                    mappingValue = new MappingValueExpression(targetPath, qualifiedTargetPath, value, description, type, selectId);
                     break;
                 case REFERENCE:
                     final String val = value.startsWith("'#") ? "'" + value.substring(2) : value;
-                    mappingValue = new MappingValueReference(targetPath, qualifiedTargetPath, val, description, type, referencedFeatureType);
+                    mappingValue = new MappingValueReference(targetPath, qualifiedTargetPath, val, description, type, selectId, referencedFeatureType);
                     break;
                 case CLASSIFICATION:
                 case NIL:
-                    mappingValue = new MappingValueClassification(targetPath, qualifiedTargetPath, value, description, type, keys, values);
+                    mappingValue = new MappingValueClassification(targetPath, qualifiedTargetPath, value, description, type, selectId, keys, values);
                     break;
                 case COLUMN:
                 case CONSTANT:
                 case GEOMETRY:
                 default:
-                    mappingValue = new MappingValue(targetPath, qualifiedTargetPath, value, description, type);
+                    mappingValue = new MappingValue(targetPath, qualifiedTargetPath, value, description, type, selectId);
             }
 
             validate(mappingValue);

@@ -28,8 +28,8 @@ public class MappingValueReference extends MappingValueExpression {
 
     private final String referencedFeatureType;
 
-    MappingValueReference(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type, final String referencedFeatureType) {
-        super(targetPath, qualifiedTargetPath, value, description, type);
+    MappingValueReference(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type, final Integer selectId, final String referencedFeatureType) {
+        super(targetPath, qualifiedTargetPath, value, description, type, selectId);
         this.referencedFeatureType = referencedFeatureType;
     }
 

@@ -34,14 +34,16 @@ public class XtraServerMappingTransformer {
     private final boolean flattenInheritance;
     private final boolean fanOutInheritance;
     private final boolean ensureRelationNavigability;
+    private final boolean fixMultiplicity;
 
-    private XtraServerMappingTransformer(final XtraServerMapping xtraServerMapping, final URI applicationSchemaUri, final boolean flattenInheritance, final boolean fanOutInheritance, final boolean ensureRelationNavigability) {
+    private XtraServerMappingTransformer(final XtraServerMapping xtraServerMapping, final URI applicationSchemaUri, final boolean flattenInheritance, final boolean fanOutInheritance, final boolean ensureRelationNavigability, boolean fixMultiplicity) {
         this.xtraServerMapping = xtraServerMapping;
         this.applicationSchemaUri = applicationSchemaUri;
         this.applicationSchema = new ApplicationSchema(applicationSchemaUri);
         this.flattenInheritance = flattenInheritance;
         this.fanOutInheritance = fanOutInheritance;
         this.ensureRelationNavigability = ensureRelationNavigability;
+        this.fixMultiplicity = fixMultiplicity;
     }
 
     /**
@@ -69,6 +71,11 @@ public class XtraServerMappingTransformer {
             transformedXtraServerMapping = new MappingTransformerFanOutInheritance(transformedXtraServerMapping, applicationSchema).transform();
             transformedXtraServerMapping = new MappingTransformerSchemaInfo(transformedXtraServerMapping, applicationSchema).transform();
             description += "    - fanOutInheritance\n";
+        }
+        if (fixMultiplicity) {
+            transformedXtraServerMapping = new MappingTransformerMultiplicity(transformedXtraServerMapping, applicationSchema).transform();
+            transformedXtraServerMapping = new MappingTransformerSchemaInfo(transformedXtraServerMapping, applicationSchema).transform();
+            description += "    - fixMultiplicity\n";
         }
         if (ensureRelationNavigability) {
             transformedXtraServerMapping = new MappingTransformerRelationNavigability(transformedXtraServerMapping).transform();
@@ -129,6 +136,15 @@ public class XtraServerMappingTransformer {
         Transform ensureRelationNavigability();
 
         /**
+         * This transformer fixes cases where multiplicity should be mapped without a join by using different columns
+         * from the same table. These cases are automatically detected and will be enhanced with for_each_select_id
+         * if necessary.
+         *
+         * @return the transformer builder
+         */
+        Transform fixMultiplicity();
+
+        /**
          * Executes the transformer chain
          *
          * @return the transformed {@link XtraServerMapping}
@@ -142,6 +158,7 @@ public class XtraServerMappingTransformer {
         private boolean flattenInheritance;
         private boolean fanOutInheritance;
         private boolean ensureRelationNavigability;
+        private boolean fixMultiplicity;
 
         Builder(final XtraServerMapping xtraServerMapping) {
             this.xtraServerMapping = xtraServerMapping;
@@ -172,8 +189,14 @@ public class XtraServerMappingTransformer {
         }
 
         @Override
+        public Transform fixMultiplicity() {
+            this.fixMultiplicity = true;
+            return this;
+        }
+
+        @Override
         public XtraServerMapping transform() {
-            return new XtraServerMappingTransformer(xtraServerMapping, applicationSchemaUri, flattenInheritance, fanOutInheritance, ensureRelationNavigability)
+            return new XtraServerMappingTransformer(xtraServerMapping, applicationSchemaUri, flattenInheritance, fanOutInheritance, ensureRelationNavigability, fixMultiplicity)
                     .transform();
         }
     }

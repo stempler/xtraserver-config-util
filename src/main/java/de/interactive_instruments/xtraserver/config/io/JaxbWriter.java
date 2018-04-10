@@ -16,6 +16,7 @@
 package de.interactive_instruments.xtraserver.config.io;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Strings;
 import com.google.common.io.Resources;
 import de.interactive_instruments.xtraserver.config.api.*;
 import de.interactive_instruments.xtraserver.config.schema.*;
@@ -25,6 +26,7 @@ import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -46,6 +49,7 @@ class JaxbWriter {
 
     private static final String MAPPING_FILE = "XtraSrvConfig_Mapping.inc.xml";
     private static final String GML_ABSTRACT_FEATURE = "gml:AbstractFeature";
+    private static final QName XLINK_HREF = new QName("http://www.w3.org/1999/xlink", "@href");
 
     private final XtraServerMapping xtraServerMapping;
     private final ObjectFactory objectFactory;
@@ -153,6 +157,12 @@ class JaxbWriter {
             } else if (!mappingTable.isPrimary()) {
                 table.setComment(mappingTable.getDescription());
             }
+
+            //TODO
+            if (mappingTable.isForEachSelectId()) {
+                table.setFor_Each_Select_Id(mappingTable.getSelectIds());
+            }
+
             mappingsSequenceType.getTableOrJoinOrAssociationTarget().add(table);
         }
 
@@ -182,6 +192,18 @@ class JaxbWriter {
                     if (mappingValue.isClassification() || mappingValue.isNil()) {
                         value.setDb_Codes(Joiner.on(' ').join(((MappingValueClassification) mappingValue).getKeys()));
                         value.setSchema_Codes(Joiner.on(' ').join(((MappingValueClassification) mappingValue).getValues()));
+                    }
+
+                    //TODO
+                    if (!Objects.isNull(mappingValue.getSelectId())) {
+                        value.setSelect_Id(mappingValue.getSelectId().toString());
+                        if (!mappingValue.isReference() && mappingValue.getQualifiedTargetPath().get(mappingValue.getQualifiedTargetPath().size()-1).getLocalPart().startsWith("@")) {
+                            value.setSignificant_For_Emptiness(false);
+                        }
+                    }
+
+                    if (!mappingValue.isReference() && mappingValue.getQualifiedTargetPath().get(mappingValue.getQualifiedTargetPath().size()-1).equals(XLINK_HREF)) {
+                        value.setIs_Reference(false);
                     }
 
                     value.setComment(mappingValue.getDescription());

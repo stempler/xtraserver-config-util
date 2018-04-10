@@ -35,6 +35,7 @@ public class MappingTableBuilder {
     private List<QName> qualifiedTargetPath;
     private String description;
     private String predicate;
+    private String selectIds;
     private final List<MappingValue> values;
     private final List<MappingTable> joiningTables;
     private final List<MappingJoin> joinPaths;
@@ -111,6 +112,17 @@ public class MappingTableBuilder {
      */
     public MappingTableBuilder predicate(final String predicate) {
         this.predicate = predicate;
+        return this;
+    }
+
+    /**
+     * Set the select_ids
+     *
+     * @param selectIds the select_ids
+     * @return the builder
+     */
+    public MappingTableBuilder selectIds(final String selectIds) {
+        this.selectIds = selectIds;
         return this;
     }
 
@@ -195,7 +207,7 @@ public class MappingTableBuilder {
 
         autoComplete();
 
-        final MappingTable mappingTable = new MappingTable(name, primaryKey, targetPath, ImmutableList.copyOf(qualifiedTargetPath), description, predicate, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
+        final MappingTable mappingTable = new MappingTable(name, primaryKey, targetPath, ImmutableList.copyOf(qualifiedTargetPath), description, predicate, selectIds, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
 
         validate(mappingTable);
 
@@ -215,6 +227,7 @@ public class MappingTableBuilder {
         this.qualifiedTargetPath = mappingTable.getQualifiedTargetPath();
         this.description = mappingTable.getDescription();
         this.predicate = mappingTable.getPredicate();
+        this.selectIds = mappingTable.getSelectIds();
 
         return this;
     }
@@ -243,7 +256,7 @@ public class MappingTableBuilder {
     public MappingTableDraft buildDraft() {
         autoComplete();
 
-        return new MappingTableDraft(name, primaryKey, targetPath, ImmutableList.copyOf(qualifiedTargetPath), description, predicate, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
+        return new MappingTableDraft(name, primaryKey, targetPath, ImmutableList.copyOf(qualifiedTargetPath), description, predicate, selectIds, ImmutableList.copyOf(joiningTables), ImmutableList.copyOf(values), ImmutableList.copyOf(joinPaths));
     }
 
     /**
@@ -253,8 +266,8 @@ public class MappingTableBuilder {
      * @see MappingTable
      */
     public static class MappingTableDraft extends MappingTable {
-        MappingTableDraft(final String name, final String primaryKey, final String targetPath, final List<QName> qualifiedTargetPath, final String description, final String predicate, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
-            super(name, primaryKey, targetPath, qualifiedTargetPath, description, predicate, joiningTables, values, joinPaths);
+        MappingTableDraft(final String name, final String primaryKey, final String targetPath, final List<QName> qualifiedTargetPath, final String description, final String predicate, final String selectIds, final List<MappingTable> joiningTables, final List<MappingValue> values, final List<MappingJoin> joinPaths) {
+            super(name, primaryKey, targetPath, qualifiedTargetPath, description, predicate, selectIds, joiningTables, values, joinPaths);
         }
     }
 
@@ -284,8 +297,8 @@ public class MappingTableBuilder {
             throw new IllegalStateException("Table has no primary key");
         }
 
-        if (!mappingTable.isPrimary() && !mappingTable.isJoined() && !mappingTable.isPredicate()) {
-            throw new IllegalStateException("Invalid table. Valid configurations are primary (no targetPath + no joinPaths), joined (targetPath + at least one joinPath) and predicate (targetPath + predicate).");
+        if (!mappingTable.isPrimary() && !mappingTable.isJoined() && !mappingTable.isPredicate() && !mappingTable.isForEachSelectId()) {
+            throw new IllegalStateException("Invalid table. Valid configurations are primary (no targetPath + no joinPaths), joined (targetPath + at least one joinPath), predicate (targetPath + predicate) and for_each_select_id (targetPath + selectIds).");
         }
 
         if (mappingTable.getJoiningTables().stream().anyMatch(MappingTableBuilder.MappingTableDraft.class::isInstance)) {

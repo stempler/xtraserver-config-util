@@ -19,7 +19,6 @@ import com.google.common.collect.ImmutableList;
 
 import javax.xml.namespace.QName;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,8 +29,8 @@ import java.util.regex.Pattern;
  */
 public class MappingValueExpression extends MappingValue {
 
-    MappingValueExpression(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type) {
-        super(targetPath, qualifiedTargetPath, value, description, type);
+    MappingValueExpression(final String targetPath, final List<QName> qualifiedTargetPath, final String value, final String description, final TYPE type, final Integer selectId) {
+        super(targetPath, qualifiedTargetPath, value, description, type, selectId);
     }
 
     /**
